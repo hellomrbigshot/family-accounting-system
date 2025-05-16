@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { Types } from 'mongoose';
 
 interface JwtPayload {
-  userId: Types.ObjectId;
   roomNumber: string;
 }
 
@@ -14,7 +12,7 @@ export const generateToken = (payload: JwtPayload): string => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.sign(payload, secret, {
+  return jwt.sign(payload, secret as jwt.Secret, {
     expiresIn: expiresIn || '15d'
   });
 };
@@ -26,5 +24,5 @@ export const verifyToken = (token: string): JwtPayload => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.verify(token, secret) as JwtPayload;
+  return jwt.verify(token, secret as jwt.Secret) as JwtPayload;
 }; 

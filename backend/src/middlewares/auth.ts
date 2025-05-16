@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
-import { User } from '../models/user';
+import Room from '../models/room';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    userId: string;
     roomNumber: string;
   };
 }
@@ -22,17 +21,13 @@ export const auth = async (
     }
 
     const decoded = verifyToken(token);
-    const user = await User.findOne({
-      _id: decoded.userId,
-      roomNumber: decoded.roomNumber
-    });
+    const room = await Room.findOne({ roomNumber: decoded.roomNumber });
 
-    if (!user) {
+    if (!room) {
       throw new Error();
     }
 
     req.user = {
-      userId: decoded.userId.toString(),
       roomNumber: decoded.roomNumber
     };
     next();

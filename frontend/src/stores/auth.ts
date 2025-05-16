@@ -3,6 +3,46 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
+import CryptoJS from 'crypto-js';
+
+// 加密密钥（实际项目中应该从环境变量或配置中获取）
+const ENCRYPTION_KEY = 'your-secure-encryption-key-32-chars-long!!';
+
+// 生成随机数
+const generateNonce = (): string => {
+  return CryptoJS.lib.WordArray.random(16).toString();
+};
+
+// 高级密码加密函数
+const encryptPassword = (password: string): { encrypted: string; timestamp: number; nonce: string } => {
+  // 生成时间戳和随机数
+  const timestamp = Date.now();
+  const nonce = generateNonce();
+  
+  // 创建加密数据对象
+  const data = {
+    password,
+    timestamp,
+    nonce
+  };
+  
+  // 使用 AES 加密
+  const encrypted = CryptoJS.AES.encrypt(
+    JSON.stringify(data),
+    ENCRYPTION_KEY,
+    {
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+      iv: CryptoJS.enc.Utf8.parse(nonce)
+    }
+  ).toString();
+  
+  return {
+    encrypted,
+    timestamp,
+    nonce
+  };
+};
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
@@ -58,22 +98,25 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (roomNumber: string, password: string) => {
     try {
       console.log('Attempting login with:', { roomNumber });
+      const { encrypted, timestamp, nonce } = encryptPassword(password);
       const response = await axios.post('/api/auth/login', {
         roomNumber,
-        password
+        password: encrypted,
+        timestamp,
+        nonce
       });
 
       console.log('Login response:', response.data);
-      const { token } = response.data;
+      const { token: newToken } = response.data;
       
-      if (!token) {
+      if (!newToken) {
         throw new Error('No token received from server');
       }
       
       // 设置 token 到 cookie，默认过期时间为 15 天
-      setTokenToCookie(token, 15 * 24 * 60 * 60);
+      setTokenToCookie(newToken, 15 * 24 * 60 * 60);
       
-      token.value = token;
+      token.value = newToken;
       
       // 获取用户信息
       await fetchUserInfo();
@@ -122,20 +165,42 @@ export const useAuthStore = defineStore('auth', () => {
   // 获取用户信息
   const fetchUserInfo = async () => {
     try {
-      const response = await axios.get('/api/auth/user');
+      const token = getTokenFromCookie();
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.get('/api/auth/user', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       user.value = response.data;
     } catch (error) {
       console.error('Failed to fetch user info:', error);
+      throw error;
     }
   };
 
   // 登出
   const logout = () => {
-    clearAuthCookies();
-    token.value = null;
-    refreshToken.value = null;
-    user.value = null;
-    router.push('/login');
+    try {
+      clearAuthCookies();
+      token.value = null;
+      refreshToken.value = null;
+      user.value = null;
+      router.push('/login');
+      showToast({
+        type: 'success',
+        message: '已成功退出登录'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      showToast({
+        type: 'fail',
+        message: '退出登录失败'
+      });
+    }
   };
 
   // 检查是否已登录

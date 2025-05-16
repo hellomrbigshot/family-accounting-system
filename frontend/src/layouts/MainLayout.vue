@@ -1,28 +1,30 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-gray-900">家庭记账系统</h1>
-            </div>
-            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <router-link
-                v-for="item in navigation"
-                :key="item.name"
-                :to="item.to"
-                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                :class="{ 'border-primary-500 text-gray-900': isActive(item.to) }"
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <nav class="bg-white shadow-sm border-b border-gray-100">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-8">
+            <router-link to="/" class="text-xl font-bold text-gray-900">家庭记账</router-link>
+            <div class="hidden md:flex space-x-4">
+              <router-link 
+                v-for="item in navItems" 
+                :key="item.path" 
+                :to="item.path"
+                :class="[
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  isActive(item.path) 
+                    ? 'text-indigo-600 bg-indigo-50' 
+                    : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'
+                ]"
               >
                 {{ item.name }}
               </router-link>
             </div>
           </div>
-          <div class="flex items-center">
-            <button
-              @click="handleLogout"
-              class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          <div class="flex items-center space-x-4">
+            <button 
+              @click="handleLogout" 
+              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
             >
               退出登录
             </button>
@@ -30,39 +32,31 @@
         </div>
       </div>
     </nav>
-
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <router-view v-slot="{ Component }">
-        <keep-alive>
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
+    <main class="py-6">
+      <router-view></router-view>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
-const route = useRoute();
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
-const navigation = [
-  { name: '首页', to: { name: 'home' } },
-  { name: '支出记录', to: { name: 'expenses' } },
-  { name: '分类管理', to: { name: 'categories' } },
-  { name: '报表分析', to: { name: 'reports' } },
-  { name: '账户管理', to: { name: 'accounts' } },
+const navItems = [
+  { name: '首页', path: '/' },
+  { name: '支出', path: '/expenses' },
+  { name: '分类', path: '/categories' }
 ];
 
-const isActive = (path: { name: string }) => {
-  return route.name === path.name;
+const isActive = (path: string) => {
+  return router.currentRoute.value.path === path;
 };
 
-const handleLogout = () => {
-  userStore.logout();
+const handleLogout = async () => {
+  await authStore.logout();
   router.push('/login');
 };
 </script> 
