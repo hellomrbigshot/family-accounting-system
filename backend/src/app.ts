@@ -6,6 +6,7 @@ import accountRoutes from './routes/account';
 import userRoutes from './routes/user';
 import expenseRoutes from './routes/expense';
 import authRoutes from './routes/auth';
+import categoryRoutes from './routes/category';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // 错误处理中间件
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -4,21 +4,24 @@ import { Types } from 'mongoose';
 
 interface AuthenticatedRequest extends Request {
   user?: {
-    userId: string;
+    _id: string;
     roomNumber: string;
   };
 }
 
 export const createExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { date, category, amount, paymentMethod, description } = req.body;
+    const { date, category, amount, description } = req.body;
+
+    if (!req.user?._id) {
+      return res.status(401).json({ message: '未授权访问' });
+    }
 
     const expense = new Expense({
-      userId: new Types.ObjectId(req.user?.userId),
+      userId: new Types.ObjectId(req.user._id),
       date,
       category,
       amount,
-      paymentMethod,
       description
     });
 
@@ -29,16 +32,27 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
       expense
     });
   } catch (error) {
-    res.status(500).json({ message: '支出记录创建失败' });
+    console.error('创建支出记录失败:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        message: '支出记录创建失败',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({ message: '支出记录创建失败' });
+    }
   }
 };
 
 export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { startDate, endDate, category, paymentMethod } = req.query;
-    const userId = req.user?.userId;
+    const { startDate, endDate, category } = req.query;
+    
+    if (!req.user?._id) {
+      return res.status(401).json({ message: '未授权访问' });
+    }
 
-    const query: any = { userId: new Types.ObjectId(userId) };
+    const query: any = { userId: new Types.ObjectId(req.user._id) };
 
     if (startDate && endDate) {
       query.date = {
@@ -51,26 +65,33 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
       query.category = category;
     }
 
-    if (paymentMethod) {
-      query.paymentMethod = paymentMethod;
-    }
-
     const expenses = await Expense.find(query)
       .sort({ date: -1 })
       .exec();
 
     res.json(expenses);
   } catch (error) {
-    res.status(500).json({ message: '获取支出记录失败' });
+    console.error('获取支出记录失败:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        message: '获取支出记录失败',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({ message: '获取支出记录失败' });
+    }
   }
 };
 
 export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
-    const userId = req.user?.userId;
+    
+    if (!req.user?._id) {
+      return res.status(401).json({ message: '未授权访问' });
+    }
 
-    const query: any = { userId: new Types.ObjectId(userId) };
+    const query: any = { userId: new Types.ObjectId(req.user._id) };
 
     if (startDate && endDate) {
       query.date = {
@@ -85,17 +106,6 @@ export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) 
       {
         $group: {
           _id: '$category',
-          total: { $sum: '$amount' }
-        }
-      }
-    ]);
-
-    // 按支付方式统计
-    const paymentMethodStats = await Expense.aggregate([
-      { $match: query },
-      {
-        $group: {
-          _id: '$paymentMethod',
           total: { $sum: '$amount' }
         }
       }
@@ -120,10 +130,17 @@ export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) 
 
     res.json({
       categoryStats,
-      paymentMethodStats,
       dateStats
     });
   } catch (error) {
-    res.status(500).json({ message: '获取统计数据失败' });
+    console.error('获取统计数据失败:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        message: '获取统计数据失败',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({ message: '获取统计数据失败' });
+    }
   }
 }; 

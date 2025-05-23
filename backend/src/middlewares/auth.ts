@@ -4,6 +4,7 @@ import Room from '../models/room';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
+    _id: string;
     roomNumber: string;
   };
 }
@@ -28,6 +29,7 @@ export const auth = async (
     }
 
     req.user = {
+      _id: room._id.toString(),
       roomNumber: decoded.roomNumber
     };
     next();

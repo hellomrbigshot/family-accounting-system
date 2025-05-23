@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Room from '../models/room';
 import CryptoJS from 'crypto-js';
+import { JwtPayload } from '../utils/jwt';
 
 // 加密密钥（应该与前端保持一致，实际项目中应该从环境变量获取）
 const ENCRYPTION_KEY = 'your-secure-encryption-key-32-chars-long!!';
@@ -139,16 +140,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const getUserInfo = async (req: Request, res: Response): Promise<void> => {
   try {
     // 从 JWT 中获取房间号
-    const roomNumber = (req as any).user?.roomNumber;
-    if (!roomNumber) {
-      res.status(401).json({ message: '未授权' });
-      return;
-    }
-
-    // 查找房间信息
-    const room = await Room.findOne({ roomNumber });
+    const room = (req as any).user;
     if (!room) {
-      res.status(404).json({ message: '房间不存在' });
+      res.status(401).json({ message: '未授权' });
       return;
     }
 

@@ -23,7 +23,7 @@ export interface ReportData {
 }
 
 class ReportApi {
-  private baseUrl = '/api/reports';
+  private baseUrl = '/reports';
 
   async getReport(query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>): Promise<ReportData> {
     const response = await axios.get(this.baseUrl, { params: query });

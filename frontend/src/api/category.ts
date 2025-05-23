@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '@/utils/axios';
 
 export interface CategoryData {
   id: string;
@@ -7,6 +7,7 @@ export interface CategoryData {
   icon?: string;
   color?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CategoryQuery {
@@ -14,7 +15,7 @@ export interface CategoryQuery {
 }
 
 class CategoryApi {
-  private baseUrl = '/api/categories';
+  private baseUrl = '/categories';
 
   async getList(query?: CategoryQuery): Promise<CategoryData[]> {
     const response = await axios.get(this.baseUrl, { params: query });

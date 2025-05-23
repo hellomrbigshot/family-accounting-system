@@ -11,16 +11,16 @@
       <van-form @submit="handleSubmit" class="space-y-6">
         <van-cell-group inset>
           <van-field
-            v-model="form.type"
             name="type"
             label="类型"
             :rules="[{ required: true, message: '请选择类型' }]"
+            class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           >
-            <template #input>
-              <van-radio-group v-model="form.type" direction="horizontal">
-                <van-radio name="expense">支出</van-radio>
-                <van-radio name="income">收入</van-radio>
-              </van-radio-group>
+            <template #value>
+              <div class="flex space-x-4">
+                <van-radio v-model="form.type" name="expense">支出</van-radio>
+                <van-radio v-model="form.type" name="income">收入</van-radio>
+              </div>
             </template>
           </van-field>
 
@@ -32,6 +32,7 @@
             readonly
             is-link
             @click="showDatePicker = true"
+            class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           />
 
           <van-field
@@ -42,6 +43,7 @@
             is-link
             readonly
             @click="showCategoryPicker = true"
+            class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           />
 
           <van-field
@@ -52,7 +54,7 @@
             :rules="[{ validator: amountValidator }]"
             type="number"
             inputmode="decimal"
-            class="rounded-lg"
+            class="rounded-lg [&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           />
 
           <van-field
@@ -63,6 +65,7 @@
             is-link
             readonly
             @click="showPaymentMethodPicker = true"
+            class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           />
 
           <van-field
@@ -75,6 +78,7 @@
             maxlength="200"
             placeholder="请输入描述"
             show-word-limit
+            class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
           />
         </van-cell-group>
 
@@ -141,23 +145,26 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useExpenseStore } from '@/stores/expense';
+import { useCategoryStore } from '@/stores/category';
 import { showToast } from 'vant';
+import dayjs from '@/utils/dayjs';
 
 const router = useRouter();
 const expenseStore = useExpenseStore();
+const categoryStore = useCategoryStore();
 
-const categories = [
-  { text: '食品餐饮', value: '食品餐饮' },
-  { text: '购物消费', value: '购物消费' },
-  { text: '出行交通', value: '出行交通' },
-  { text: '休闲娱乐', value: '休闲娱乐' },
-  { text: '医疗保健', value: '医疗保健' },
-  { text: '教育学习', value: '教育学习' },
-  { text: '其他', value: '其他' }
-];
+// 获取分类列表
+const categories = computed(() => {
+  return categoryStore.categories
+    .filter(category => category.type === form.type)
+    .map(category => ({
+      text: `${category.icon} ${category.name}`,
+      value: category.id
+    }));
+});
 
 const paymentMethods = [
   { text: '支付宝', value: '支付宝' },
@@ -170,8 +177,8 @@ const showCategoryPicker = ref(false);
 const showPaymentMethodPicker = ref(false);
 const showDatePicker = ref(false);
 
-const minDate = new Date(2020, 0, 1);
-const maxDate = new Date();
+const minDate = dayjs('2020-01-01').toDate();
+const maxDate = dayjs().toDate();
 
 interface FormData {
   type: string;
@@ -198,61 +205,75 @@ const amountValidator = (value: string) => {
 
 const form = reactive<FormData>({
   type: 'expense',
-  date: new Date().toISOString().split('T')[0],
+  date: dayjs().format('YYYY-MM-DD'),
   category: '',
   amount: 0,
   paymentMethod: '',
-  description: '',
+  description: ''
+});
+
+// 监听类型变化，重置分类
+watch(() => form.type, () => {
+  form.category = '';
 });
 
 const currentDate = ref<string[]>([
-  new Date().getFullYear().toString(),
-  (new Date().getMonth() + 1).toString(),
-  new Date().getDate().toString()
+  dayjs().year().toString(),
+  (dayjs().month() + 1).toString(),
+  dayjs().date().toString()
 ]);
 
 const onDateConfirm = (value: string[]) => {
   const [year, month, day] = value;
-  form.date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  form.date = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`).format('YYYY-MM-DD');
   showDatePicker.value = false;
 };
 
-const onCategoryConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
-  form.category = selectedValues[0];
+const onCategoryConfirm = (value: { value: string }) => {
+  form.category = value.value;
   showCategoryPicker.value = false;
 };
 
-const onPaymentMethodConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
-  form.paymentMethod = selectedValues[0];
+const onPaymentMethodConfirm = (value: { value: string }) => {
+  form.paymentMethod = value.value;
   showPaymentMethodPicker.value = false;
 };
 
 const handleSubmit = async () => {
   try {
-    const expenseData = {
+    await expenseStore.createExpense({
       ...form,
       amount: parseFloat(form.amount.toString())
-    };
-    await expenseStore.createExpense(expenseData);
-    showToast({
-      type: 'success',
-      message: '保存成功',
-      onClose: () => {
-        router.push('/expenses');
-      },
     });
+    showToast('保存成功');
+    router.push('/expenses');
   } catch (error) {
-    showToast({
-      type: 'fail',
-      message: '保存失败',
-    });
     console.error('Failed to create expense:', error);
+    showToast('保存失败');
   }
 };
+
+// 在组件挂载时获取分类列表
+onMounted(async () => {
+  try {
+    await categoryStore.fetchCategories();
+  } catch (error) {
+    console.error('Failed to fetch categories:', error);
+    showToast('获取分类列表失败');
+  }
+});
 </script>
 
 <style>
 .van-stepper {
-  width: 100%;
+  @apply w-full;
+}
+
+.van-button--primary {
+  @apply bg-indigo-600 border-indigo-600;
+}
+
+.van-button--primary:active {
+  @apply bg-indigo-700 border-indigo-700;
 }
 </style> 

@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useReportStore } from '@/stores/report';
+import dayjs from '@/utils/dayjs';
 
 const reportStore = useReportStore();
 const currentTrend = ref<'daily' | 'weekly' | 'monthly'>('daily');
@@ -90,14 +91,14 @@ const maxAmount = computed(() => {
 });
 
 const formatDate = (date: string) => {
-  const d = new Date(date);
+  const d = dayjs(date);
   switch (currentTrend.value) {
     case 'daily':
-      return `${d.getMonth() + 1}/${d.getDate()}`;
+      return d.format('MM/DD');
     case 'weekly':
-      return `第${Math.ceil(d.getDate() / 7)}周`;
+      return `第${Math.ceil(d.date() / 7)}周`;
     case 'monthly':
-      return `${d.getFullYear()}/${d.getMonth() + 1}`;
+      return d.format('YYYY/MM');
   }
 };
 </script> 

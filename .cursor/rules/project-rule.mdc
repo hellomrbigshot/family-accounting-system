@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# 本地运行环境
+
+- 项目运行的 node 版本为 node@22，开发时使用 nvm 作为 node 版本管理器
+- 使用 pnpm 作为包管理器
+
+# 前端项目管理
+
+- 这是一个移动端的 pwa 网页应用
+- 使用 vue@3 作为前端框架，使用 vue 全家桶 vue-router、pinia
+- 优先使用 vant 作为 UI 框架
+- 使用 dayjs 作为时间管理器
+- 优先使用 tailwindcss 实现样式，减少 css 代码量
+- 使用 echarts 实现图标功能
+
+
+# 后端项目管理
+
+- 使用 express 作为 node 框架
+- 使用 mongoose 管理 mongoDB 数据库
+- 使用 jsonwebtoken 实现 jwt 认证
+- 使用 bcryptjs 加密

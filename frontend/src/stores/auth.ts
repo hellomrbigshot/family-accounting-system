@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import axios from 'axios';
+import axios from '@/utils/axios';
 import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
 import CryptoJS from 'crypto-js';

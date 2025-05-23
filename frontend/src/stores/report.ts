@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { reportApi } from '@/api/report';
 import type { ReportData } from '@/api/report';
 import type { ExpenseQuery } from '@/api/expense';
+import dayjs from '@/utils/dayjs';
 
 interface ReportState {
   data: ReportData | null;
@@ -77,7 +78,7 @@ export const useReportStore = defineStore('report', {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `report-${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.download = `report-${dayjs().format('YYYY-MM-DD')}.xlsx`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
-interface JwtPayload {
+export interface JwtPayload {
   roomNumber: string;
 }
 
@@ -12,9 +12,11 @@ export const generateToken = (payload: JwtPayload): string => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.sign(payload, secret as jwt.Secret, {
-    expiresIn: expiresIn || '15d'
-  });
+  const options: SignOptions = {
+    expiresIn: 15 * 24 * 60 * 60 // 15 days in seconds
+  };
+
+  return jwt.sign(payload as object, secret, options);
 };
 
 export const verifyToken = (token: string): JwtPayload => {
@@ -24,5 +26,5 @@ export const verifyToken = (token: string): JwtPayload => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.verify(token, secret as jwt.Secret) as JwtPayload;
+  return jwt.verify(token, secret) as JwtPayload;
 }; 

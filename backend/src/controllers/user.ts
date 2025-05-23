@@ -22,7 +22,6 @@ export const register = async (req: Request, res: Response) => {
 
     // 生成 token
     const token = generateToken({
-      userId: user._id,
       roomNumber: user.roomNumber
     });
 
@@ -53,7 +52,6 @@ export const login = async (req: Request, res: Response) => {
 
     // 生成 token
     const token = generateToken({
-      userId: user._id,
       roomNumber: user.roomNumber
     });
 

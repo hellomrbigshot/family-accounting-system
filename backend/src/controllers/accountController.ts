@@ -116,10 +116,13 @@ export const transfer = async (req: Request, res: Response) => {
       // 回滚事务
       await session.abortTransaction();
       session.endSession();
-      throw error;
+      console.error('转账失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '转账失败';
+      res.status(400).json({ message: errorMessage });
     }
   } catch (error) {
-    res.status(400).json({ message: error.message || '转账失败' });
+    const errorMessage = error instanceof Error ? error.message : '转账失败';
+    res.status(400).json({ message: errorMessage });
   }
 };
 

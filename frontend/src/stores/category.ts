@@ -16,8 +16,7 @@ export const useCategoryStore = defineStore('category', {
   }),
 
   getters: {
-    expenseCategories: (state) => state.categories.filter(c => c.type === 'expense'),
-    incomeCategories: (state) => state.categories.filter(c => c.type === 'income'),
+    // 移除 expenseCategories 和 incomeCategories getters，因为所有分类都是支出类型
   },
 
   actions: {
@@ -77,6 +76,6 @@ export const useCategoryStore = defineStore('category', {
       } finally {
         this.loading = false;
       }
-    },
+    }
   },
 }); 

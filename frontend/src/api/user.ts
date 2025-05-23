@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '@/utils/axios';
 
 export interface LoginResponse {
   token: string;
@@ -11,7 +11,7 @@ export interface RegisterRequest {
 
 export const userApi = {
   async login(roomNumber: string, password: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>('/api/auth/login', {
+    const response = await axios.post<LoginResponse>('/auth/login', {
       roomNumber,
       password,
     });
@@ -19,7 +19,7 @@ export const userApi = {
   },
 
   async register(roomNumber: string, password: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>('/api/auth/register', {
+    const response = await axios.post<LoginResponse>('/auth/register', {
       roomNumber,
       password,
     });

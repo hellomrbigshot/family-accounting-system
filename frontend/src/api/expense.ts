@@ -5,7 +5,6 @@ export interface ExpenseData {
   date: string;
   category: string;
   amount: number;
-  paymentMethod: string;
   description: string;
   createdAt: string;
 }
@@ -14,18 +13,16 @@ export interface ExpenseQuery {
   startDate?: string;
   endDate?: string;
   category?: string;
-  paymentMethod?: string;
 }
 
 export interface ExpenseStats {
   total: number;
   byCategory: Record<string, number>;
-  byPaymentMethod: Record<string, number>;
   byDate: Record<string, number>;
 }
 
 class ExpenseApi {
-  private baseUrl = '/api/expenses';
+  private baseUrl = '/expenses';
 
   async getList(query?: ExpenseQuery): Promise<ExpenseData[]> {
     const response = await axios.get(this.baseUrl, { params: query });
