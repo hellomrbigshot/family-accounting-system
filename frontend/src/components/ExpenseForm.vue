@@ -156,6 +156,7 @@ const form = reactive({
 });
 
 const categoryName = computed(() => {
+  if (!Array.isArray(categoryStore.categories)) return '';
   const category = categoryStore.categories.find(category => category.id === form.category);
   return category ? `${category.icon} ${category.name}` : '';
 });
@@ -166,13 +167,16 @@ const minDate = dayjs('2020-01-01').toDate();
 const maxDate = dayjs().toDate();
 const currentDate = ref<string[]>([
   dayjs().year().toString(),
-  (dayjs().month() + 1).toString(),
-  dayjs().date().toString()
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
 ]);
 
 // 分类选择器
 const showCategoryPicker = ref(false);
 const categoryColumns = computed(() => {
+  if (!Array.isArray(categoryStore.categories)) {
+    return [{ text: '暂无分类', value: '' }];
+  }
   const expenseCategories = categoryStore.categories.filter(category => category.type === 'expense');
   if (expenseCategories.length === 0) {
     return [{ text: '暂无分类', value: '' }];
@@ -196,9 +200,9 @@ const amountValidator = (value: string) => {
 };
 
 // 日期确认
-const onDateConfirm = (value: string[]) => {
-  const [year, month, day] = value;
-  form.date = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`).format('YYYY-MM-DD');
+const onDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  form.date = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showDatePicker.value = false;
 };
 
@@ -270,15 +274,13 @@ watch(() => props.show, async (newValue) => {
   }
 });
 
-// 在组件挂载时获取分类列表
+// 在组件挂载时加载分类数据
 onMounted(async () => {
   try {
-    if (categoryStore.categories.length === 0) {
-      await categoryStore.fetchCategories();
-    }
+    await categoryStore.fetchCategories();
   } catch (error) {
-    console.error('Failed to fetch categories:', error);
-    showToast('获取分类列表失败');
+    console.error('Failed to load categories:', error);
+    showToast('加载分类失败');
   }
 });
 </script>

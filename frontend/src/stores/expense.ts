@@ -1,65 +1,79 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 import { expenseApi } from '@/api/expense';
+import { showToast } from 'vant';
 import type { ExpenseData, ExpenseQuery, ExpenseStats } from '@/api/expense';
 
-interface ExpenseState {
-  expenses: ExpenseData[];
-  stats: ExpenseStats | null;
-  loading: boolean;
-  error: string | null;
-}
+export const useExpenseStore = defineStore('expense', () => {
+  const expenses = ref<ExpenseData[]>([]);
+  const stats = ref<ExpenseStats | null>(null);
+  const loading = ref<boolean>(false);
+  const error = ref<string | null>(null);
 
-export const useExpenseStore = defineStore('expense', {
-  state: (): ExpenseState => ({
-    expenses: [],
-    stats: null,
-    loading: false,
-    error: null,
-  }),
+  const totalExpense = () => expenses.value.reduce((sum, expense) => sum + expense.amount, 0);
 
-  getters: {
-    totalExpense: (state) => state.expenses.reduce((sum, expense) => sum + expense.amount, 0),
-  },
+  const fetchExpenses = async (query?: ExpenseQuery) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await expenseApi.getList(query);
+      expenses.value = response;
+      return true;
+    } catch (error) {
+      console.error('获取支出列表失败:', error);
+      showToast('获取支出列表失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
 
-  actions: {
-    async fetchExpenses(query?: ExpenseQuery) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const expenses = await expenseApi.getList(query);
-        this.expenses = expenses;
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : '获取支出记录失败';
-      } finally {
-        this.loading = false;
+  const createExpense = async (expense: Omit<ExpenseData, 'id' | 'createdAt'>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (expense.amount <= 0) {
+        showToast('支出金额必须大于0');
+        return false;
       }
-    },
 
-    async createExpense(expense: Omit<ExpenseData, 'id' | 'createdAt'>) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const newExpense = await expenseApi.create(expense);
-        this.expenses.unshift(newExpense);
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : '创建支出记录失败';
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
+      const response = await expenseApi.create(expense);
+      expenses.value.unshift(response);
+      showToast('添加支出成功');
+      return true;
+    } catch (error) {
+      console.error('添加支出失败:', error);
+      showToast('添加支出失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
 
-    async getStatistics(query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>) {
-      this.loading = true;
-      this.error = null;
-      try {
-        this.stats = await expenseApi.getStats(query);
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : '获取统计数据失败';
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-  },
+  const fetchStats = async (query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await expenseApi.getStats(query);
+      stats.value = response;
+      return true;
+    } catch (error) {
+      console.error('获取支出统计失败:', error);
+      showToast('获取支出统计失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    expenses,
+    stats,
+    loading,
+    error,
+    totalExpense,
+    fetchExpenses,
+    createExpense,
+    fetchStats
+  };
 }); 

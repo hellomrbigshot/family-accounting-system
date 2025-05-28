@@ -53,18 +53,27 @@
     </div>
 
     <!-- 日期选择器 -->
-    <van-calendar
-      v-model:show="showStartDatePicker"
-      @confirm="onStartDateConfirm"
-      :min-date="minDate"
-      :max-date="maxDate"
-    />
-    <van-calendar
-      v-model:show="showEndDatePicker"
-      @confirm="onEndDateConfirm"
-      :min-date="minDate"
-      :max-date="maxDate"
-    />
+    <van-popup v-model:show="showStartDatePicker" position="bottom">
+      <van-date-picker
+        v-model="currentStartDate"
+        title="选择开始日期"
+        :min-date="minDate"
+        :max-date="maxDate"
+        @confirm="onStartDateConfirm"
+        @cancel="showStartDatePicker = false"
+      />
+    </van-popup>
+
+    <van-popup v-model:show="showEndDatePicker" position="bottom">
+      <van-date-picker
+        v-model="currentEndDate"
+        title="选择结束日期"
+        :min-date="minDate"
+        :max-date="maxDate"
+        @confirm="onEndDateConfirm"
+        @cancel="showEndDatePicker = false"
+      />
+    </van-popup>
   </div>
 </template>
 
@@ -98,6 +107,18 @@ const reportData = reactive({
   category: {} as Record<string, number>
 });
 
+const currentStartDate = ref<string[]>([
+  dayjs().year().toString(),
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
+]);
+
+const currentEndDate = ref<string[]>([
+  dayjs().year().toString(),
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
+]);
+
 const handleSearch = async () => {
   loading.value = true;
   try {
@@ -113,13 +134,15 @@ const handleSearch = async () => {
   }
 };
 
-const onStartDateConfirm = (date: Date) => {
-  query.startDate = dayjs(date).format('YYYY-MM-DD');
+const onStartDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  query.startDate = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showStartDatePicker.value = false;
 };
 
-const onEndDateConfirm = (date: Date) => {
-  query.endDate = dayjs(date).format('YYYY-MM-DD');
+const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  query.endDate = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showEndDatePicker.value = false;
 };
 

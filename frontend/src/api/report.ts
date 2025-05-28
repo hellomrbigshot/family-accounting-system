@@ -1,39 +1,36 @@
-import axios from 'axios';
+import axios from '@/utils/axios';
 import type { ExpenseQuery } from './expense';
 
 export interface ReportData {
   expenses: {
     total: number;
     byCategory: Record<string, number>;
-    byPaymentMethod: Record<string, number>;
     byDate: Record<string, number>;
   };
   incomes: {
     total: number;
     byCategory: Record<string, number>;
-    byPaymentMethod: Record<string, number>;
     byDate: Record<string, number>;
   };
   balance: number;
   trends: {
-    daily: Record<string, number>;
-    weekly: Record<string, number>;
-    monthly: Record<string, number>;
+    expenses: Record<string, number>;
+    incomes: Record<string, number>;
   };
 }
 
 class ReportApi {
   private baseUrl = '/reports';
 
-  async getReport(query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>): Promise<ReportData> {
+  async getReport(query?: ExpenseQuery) {
     const response = await axios.get(this.baseUrl, { params: query });
     return response.data;
   }
 
-  async exportReport(query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>): Promise<Blob> {
+  async exportReport(query?: ExpenseQuery) {
     const response = await axios.get(`${this.baseUrl}/export`, {
       params: query,
-      responseType: 'blob',
+      responseType: 'blob'
     });
     return response.data;
   }

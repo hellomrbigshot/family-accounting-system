@@ -67,6 +67,7 @@ import { reactive, watch, onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import type { CategoryData } from '@/api/category';
 import dayjs from '@/utils/dayjs';
+import { showToast } from 'vant';
 
 const props = defineProps<{
   category?: CategoryData;
@@ -98,14 +99,19 @@ const handleCancel = () => {
 
 const handleSubmit = async () => {
   try {
+    let success;
     if (props.category) {
-      await categoryStore.updateCategory(props.category.id, form);
+      success = await categoryStore.updateCategory(props.category.id, form);
     } else {
-      await categoryStore.createCategory(form);
+      success = await categoryStore.createCategory(form);
     }
-    emit('success');
+    if (success) {
+      showToast(props.category ? '更新成功' : '创建成功');
+      emit('success');
+    }
   } catch (error) {
-    console.error('Failed to save category:', error);
+    console.error(props.category ? '更新分类失败:' : '创建分类失败:', error);
+    showToast(props.category ? '更新分类失败' : '创建分类失败');
   }
 };
 

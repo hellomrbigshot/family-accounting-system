@@ -1,40 +1,39 @@
-import axios from '@/utils/axios';
+import axios from '@/utils/axios'
 
 export interface CategoryData {
-  id: string;
-  name: string;
-  type: 'expense' | 'income';
-  icon?: string;
-  color?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name: string
+  type: 'expense' | 'income'
+  icon?: string
+  color?: string
+  createdAt: string
 }
 
 export interface CategoryQuery {
-  type?: 'expense' | 'income';
+  type?: 'expense' | 'income'
 }
 
 class CategoryApi {
-  private baseUrl = '/categories';
+  private baseUrl = '/categories'
 
-  async getList(query?: CategoryQuery): Promise<CategoryData[]> {
-    const response = await axios.get(this.baseUrl, { params: query });
-    return response.data;
+  async getList(query?: CategoryQuery) {
+    const response = await axios.get(this.baseUrl, { params: query })
+    return response.data
   }
 
-  async create(category: Omit<CategoryData, 'id' | 'createdAt'>): Promise<CategoryData> {
-    const response = await axios.post(this.baseUrl, category);
-    return response.data;
+  async create(category: Omit<CategoryData, 'id' | 'createdAt'>) {
+    const response = await axios.post(this.baseUrl, category)
+    return response.data
   }
 
-  async update(id: string, category: Partial<Omit<CategoryData, 'id' | 'createdAt'>>): Promise<CategoryData> {
-    const response = await axios.put(`${this.baseUrl}/${id}`, category);
-    return response.data;
+  async update(id: string, category: Partial<Omit<CategoryData, 'id' | 'createdAt'>>) {
+    const response = await axios.put(`${this.baseUrl}/${id}`, category)
+    return response.data
   }
 
-  async delete(id: string): Promise<void> {
-    await axios.delete(`${this.baseUrl}/${id}`);
+  async delete(id: string) {
+    await axios.delete(`${this.baseUrl}/${id}`)
   }
 }
 
-export const categoryApi = new CategoryApi(); 
+export const categoryApi = new CategoryApi() 

@@ -9,7 +9,7 @@ import CryptoJS from 'crypto-js';
 const ENCRYPTION_KEY = 'your-secure-encryption-key-32-chars-long!!';
 
 // 生成随机数
-const generateNonce = (): string => {
+const generateNonce = () => {
   return CryptoJS.lib.WordArray.random(16).toString();
 };
 
@@ -99,7 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       console.log('Attempting login with:', { roomNumber });
       const { encrypted, timestamp, nonce } = encryptPassword(password);
-      const response = await axios.post('/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         roomNumber,
         password: encrypted,
         timestamp,
@@ -107,7 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
       });
 
       console.log('Login response:', response.data);
-      const { token: newToken } = response.data;
+      const { token: newToken, refreshToken: newRefreshToken, user: newUser } = response.data;
       
       if (!newToken) {
         throw new Error('No token received from server');
@@ -115,8 +115,11 @@ export const useAuthStore = defineStore('auth', () => {
       
       // 设置 token 到 cookie，默认过期时间为 15 天
       setTokenToCookie(newToken, 15 * 24 * 60 * 60);
+      setRefreshTokenToCookie(newRefreshToken);
       
       token.value = newToken;
+      refreshToken.value = newRefreshToken;
+      user.value = newUser;
       
       // 获取用户信息
       await fetchUserInfo();
@@ -147,7 +150,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('No refresh token');
       }
 
-      const response = await axios.post('/api/auth/refresh', {
+      const response = await axios.post('/auth/token/refresh', {
         refresh_token: refreshToken,
         grant_type: 'refresh_token'
       });
@@ -170,42 +173,68 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('No token found');
       }
 
-      const response = await axios.get('/api/auth/user', {
+      const response = await axios.get('/auth/user', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       user.value = response.data;
+      return true;
     } catch (error) {
       console.error('Failed to fetch user info:', error);
-      throw error;
+      // 如果获取用户信息失败，清除认证状态
+      clearAuthCookies();
+      token.value = null;
+      refreshToken.value = null;
+      user.value = null;
+      return false;
     }
   };
 
   // 登出
-  const logout = () => {
+  const logout = async () => {
     try {
+      await axios.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
       clearAuthCookies();
       token.value = null;
       refreshToken.value = null;
       user.value = null;
       router.push('/login');
-      showToast({
-        type: 'success',
-        message: '已成功退出登录'
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-      showToast({
-        type: 'fail',
-        message: '退出登录失败'
-      });
     }
   };
 
   // 检查是否已登录
-  const isAuthenticated = () => {
-    return !!getTokenFromCookie();
+  const isAuthenticated = async () => {
+    const token = getTokenFromCookie();
+    if (!token) {
+      return false;
+    }
+
+    // 如果已经有用户信息，直接返回 true
+    if (user.value) {
+      return true;
+    }
+
+    // 否则尝试获取用户信息
+    try {
+      const success = await fetchUserInfo();
+      if (!success) {
+        // 如果获取用户信息失败，尝试刷新 token
+        try {
+          await refreshAccessToken();
+          // 刷新 token 成功后再次尝试获取用户信息
+          return await fetchUserInfo();
+        } catch (error) {
+          return false;
+        }
+      }
+      return success;
+    } catch (error) {
+      return false;
+    }
   };
 
   return {
@@ -215,8 +244,8 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     refreshAccessToken,
-    isAuthenticated,
     fetchUserInfo,
+    isAuthenticated,
     getTokenFromCookie
   };
 }); 

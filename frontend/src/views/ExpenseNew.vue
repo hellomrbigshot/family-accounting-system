@@ -219,13 +219,13 @@ watch(() => form.type, () => {
 
 const currentDate = ref<string[]>([
   dayjs().year().toString(),
-  (dayjs().month() + 1).toString(),
-  dayjs().date().toString()
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
 ]);
 
-const onDateConfirm = (value: string[]) => {
-  const [year, month, day] = value;
-  form.date = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`).format('YYYY-MM-DD');
+const onDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  form.date = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showDatePicker.value = false;
 };
 

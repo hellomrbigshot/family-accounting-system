@@ -88,4 +88,7 @@ backend/node_modules
 backend/dist
 backend/.env
 backend/logs
-backend/coverage 
+backend/coverage
+
+# Documentation and README files
+Vant-README/ 

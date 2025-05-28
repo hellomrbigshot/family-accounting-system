@@ -108,37 +108,12 @@ const deletingCategory = ref<CategoryData | undefined>();
 const categories = computed(() => categoryStore.categories);
 const categoryCount = computed(() => categories.value.length);
 
-// 默认类别列表
-const defaultCategories = [
-  // 支出类别
-  { name: '餐饮', icon: '🍔', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '购物', icon: '🛍️', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '交通', icon: '🚗', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '娱乐', icon: '🎮', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '医疗', icon: '💊', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '教育', icon: '📚', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '住房', icon: '🏠', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '通讯', icon: '📱', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '服饰', icon: '👕', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '日用品', icon: '🧴', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '旅行', icon: '✈️', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '宠物', icon: '🐱', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '礼物', icon: '🎁', type: 'expense' as const, updatedAt: dayjs().format() },
-  { name: '其他支出', icon: '📦', type: 'expense' as const, updatedAt: dayjs().format() }
-];
-
-// 初始化默认类别
-const initDefaultCategories = async () => {
+// 初始化分类列表
+const initCategories = async () => {
   try {
     await categoryStore.fetchCategories();
-    if (categoryStore.categories.length === 0) {
-      // 如果没有类别，则创建默认类别
-      for (const category of defaultCategories) {
-        await categoryStore.createCategory(category);
-      }
-    }
   } catch (error) {
-    console.error('Failed to initialize default categories:', error);
+    console.error('Failed to fetch categories:', error);
   }
 };
 
@@ -188,7 +163,7 @@ const confirmDelete = async () => {
 };
 
 onMounted(() => {
-  initDefaultCategories();
+  initCategories();
 });
 </script>
 

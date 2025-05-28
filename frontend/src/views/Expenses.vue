@@ -119,14 +119,14 @@ const maxDate = dayjs().toDate();
 
 const currentStartDate = ref<string[]>([
   dayjs().year().toString(),
-  (dayjs().month() + 1).toString(),
-  dayjs().date().toString()
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
 ]);
 
 const currentEndDate = ref<string[]>([
   dayjs().year().toString(),
-  (dayjs().month() + 1).toString(),
-  dayjs().date().toString()
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
 ]);
 
 // 设置默认日期范围（最近一周）
@@ -151,15 +151,15 @@ const setDefaultDateRange = () => {
   ];
 };
 
-const onStartDateConfirm = (value: string[]) => {
-  const [year, month, day] = value;
-  query.startDate = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`).format('YYYY-MM-DD');
+const onStartDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  query.startDate = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showStartDatePicker.value = false;
 };
 
-const onEndDateConfirm = (value: string[]) => {
-  const [year, month, day] = value;
-  query.endDate = dayjs(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`).format('YYYY-MM-DD');
+const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  const [year, month, day] = selectedValues;
+  query.endDate = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showEndDatePicker.value = false;
 };
 

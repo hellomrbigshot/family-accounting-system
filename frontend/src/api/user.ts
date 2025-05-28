@@ -1,28 +1,34 @@
-import axios from '@/utils/axios';
+import axios from '@/utils/axios'
 
 export interface LoginResponse {
-  token: string;
+  token: string
+  refreshToken: string
+  user: {
+    id: string
+    roomNumber: string
+  }
 }
 
 export interface RegisterRequest {
-  roomNumber: string;
-  password: string;
+  roomNumber: string
+  password: string
 }
 
-export const userApi = {
-  async login(roomNumber: string, password: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>('/auth/login', {
-      roomNumber,
-      password,
-    });
-    return response.data;
-  },
+class UserApi {
+  private baseUrl = '/users'
 
-  async register(roomNumber: string, password: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>('/auth/register', {
+  async login(roomNumber: string, password: string) {
+    const response = await axios.post(`${this.baseUrl}/login`, {
       roomNumber,
-      password,
-    });
-    return response.data;
-  },
-}; 
+      password
+    })
+    return response.data
+  }
+
+  async register(data: RegisterRequest) {
+    const response = await axios.post(`${this.baseUrl}/register`, data)
+    return response.data
+  }
+}
+
+export const userApi = new UserApi() 

@@ -6,27 +6,19 @@ import { showToast } from 'vant';
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 // 请求拦截器
 instance.interceptors.request.use(
   (config) => {
-    const cookies = document.cookie.split(';');
-    let token = null;
-    
-    for (const cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'access_token') {
-        token = value;
-        break;
-      }
-    }
-    
-    // 如果有 token，添加到请求头
+    const authStore = useAuthStore();
+    const token = authStore.getTokenFromCookie();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
@@ -40,25 +32,40 @@ instance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
-    
-    // 如果是 401 错误
-    if (error.response?.status === 401) {
-      // 清除认证相关的 cookie
-      document.cookie = 'access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-      document.cookie = 'refresh_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-      
-      // 如果不是登录请求，重定向到登录页
-      if (!originalRequest.url.includes('/login')) {
-        window.location.href = '/login';
+    if (error.response) {
+      const { status } = error.response;
+      const authStore = useAuthStore();
+
+      if (status === 401) {
+        try {
+          await authStore.refreshToken();
+          const config = error.config;
+          config.headers.Authorization = `Bearer ${authStore.token}`;
+          return instance(config);
+        } catch (refreshError) {
+          authStore.logout();
+          showToast('登录已过期，请重新登录');
+          return Promise.reject(refreshError);
+        }
       }
-      
-      showToast({
-        type: 'fail',
-        message: '登录已过期，请重新登录'
-      });
+
+      if (status === 403) {
+        showToast('没有权限执行此操作');
+      }
+
+      if (status === 404) {
+        showToast('请求的资源不存在');
+      }
+
+      if (status === 500) {
+        showToast('服务器错误，请稍后重试');
+      }
+    } else if (error.request) {
+      showToast('网络错误，请检查网络连接');
+    } else {
+      showToast('请求配置错误');
     }
-    
+
     return Promise.reject(error);
   }
 );

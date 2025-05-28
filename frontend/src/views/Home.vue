@@ -1,221 +1,243 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 py-4">
-      <!-- 欢迎区域 -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">家庭记账</h1>
-        <p class="text-gray-600">今天是 {{ currentDate }}</p>
-      </div>
+    <!-- 顶部导航栏 -->
+    <van-nav-bar
+      title="家庭记账"
+      left-arrow
+      @click-left="onClickLeft"
+      class="bg-white"
+    />
 
-      <!-- 预算信息 -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+    <!-- 主要内容区域 -->
+    <div class="p-4">
+      <!-- 预算卡片 -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-medium text-gray-900">本月预算</h2>
-          <van-button size="small" type="primary" @click="showBudgetDialog = true">
+          <van-button
+            type="primary"
+            size="small"
+            @click="showBudgetDialog = true"
+          >
             设置预算
           </van-button>
         </div>
-        <div class="space-y-4">
+        <div class="space-y-2">
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
               <span class="text-gray-600">预算</span>
-              <span class="text-lg font-medium text-gray-900">¥{{ budgetStore.currentBudget?.amount.toFixed(2) || '0.00' }}</span>
+              <span class="text-lg font-medium text-gray-900">
+                {{ formatAmount(budgetStore.currentBudget?.amount) }}
+              </span>
             </div>
             <div class="flex items-center space-x-2">
               <span class="text-gray-600">支出</span>
               <span :class="[
                 'text-2xl font-bold',
                 isOverBudget ? 'text-red-600' : 'text-gray-900'
-              ]">¥{{ monthlyExpense.toFixed(2) }}</span>
+              ]">
+                {{ formatAmount(monthlyExpense) }}
+              </span>
             </div>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <div
-              class="h-2 rounded-full"
+              class="h-2 rounded-full transition-all duration-300"
               :class="isOverBudget ? 'bg-red-600' : 'bg-indigo-600'"
-              :style="{ width: `${budgetProgress}%` }"
+              :style="{ width: `${actualProgress}%` }"
             />
           </div>
           <div class="text-sm text-gray-500 text-right">
-            已使用 {{ budgetProgress.toFixed(1) }}%
+            已使用 {{ actualProgress.toFixed(1) }}%
           </div>
         </div>
       </div>
 
-      <!-- 功能卡片区域 -->
-      <div class="grid grid-cols-2 gap-4 mb-8">
-        <router-link to="/expenses" class="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center">
-          <van-icon name="balance-o" size="32" class="text-indigo-600 mb-2" />
-          <span class="text-gray-900 font-medium">支出记录</span>
-        </router-link>
-        <router-link to="/categories" class="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center">
-          <van-icon name="apps-o" size="32" class="text-indigo-600 mb-2" />
-          <span class="text-gray-900 font-medium">分类管理</span>
-        </router-link>
-      </div>
-
       <!-- 最近支出 -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+      <div class="bg-white rounded-lg shadow-sm p-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-medium text-gray-900">最近支出</h2>
-          <router-link to="/expenses" class="text-sm text-indigo-600">查看全部</router-link>
+          <van-button
+            type="default"
+            size="small"
+            @click="router.push('/expenses')"
+          >
+            查看全部
+          </van-button>
         </div>
-        <ExpenseList :expenses="recentExpenses" />
+        <ExpenseList
+          :expenses="expenseStore.expenses"
+          :show-refresh="false"
+          :max-items="5"
+          empty-text="最近7天暂无支出记录"
+          @refresh="handleRefresh"
+        />
       </div>
     </div>
 
-    <!-- 新增支出表单弹窗 -->
-    <ExpenseForm
-      v-model:show="showForm"
-      @success="handleSuccess"
-    />
-
-    <!-- 记一笔按钮 -->
+    <!-- 悬浮按钮 -->
     <van-floating-bubble
       axis="xy"
       magnetic="x"
-      :style="{
-        right: '20px',
-        bottom: '20px',
-      }"
-      @click="showForm = true"
+      @click="showAddExpenseDialog = true"
     >
-      <div class="flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-full shadow-lg">
-        <van-icon name="plus" size="24" color="#fff" />
-      </div>
+      <van-icon name="plus" size="20" />
     </van-floating-bubble>
 
-    <!-- 预算设置弹窗 -->
-    <van-dialog
-      v-model:show="showBudgetDialog"
-      title="设置预算"
-      show-cancel-button
-      @confirm="handleBudgetUpdate"
-    >
-      <div class="p-4 space-y-4">
-        <van-field
-          v-model="budgetAmount"
-          type="number"
-          label="预算金额"
-          placeholder="请输入预算金额"
-          :rules="[{ required: true, message: '请输入预算金额' }]"
-        />
-        <van-field
-          v-model="budgetYear"
-          type="number"
-          label="年份"
-          placeholder="请输入年份"
-          :rules="[{ required: true, message: '请输入年份' }]"
-        />
-        <van-field
-          v-model="budgetMonth"
-          type="number"
-          label="月份"
-          placeholder="请输入月份"
-          :rules="[
-            { required: true, message: '请输入月份' },
-            { validator: validateMonth, message: '月份必须在1-12之间' }
-          ]"
-        />
-      </div>
-    </van-dialog>
+    <!-- 预算设置对话框 -->
+    <BudgetDialog v-model:show="showBudgetDialog" />
+
+    <!-- 添加支出对话框 -->
+    <AddExpenseDialog v-model:show="showAddExpenseDialog" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useExpenseStore } from '@/stores/expense';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useBudgetStore } from '@/stores/budget';
+import { useExpenseStore } from '@/stores/expense';
+import { useCategoryStore } from '@/stores/category';
+import { showToast } from 'vant';
+import dayjs from 'dayjs';
+import BudgetDialog from '@/components/BudgetDialog.vue';
+import AddExpenseDialog from '@/components/AddExpenseDialog.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
-import ExpenseForm from '@/components/ExpenseForm.vue';
-import dayjs from '@/utils/dayjs';
+import type { CategoryData } from '@/api/category';
+import type { ExpenseData } from '@/api/expense';
 
-const expenseStore = useExpenseStore();
+interface ExpenseWithCategory extends Omit<ExpenseData, 'category'> {
+  category: CategoryData;
+}
+
+const router = useRouter();
 const budgetStore = useBudgetStore();
-const showForm = ref(false);
-const showBudgetDialog = ref(false);
-const budgetAmount = ref('');
-const budgetYear = ref(dayjs().year().toString());
-const budgetMonth = ref((dayjs().month() + 1).toString());
+const expenseStore = useExpenseStore();
+const categoryStore = useCategoryStore();
 
-// 当前日期
-const currentDate = computed(() => {
-  return dayjs().format('YYYY年MM月DD日');
+// 预算对话框
+const showBudgetDialog = ref(false);
+
+// 添加支出对话框
+const showAddExpenseDialog = ref(false);
+
+// 确保 expenseStore.expenses 的类型正确
+const expenses = computed<ExpenseWithCategory[]>(() => {
+  return expenseStore.expenses.map(expense => ({
+    ...expense,
+    category: categoryStore.categories.find(c => c.id === expense.category) || {
+      id: '',
+      name: '未分类',
+      type: 'expense',
+      icon: '💰',
+      color: '#e5e7eb',
+      createdAt: dayjs().format()
+    }
+  }));
 });
 
 // 本月支出
 const monthlyExpense = computed(() => {
-  const now = dayjs();
-  const startOfMonth = now.startOf('month').format('YYYY-MM-DD');
-  const endOfMonth = now.endOf('month').format('YYYY-MM-DD');
+  if (!Array.isArray(expenses.value)) return 0
   
-  return expenseStore.expenses
+  const now = dayjs()
+  const startOfMonth = now.startOf('month').format('YYYY-MM-DD')
+  const endOfMonth = now.endOf('month').format('YYYY-MM-DD')
+  
+  return expenses.value
     .filter(expense => {
-      const date = dayjs(expense.date);
-      return date.isAfter(startOfMonth) && date.isBefore(endOfMonth);
+      const date = dayjs(expense.date)
+      return date.isAfter(startOfMonth) && date.isBefore(endOfMonth)
     })
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + (expense.amount || 0), 0)
 });
 
 // 是否超出预算
 const isOverBudget = computed(() => {
-  if (!budgetStore.currentBudget?.amount) return false;
-  return monthlyExpense.value > budgetStore.currentBudget.amount;
+  if (!budgetStore.currentBudget) return false
+  return monthlyExpense.value > (budgetStore.currentBudget.amount || 0)
 });
 
 // 预算使用进度
 const budgetProgress = computed(() => {
-  if (!budgetStore.currentBudget?.amount) return 0;
-  return (monthlyExpense.value / budgetStore.currentBudget.amount) * 100;
+  if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0
+  return Math.min((monthlyExpense.value / budgetStore.currentBudget.amount) * 100, 100)
 });
 
-// 最近支出（最近5条）
-const recentExpenses = computed(() => {
-  return expenseStore.expenses.slice(0, 5);
+// 实际进度（可能超过100%）
+const actualProgress = computed(() => {
+  if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0
+  return (monthlyExpense.value / budgetStore.currentBudget.amount) * 100
 });
 
-const validateMonth = (val: string) => {
-  const month = parseInt(val);
-  return month >= 1 && month <= 12;
+// 格式化金额
+const formatAmount = (amount?: number) => {
+  if (!amount) return '¥0.00';
+  return `¥${amount.toFixed(2)}`;
 };
 
-const handleSuccess = () => {
-  showForm.value = false;
-  fetchExpenses();
+// 返回上一页
+const onClickLeft = () => {
+  router.back()
 };
 
-const handleBudgetUpdate = async () => {
+// 处理刷新
+const handleRefresh = async () => {
   try {
-    await budgetStore.updateBudget(
-      parseFloat(budgetAmount.value),
-      parseInt(budgetYear.value),
-      parseInt(budgetMonth.value)
-    );
-    showBudgetDialog.value = false;
-  } catch (error) {
-    console.error('Failed to update budget:', error);
-  }
-};
-
-const fetchExpenses = async () => {
-  try {
-    // 获取最近一周的支出
-    const end = dayjs();
-    const start = end.subtract(6, 'day');
+    const now = dayjs();
+    const sevenDaysAgo = now.subtract(7, 'day');
     await expenseStore.fetchExpenses({
-      startDate: start.format('YYYY-MM-DD'),
-      endDate: end.format('YYYY-MM-DD')
+      startDate: sevenDaysAgo.format('YYYY-MM-DD'),
+      endDate: now.format('YYYY-MM-DD')
     });
   } catch (error) {
-    console.error('Failed to fetch expenses:', error);
+    console.error('Failed to refresh expenses:', error);
+    showToast('刷新失败');
   }
 };
 
 onMounted(async () => {
-  await Promise.all([
-    fetchExpenses(),
-    budgetStore.fetchCurrentBudget()
-  ]);
+  try {
+    const now = dayjs();
+    // 分别处理每个请求的错误
+    try {
+      await budgetStore.fetchCurrentBudget(now.year(), now.month() + 1);
+    } catch (error) {
+      console.error('Failed to fetch budget:', error);
+      showToast('获取预算失败');
+    }
+
+    try {
+      const sevenDaysAgo = now.subtract(7, 'day');
+      await expenseStore.fetchExpenses({
+        startDate: sevenDaysAgo.format('YYYY-MM-DD'),
+        endDate: now.format('YYYY-MM-DD')
+      });
+    } catch (error) {
+      console.error('Failed to fetch expenses:', error);
+      showToast('获取支出记录失败');
+    }
+
+    try {
+      await categoryStore.fetchCategories();
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      showToast('获取分类列表失败');
+    }
+  } catch (error) {
+    console.error('Failed to load initial data:', error);
+  }
+});
+
+// 监听月份变化，自动更新预算
+watch(() => dayjs().month(), async (newMonth) => {
+  const now = dayjs();
+  try {
+    await budgetStore.fetchCurrentBudget(now.year(), newMonth + 1);
+  } catch (error) {
+    console.error('Failed to fetch budget:', error);
+    showToast('获取预算失败');
+  }
 });
 </script>
 

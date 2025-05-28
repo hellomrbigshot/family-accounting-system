@@ -6,7 +6,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "tsc && nodemon dist/app.js",
     "build": "tsc",
     "test": "jest"
   },
@@ -30,12 +30,13 @@
     "@types/jest": "^29.5.0",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/ms": "^2.1.0",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.19.103",
     "jest": "^29.5.0",
     "nodemon": "^3.1.10",
     "ts-jest": "^29.1.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.3"
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
   },
   "packageManager": "pnpm@9.14.4+sha512.c8180b3fbe4e4bca02c94234717896b5529740a6cbadf19fa78254270403ea2f27d4e1d46a08a0f56c89b63dc8ebfd3ee53326da720273794e6200fcf0d184ab"
 }

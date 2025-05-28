@@ -1,104 +1,76 @@
-import axios from '@/utils/axios';
+import axios from '@/utils/axios'
 
 export interface Account {
-  id: string;
-  name: string;
-  type: 'CASH' | 'BANK' | 'CREDIT_CARD' | 'INVESTMENT' | 'OTHER';
-  balance: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name: string
+  type: 'cash' | 'bank' | 'credit'
+  balance: number
+  currency: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CreateAccountDto {
-  name: string;
-  type: 'CASH' | 'BANK' | 'CREDIT_CARD' | 'INVESTMENT' | 'OTHER';
-  balance: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
-  description?: string;
+  name: string
+  type: 'cash' | 'bank' | 'credit'
+  balance: number
+  currency: string
 }
 
-export interface UpdateAccountDto extends Partial<CreateAccountDto> {}
+export interface UpdateAccountDto {
+  name?: string
+  type?: 'cash' | 'bank' | 'credit'
+  currency?: string
+}
 
 export interface TransferDto {
-  fromAccountId: string;
-  toAccountId: string;
-  amount: number;
-  remark?: string;
+  fromAccountId: string
+  toAccountId: string
+  amount: number
+  description?: string
 }
 
 export interface AdjustBalanceDto {
-  amount: number;
-  remark?: string;
+  amount: number
+  description?: string
 }
 
-export const accountApi = {
-  async getAll(): Promise<Account[]> {
-    try {
-      const response = await axios.get<Account[]>('/accounts');
-      return response.data;
-    } catch (error) {
-      console.error('获取账户列表失败:', error);
-      throw error;
-    }
-  },
+class AccountApi {
+  private baseUrl = '/accounts'
 
-  async getById(id: string): Promise<Account> {
-    try {
-      const response = await axios.get<Account>(`/accounts/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`获取账户 ${id} 失败:`, error);
-      throw error;
-    }
-  },
-
-  async create(data: CreateAccountDto): Promise<Account> {
-    try {
-      const response = await axios.post<Account>('/accounts', data);
-      return response.data;
-    } catch (error) {
-      console.error('创建账户失败:', error);
-      throw error;
-    }
-  },
-
-  async update(id: string, data: UpdateAccountDto): Promise<Account> {
-    try {
-      const response = await axios.put<Account>(`/accounts/${id}`, data);
-      return response.data;
-    } catch (error) {
-      console.error(`更新账户 ${id} 失败:`, error);
-      throw error;
-    }
-  },
-
-  async delete(id: string): Promise<void> {
-    try {
-      await axios.delete(`/accounts/${id}`);
-    } catch (error) {
-      console.error(`删除账户 ${id} 失败:`, error);
-      throw error;
-    }
-  },
-
-  async transfer(data: TransferDto): Promise<void> {
-    try {
-      await axios.post('/accounts/transfer', data);
-    } catch (error) {
-      console.error('转账失败:', error);
-      throw error;
-    }
-  },
-
-  async adjustBalance(id: string, data: AdjustBalanceDto): Promise<Account> {
-    try {
-      const response = await axios.post<Account>(`/accounts/${id}/adjust`, data);
-      return response.data;
-    } catch (error) {
-      console.error(`调整账户 ${id} 余额失败:`, error);
-      throw error;
-    }
+  async getAll() {
+    const response = await axios.get(this.baseUrl)
+    return response.data
   }
-}; 
+
+  async getById(id: string) {
+    const response = await axios.get(`${this.baseUrl}/${id}`)
+    return response.data
+  }
+
+  async create(account: CreateAccountDto) {
+    const response = await axios.post(this.baseUrl, account)
+    return response.data
+  }
+
+  async update(id: string, account: UpdateAccountDto) {
+    const response = await axios.put(`${this.baseUrl}/${id}`, account)
+    return response.data
+  }
+
+  async delete(id: string) {
+    await axios.delete(`${this.baseUrl}/${id}`)
+  }
+
+  async transfer(data: TransferDto) {
+    const response = await axios.post(`${this.baseUrl}/transfer`, data)
+    return response.data
+  }
+
+  async adjustBalance(id: string, data: AdjustBalanceDto) {
+    const response = await axios.post(`${this.baseUrl}/${id}/adjust`, data)
+    return response.data
+  }
+}
+
+export const accountApi = new AccountApi() 

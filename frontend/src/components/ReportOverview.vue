@@ -15,7 +15,7 @@
               <dt class="text-sm font-medium text-gray-500 truncate">总支出</dt>
               <dd class="flex items-baseline">
                 <div class="text-2xl font-semibold text-gray-900">
-                  ¥{{ data?.expenses.total.toFixed(2) || '0.00' }}
+                  ¥{{ data.expenses.total.toFixed(2) }}
                 </div>
               </dd>
             </dl>
@@ -39,7 +39,7 @@
               <dt class="text-sm font-medium text-gray-500 truncate">总收入</dt>
               <dd class="flex items-baseline">
                 <div class="text-2xl font-semibold text-gray-900">
-                  ¥{{ data?.incomes.total.toFixed(2) || '0.00' }}
+                  ¥{{ data.incomes.total.toFixed(2) }}
                 </div>
               </dd>
             </dl>
@@ -63,7 +63,7 @@
               <dt class="text-sm font-medium text-gray-500 truncate">结余</dt>
               <dd class="flex items-baseline">
                 <div class="text-2xl font-semibold text-gray-900">
-                  ¥{{ data?.balance.toFixed(2) || '0.00' }}
+                  ¥{{ data.balance.toFixed(2) }}
                 </div>
               </dd>
             </dl>

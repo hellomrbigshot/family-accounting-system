@@ -5,51 +5,66 @@ import type { ExpenseQuery } from '@/api/expense';
 import dayjs from '@/utils/dayjs';
 
 interface ReportState {
-  data: ReportData | null;
+  data: ReportData;
   loading: boolean;
   error: string | null;
 }
 
+const defaultReportData: ReportData = {
+  expenses: {
+    total: 0,
+    byCategory: {},
+    byPaymentMethod: {},
+    byDate: {}
+  },
+  incomes: {
+    total: 0,
+    byCategory: {},
+    byPaymentMethod: {},
+    byDate: {}
+  },
+  balance: 0,
+  trends: {
+    daily: {},
+    weekly: {},
+    monthly: {}
+  }
+};
+
 export const useReportStore = defineStore('report', {
   state: (): ReportState => ({
-    data: null,
+    data: defaultReportData,
     loading: false,
     error: null,
   }),
 
   getters: {
     expenseCategories: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.expenses.byCategory)
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount);
     },
     incomeCategories: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.incomes.byCategory)
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount);
     },
     paymentMethods: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.expenses.byPaymentMethod)
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount);
     },
     dailyTrends: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.trends.daily)
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     },
     weeklyTrends: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.trends.weekly)
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     },
     monthlyTrends: (state) => {
-      if (!state.data) return [];
       return Object.entries(state.data.trends.monthly)
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -65,6 +80,7 @@ export const useReportStore = defineStore('report', {
         this.data = data;
       } catch (error) {
         this.error = error instanceof Error ? error.message : '获取报表数据失败';
+        this.data = defaultReportData;
       } finally {
         this.loading = false;
       }
