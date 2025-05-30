@@ -41,5 +41,6 @@ declare module 'vue' {
     VanPopup: typeof import('vant/es')['Popup']
     VanPullRefresh: typeof import('vant/es')['PullRefresh']
     VanSearch: typeof import('vant/es')['Search']
+    VanSwipeCell: typeof import('vant/es')['SwipeCell']
   }
 }

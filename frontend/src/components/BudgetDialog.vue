@@ -5,7 +5,7 @@
     title="设置预算"
     :show-cancel-button="true"
     class="budget-dialog"
-    @confirm="handleConfirm"
+    :before-close="handleBeforeClose"
   >
     <div class="p-4">
       <div class="mb-4">
@@ -33,16 +33,17 @@
       </div>
       <div class="mb-4">
         <div class="text-sm text-gray-500 mb-2">预算金额</div>
-        <div class="flex items-center">
-          <span class="text-lg mr-2">¥</span>
-          <input
-            type="text"
-            v-model="budgetAmount"
-            class="flex-1 text-lg outline-none"
-            readonly
-            @focus="showNumberKeyboard = true"
-          />
-        </div>
+        <van-field
+          v-model="budgetAmount"
+          readonly
+          clickable
+          label=""
+          placeholder="请输入金额"
+          @click="showNumberKeyboard = true"
+          class="amount-field"
+          :label-width="0"
+          left-icon="￥"
+        />
       </div>
     </div>
 
@@ -103,28 +104,48 @@ const onMonthConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   showMonthPicker.value = false;
 };
 
-// 处理确认
-const handleConfirm = async () => {
-  if (!budgetAmount.value) {
-    showToast('请输入预算金额');
-    return;
-  }
+// 处理关闭前验证
+const handleBeforeClose = async (action: string) => {
+  if (action === 'confirm') {
+    if (!budgetAmount.value) {
+      showToast({
+        message: '请输入预算金额',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
 
-  const amount = parseFloat(budgetAmount.value);
-  if (isNaN(amount) || amount <= 0) {
-    showToast('请输入有效的预算金额');
-    return;
-  }
+    const amount = parseFloat(budgetAmount.value)
+    if (isNaN(amount) || amount <= 0) {
+      showToast({
+        message: '请输入有效的预算金额',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
 
-  try {
-    const [year, month] = selectedMonth.value;
-    await budgetStore.updateBudget(amount, parseInt(year), parseInt(month));
-    showToast('设置成功');
-    emit('update:show', false);
-  } catch (error: any) {
-    showToast(error.response?.data?.message || '设置失败');
+    try {
+      const [year, month] = selectedMonth.value
+      await budgetStore.updateBudget(amount, parseInt(year), parseInt(month))
+      showToast({
+        message: '设置成功',
+        position: 'middle',
+        duration: 2000
+      })
+      return true
+    } catch (error: any) {
+      showToast({
+        message: error.response?.data?.message || '设置失败',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
   }
-};
+  return true
+}
 
 // 处理数字输入
 const onAmountInput = (value: string) => {
@@ -167,9 +188,21 @@ const onAmountDelete = () => {
 };
 </script>
 
-<style>
+<style scoped>
 .budget-dialog .van-dialog__content {
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.amount-field :deep(.van-field__control) {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding-left: 0 !important;
+}
+
+.amount-field :deep(.van-field__left-icon) {
+  margin-right: 8px;
+  font-size: 16px;
+  font-weight: 500;
 }
 </style> 

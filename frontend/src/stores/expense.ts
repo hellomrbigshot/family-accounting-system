@@ -28,7 +28,7 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   };
 
-  const createExpense = async (expense: Omit<ExpenseData, 'id' | 'createdAt'>) => {
+  const createExpense = async (expense: Omit<ExpenseData, '_id' | 'createdAt'>) => {
     loading.value = true;
     error.value = null;
     try {
@@ -37,8 +37,7 @@ export const useExpenseStore = defineStore('expense', () => {
         return false;
       }
 
-      const response = await expenseApi.create(expense);
-      expenses.value.unshift(response);
+      await expenseApi.create(expense);
       showToast('添加支出成功');
       return true;
     } catch (error) {
@@ -66,6 +65,21 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   };
 
+  const deleteExpense = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      await expenseApi.delete(id);
+      return true;
+    } catch (error) {
+      console.error('删除支出记录失败:', error);
+      showToast('删除支出记录失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     expenses,
     stats,
@@ -74,6 +88,7 @@ export const useExpenseStore = defineStore('expense', () => {
     totalExpense,
     fetchExpenses,
     createExpense,
-    fetchStats
+    fetchStats,
+    deleteExpense
   };
 }); 

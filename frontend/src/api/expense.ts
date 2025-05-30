@@ -1,7 +1,7 @@
 import axios from '@/utils/axios'
 
 export interface ExpenseData {
-  id: string
+  _id: string
   date: string
   category: string
   amount: number
@@ -29,7 +29,7 @@ class ExpenseApi {
     return response.data
   }
 
-  async create(expense: Omit<ExpenseData, 'id' | 'createdAt'>) {
+  async create(expense: Omit<ExpenseData, '_id' | 'createdAt'>) {
     const response = await axios.post(this.baseUrl, expense)
     return response.data
   }
@@ -37,6 +37,10 @@ class ExpenseApi {
   async getStats(query?: ExpenseQuery) {
     const response = await axios.get(`${this.baseUrl}/stats`, { params: query })
     return response.data
+  }
+
+  async delete(id: string): Promise<void> {
+    await axios.delete(`${this.baseUrl}/${id}`);
   }
 }
 

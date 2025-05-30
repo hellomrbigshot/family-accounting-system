@@ -7,29 +7,68 @@
         :finished-text="finishedText"
         @load="onLoad"
       >
-        <van-cell
-          v-for="expense in displayExpenses"
-          :key="expense.id"
-          :title="getCategoryName(expense.category)"
-          :value="formatAmount(expense.amount)"
-          :border="false"
-          class="mb-2"
-        >
-          <template #title>
-            <div class="flex flex-col w-full">
-              <div class="flex items-center">
-                <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
-                <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+        <template v-if="showDelete">
+          <van-swipe-cell
+            v-for="expense in displayExpenses"
+            :key="expense._id"
+            class="mb-2"
+          >
+            <van-cell
+              :title="getCategoryName(expense.category)"
+              :value="formatAmount(expense.amount)"
+              :border="false"
+            >
+              <template #title>
+                <div class="flex flex-col w-full">
+                  <div class="flex items-center">
+                    <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
+                    <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+                  </div>
+                  <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
+                    {{ expense.description }}
+                  </div>
+                  <div class="text-gray-500 text-xs mt-1">
+                    {{ formatDate(expense.date) }}
+                  </div>
+                </div>
+              </template>
+            </van-cell>
+            <template #right>
+              <van-button
+                square
+                type="danger"
+                text="删除"
+                class="h-full"
+                @click="handleDelete(expense)"
+              />
+            </template>
+          </van-swipe-cell>
+        </template>
+        <template v-else>
+          <van-cell
+            v-for="expense in displayExpenses"
+            :key="expense._id"
+            :title="getCategoryName(expense.category)"
+            :value="formatAmount(expense.amount)"
+            :border="false"
+            class="mb-2"
+          >
+            <template #title>
+              <div class="flex flex-col w-full">
+                <div class="flex items-center">
+                  <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
+                  <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+                </div>
+                <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
+                  {{ expense.description }}
+                </div>
+                <div class="text-gray-500 text-xs mt-1">
+                  {{ formatDate(expense.date) }}
+                </div>
               </div>
-              <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
-                {{ expense.description }}
-              </div>
-              <div class="text-gray-500 text-xs mt-1">
-                {{ formatDate(expense.date) }}
-              </div>
-            </div>
-          </template>
-        </van-cell>
+            </template>
+          </van-cell>
+        </template>
       </van-list>
     </van-pull-refresh>
     
@@ -39,31 +78,82 @@
         {{ emptyText }}
       </div>
       <div v-else>
-        <van-cell
-          v-for="expense in displayExpenses"
-          :key="expense.id"
-          :title="getCategoryName(expense.category)"
-          :value="formatAmount(expense.amount)"
-          :border="false"
-          class="mb-2"
-        >
-          <template #title>
-            <div class="flex flex-col w-full">
-              <div class="flex items-center">
-                <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
-                <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+        <template v-if="showDelete">
+          <van-swipe-cell
+            v-for="expense in displayExpenses"
+            :key="expense._id"
+            class="mb-2"
+          >
+            <van-cell
+              :title="getCategoryName(expense.category)"
+              :value="formatAmount(expense.amount)"
+              :border="false"
+            >
+              <template #title>
+                <div class="flex flex-col w-full">
+                  <div class="flex items-center">
+                    <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
+                    <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+                  </div>
+                  <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
+                    {{ expense.description }}
+                  </div>
+                  <div class="text-gray-500 text-xs mt-1">
+                    {{ formatDate(expense.date) }}
+                  </div>
+                </div>
+              </template>
+            </van-cell>
+            <template #right>
+              <van-button
+                square
+                type="danger"
+                text="删除"
+                class="h-full"
+                @click="handleDelete(expense)"
+              />
+            </template>
+          </van-swipe-cell>
+        </template>
+        <template v-else>
+          <van-cell
+            v-for="expense in displayExpenses"
+            :key="expense._id"
+            :title="getCategoryName(expense.category)"
+            :value="formatAmount(expense.amount)"
+            :border="false"
+            class="mb-2"
+          >
+            <template #title>
+              <div class="flex flex-col w-full">
+                <div class="flex items-center">
+                  <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
+                  <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
+                </div>
+                <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
+                  {{ expense.description }}
+                </div>
+                <div class="text-gray-500 text-xs mt-1">
+                  {{ formatDate(expense.date) }}
+                </div>
               </div>
-              <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
-                {{ expense.description }}
-              </div>
-              <div class="text-gray-500 text-xs mt-1">
-                {{ formatDate(expense.date) }}
-              </div>
-            </div>
-          </template>
-        </van-cell>
+            </template>
+          </van-cell>
+        </template>
       </div>
     </div>
+
+    <!-- 删除确认对话框 -->
+    <van-dialog
+      v-model:show="showDeleteDialog"
+      title="确认删除"
+      show-cancel-button
+      @confirm="confirmDelete"
+    >
+      <div class="p-4 text-center">
+        确定要删除这条支出记录吗？
+      </div>
+    </van-dialog>
   </div>
 </template>
 
@@ -71,11 +161,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
+import { showToast } from 'vant';
 import dayjs from '@/utils/dayjs';
 
 const props = defineProps<{
   expenses: Array<{
-    id: string;
+    _id: string;
     date: string;
     category: string;
     amount: number;
@@ -85,6 +176,7 @@ const props = defineProps<{
   maxItems?: number;
   emptyText?: string;
   finishedText?: string;
+  showDelete?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -96,12 +188,15 @@ const showRefresh = computed(() => props.showRefresh ?? true);
 const maxItems = computed(() => props.maxItems ?? 0);
 const emptyText = computed(() => props.emptyText ?? '暂无支出记录');
 const finishedText = computed(() => props.finishedText ?? '没有更多了');
+const showDelete = computed(() => props.showDelete ?? false);
 
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const refreshing = ref(false);
 const loading = ref(false);
 const finished = ref(false);
+const showDeleteDialog = ref(false);
+const expenseToDelete = ref<{ _id: string } | null>(null);
 
 // 显示的支出列表（可能被限制数量）
 const displayExpenses = computed(() => {
@@ -144,9 +239,9 @@ const formatDate = (date: string) => {
   const target = dayjs(date);
   
   if (now.isSame(target, 'day')) {
-    return '今天 ' + target.format('HH:mm');
+    return '今天';
   } else if (now.isSame(target, 'year')) {
-    return target.format('MM月DD日 HH:mm');
+    return target.format('MM月DD日');
   } else {
     return target.format('YYYY年MM月DD日');
   }
@@ -170,11 +265,33 @@ const onLoad = () => {
   loading.value = false;
   finished.value = true;
 };
+
+// 处理删除点击
+const handleDelete = (expense: { _id: string }) => {
+  expenseToDelete.value = expense;
+  showDeleteDialog.value = true;
+};
+
+// 确认删除
+const confirmDelete = async () => {
+  if (!expenseToDelete.value) return;
+  
+  try {
+    await expenseStore.deleteExpense(expenseToDelete.value._id);
+    showToast('删除成功');
+    emit('refresh');
+  } catch (error) {
+    console.error('删除支出记录失败:', error);
+    showToast('删除失败');
+  } finally {
+    expenseToDelete.value = null;
+  }
+};
 </script>
 
-<style>
+<style scoped>
 .van-cell {
-  @apply bg-white rounded-lg shadow-sm mb-2;
+  @apply bg-white rounded-lg shadow-sm;
 }
 
 .van-cell__title {
@@ -198,5 +315,24 @@ const onLoad = () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.van-swipe-cell {
+  @apply rounded-lg overflow-hidden mb-2;
+  height: 80px;
+}
+
+.van-swipe-cell__right {
+  @apply h-full;
+  width: 65px;
+}
+
+.van-button--danger {
+  @apply bg-red-500 border-red-500 h-full w-full;
+  border-radius: 0;
+}
+
+.van-button--danger:active {
+  @apply bg-red-600 border-red-600;
 }
 </style> 

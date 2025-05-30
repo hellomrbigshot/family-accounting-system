@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createExpense, getExpenses, getExpenseStats } from '../controllers/expense';
+import { createExpense, getExpenses, getExpenseStats, deleteExpense } from '../controllers/expense';
 import { auth } from '../middlewares/auth';
 
 const router = Router();
@@ -10,5 +10,6 @@ router.use(auth);
 router.post('/', createExpense);
 router.get('/', getExpenses);
 router.get('/stats', getExpenseStats);
+router.delete('/:id', deleteExpense);
 
 export default router; 

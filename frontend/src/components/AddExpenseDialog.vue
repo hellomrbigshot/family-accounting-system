@@ -5,23 +5,24 @@
     title="添加支出"
     :show-cancel-button="true"
     class="expense-dialog"
-    @confirm="handleConfirm"
+    :before-close="handleBeforeClose"
     destroy-on-close
     close-on-click-overlay
   >
     <div class="p-4">
       <div class="mb-4">
         <div class="text-sm text-gray-500 mb-2">金额</div>
-        <div class="flex items-center">
-          <span class="text-lg mr-2">¥</span>
-          <input
-            type="text"
-            v-model="expenseAmount"
-            class="flex-1 text-lg outline-none"
-            readonly
-            @focus="showNumberKeyboard = true"
-          />
-        </div>
+        <van-field
+          v-model="expenseAmount"
+          readonly
+          clickable
+          label=""
+          placeholder="请输入金额"
+          @click="showNumberKeyboard = true"
+          class="amount-field"
+          :label-width="0"
+          left-icon="￥"
+        />
       </div>
       <div class="mb-4">
         <div class="text-sm text-gray-500 mb-2">分类</div>
@@ -112,6 +113,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void;
+  (e: 'success'): void;
 }>();
 
 const expenseStore = useExpenseStore();
@@ -210,41 +212,66 @@ const onDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   showDatePicker.value = false;
 };
 
-// 处理确认
-const handleConfirm = async () => {
-  if (!expenseAmount.value) {
-    showToast('请输入金额');
-    return;
-  }
+// 处理关闭前验证
+const handleBeforeClose = async (action: string) => {
+  if (action === 'confirm') {
+    if (!expenseAmount.value) {
+      showToast({
+        message: '请输入金额',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
 
-  const amount = parseFloat(expenseAmount.value);
-  if (isNaN(amount) || amount <= 0) {
-    showToast('请输入有效的金额');
-    return;
-  }
+    const amount = parseFloat(expenseAmount.value)
+    if (isNaN(amount) || amount <= 0) {
+      showToast({
+        message: '请输入有效的金额',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
 
-  if (!form.category) {
-    showToast('请选择分类');
-    return;
-  }
+    if (!form.category) {
+      showToast({
+        message: '请选择分类',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
 
-  try {
-    await expenseStore.createExpense({
-      amount,
-      category: form.category,
-      date: formattedDate.value,
-      description: expenseDescription.value
-    });
+    try {
+      await expenseStore.createExpense({
+        amount,
+        category: form.category,
+        date: formattedDate.value,
+        description: expenseDescription.value
+      })
 
-    showToast('添加成功');
-    emit('update:show', false);
-    expenseAmount.value = '';
-    selectedCategory.value = '';
-    form.category = '';
-    expenseDescription.value = '';
-  } catch (error: any) {
-    showToast(error.response?.data?.message || '添加失败');
+      showToast({
+        message: '添加成功',
+        position: 'middle',
+        duration: 2000
+      })
+      emit('success')
+      expenseAmount.value = ''
+      selectedCategory.value = ''
+      form.category = ''
+      expenseDescription.value = ''
+      return true
+    } catch (error: any) {
+      showToast({
+        message: error.response?.data?.message || '添加失败',
+        position: 'middle',
+        duration: 2000
+      })
+      return false
+    }
   }
+  return true
 };
 
 // 日期格式化
@@ -266,5 +293,17 @@ const dateFormatter = (type: string, option: any) => {
 :deep(.expense-dialog .van-dialog__content) {
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.amount-field :deep(.van-field__control) {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding-left: 0 !important;
+}
+
+.amount-field :deep(.van-field__left-icon) {
+  margin-right: 8px;
+  font-size: 16px;
+  font-weight: 500;
 }
 </style> 

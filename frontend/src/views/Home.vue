@@ -67,7 +67,7 @@
         </div>
         <ExpenseList
           :expenses="expenseStore.expenses"
-          :show-refresh="false"
+          :show-refresh="true"
           :max-items="5"
           empty-text="最近7天暂无支出记录"
           @refresh="handleRefresh"
@@ -88,7 +88,10 @@
     <BudgetDialog v-model:show="showBudgetDialog" />
 
     <!-- 添加支出对话框 -->
-    <AddExpenseDialog v-model:show="showAddExpenseDialog" />
+    <AddExpenseDialog 
+      v-model:show="showAddExpenseDialog" 
+      @success="handleRefresh"
+    />
   </div>
 </template>
 

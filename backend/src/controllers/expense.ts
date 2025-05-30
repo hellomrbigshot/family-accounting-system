@@ -66,7 +66,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const expenses = await Expense.find(query)
-      .sort({ date: -1 })
+      .sort({ date: -1, updatedAt: -1 })
       .exec();
 
     res.json(expenses);
@@ -141,6 +141,37 @@ export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) 
       });
     } else {
       res.status(500).json({ message: '获取统计数据失败' });
+    }
+  }
+};
+
+export const deleteExpense = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    if (!req.user?._id) {
+      return res.status(401).json({ message: '未授权访问' });
+    }
+
+    const expense = await Expense.findOneAndDelete({
+      _id: id,
+      userId: new Types.ObjectId(req.user._id)
+    });
+
+    if (!expense) {
+      return res.status(404).json({ message: '支出记录不存在' });
+    }
+
+    res.json({ message: '支出记录删除成功' });
+  } catch (error) {
+    console.error('删除支出记录失败:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        message: '删除支出记录失败',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({ message: '删除支出记录失败' });
     }
   }
 }; 
