@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import axios from '@/utils/axios';
 import { useRouter } from 'vue-router';
-import { showToast } from 'vant';
+;
 import CryptoJS from 'crypto-js';
 
 // 加密密钥（实际项目中应该从环境变量或配置中获取）

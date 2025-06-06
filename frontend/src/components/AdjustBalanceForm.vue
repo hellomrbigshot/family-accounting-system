@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAccountStore } from '@/stores/account'
-import { showToast } from 'vant'
+
 
 const props = defineProps<{
   accountId: number

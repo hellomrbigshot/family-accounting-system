@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 不需要额外的脚本
 </script>
 
 <template>

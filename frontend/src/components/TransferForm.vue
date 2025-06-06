@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAccountStore } from '@/stores/account'
-import { showToast } from 'vant'
+
 
 const emit = defineEmits<{
   (e: 'success'): void

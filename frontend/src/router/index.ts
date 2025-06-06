@@ -1,16 +1,55 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import Tags from '@/views/Tags.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('@/views/Home.vue'),
-      meta: {
-        requiresAuth: true
-      }
+      component: () => import('@/layouts/MainLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'home',
+          component: () => import('@/views/Home.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'expenses',
+          name: 'expenses',
+          component: () => import('@/views/Expenses.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'accounts',
+          name: 'accounts',
+          component: () => import('@/views/Accounts.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'categories',
+          name: 'categories',
+          component: () => import('@/views/Categories.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'reports',
+          name: 'reports',
+          component: () => import('@/views/Reports.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        }
+      ]
     },
     {
       path: '/login',
@@ -26,38 +65,6 @@ const router = createRouter({
       component: () => import('@/views/Register.vue'),
       meta: {
         requiresAuth: false
-      }
-    },
-    {
-      path: '/expenses',
-      name: 'expenses',
-      component: () => import('@/views/Expenses.vue'),
-      meta: {
-        requiresAuth: true
-      }
-    },
-    {
-      path: '/accounts',
-      name: 'accounts',
-      component: () => import('@/views/Accounts.vue'),
-      meta: {
-        requiresAuth: true
-      }
-    },
-    {
-      path: '/categories',
-      name: 'categories',
-      component: () => import('@/views/Categories.vue'),
-      meta: {
-        requiresAuth: true
-      }
-    },
-    {
-      path: '/reports',
-      name: 'reports',
-      component: () => import('@/views/Reports.vue'),
-      meta: {
-        requiresAuth: true
       }
     }
   ]

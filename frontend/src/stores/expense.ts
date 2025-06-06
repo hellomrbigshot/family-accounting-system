@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { expenseApi } from '@/api/expense';
-import { showToast } from 'vant';
+;
 import type { ExpenseData, ExpenseQuery, ExpenseStats } from '@/api/expense';
 
 export const useExpenseStore = defineStore('expense', () => {
@@ -28,7 +28,7 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   };
 
-  const createExpense = async (expense: Omit<ExpenseData, '_id' | 'createdAt'>) => {
+  const createExpense = async (expense: Omit<ExpenseData, 'id' | 'createdAt'>) => {
     loading.value = true;
     error.value = null;
     try {

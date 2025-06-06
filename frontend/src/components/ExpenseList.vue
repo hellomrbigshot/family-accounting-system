@@ -10,7 +10,7 @@
         <template v-if="showDelete">
           <van-swipe-cell
             v-for="expense in displayExpenses"
-            :key="expense._id"
+            :key="expense.id"
             class="mb-2"
           >
             <van-cell
@@ -26,6 +26,17 @@
                   </div>
                   <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                     {{ expense.description }}
+                  </div>
+                  <div class="flex flex-wrap gap-1 mt-1">
+                    <van-tag
+                      v-for="tag in expense.tags"
+                      :key="tag.id"
+                      :color="tag.color"
+                      plain
+                      class="text-xs"
+                    >
+                      {{ tag.name }}
+                    </van-tag>
                   </div>
                   <div class="text-gray-500 text-xs mt-1">
                     {{ formatDate(expense.date) }}
@@ -47,7 +58,7 @@
         <template v-else>
           <van-cell
             v-for="expense in displayExpenses"
-            :key="expense._id"
+            :key="expense.id"
             :title="getCategoryName(expense.category)"
             :value="formatAmount(expense.amount)"
             :border="false"
@@ -61,6 +72,17 @@
                 </div>
                 <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                   {{ expense.description }}
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  <van-tag
+                    v-for="tag in expense.tags"
+                    :key="tag.id"
+                    :color="tag.color"
+                    plain
+                    class="text-xs"
+                  >
+                    {{ tag.name }}
+                  </van-tag>
                 </div>
                 <div class="text-gray-500 text-xs mt-1">
                   {{ formatDate(expense.date) }}
@@ -81,7 +103,7 @@
         <template v-if="showDelete">
           <van-swipe-cell
             v-for="expense in displayExpenses"
-            :key="expense._id"
+            :key="expense.id"
             class="mb-2"
           >
             <van-cell
@@ -97,6 +119,17 @@
                   </div>
                   <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                     {{ expense.description }}
+                  </div>
+                  <div class="flex flex-wrap gap-1 mt-1">
+                    <van-tag
+                      v-for="tag in expense.tags"
+                      :key="tag.id"
+                      :color="tag.color"
+                      plain
+                      class="text-xs"
+                    >
+                      {{ tag.name }}
+                    </van-tag>
                   </div>
                   <div class="text-gray-500 text-xs mt-1">
                     {{ formatDate(expense.date) }}
@@ -118,7 +151,7 @@
         <template v-else>
           <van-cell
             v-for="expense in displayExpenses"
-            :key="expense._id"
+            :key="expense.id"
             :title="getCategoryName(expense.category)"
             :value="formatAmount(expense.amount)"
             :border="false"
@@ -132,6 +165,17 @@
                 </div>
                 <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                   {{ expense.description }}
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  <van-tag
+                    v-for="tag in expense.tags"
+                    :key="tag.id"
+                    :color="tag.color"
+                    plain
+                    class="text-xs"
+                  >
+                    {{ tag.name }}
+                  </van-tag>
                 </div>
                 <div class="text-gray-500 text-xs mt-1">
                   {{ formatDate(expense.date) }}
@@ -158,135 +202,146 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useExpenseStore } from '@/stores/expense';
-import { useCategoryStore } from '@/stores/category';
-import { showToast } from 'vant';
-import dayjs from '@/utils/dayjs';
+import { ref, computed, onMounted } from 'vue'
+import { useExpenseStore } from '@/stores/expense'
+import { useCategoryStore } from '@/stores/category'
+import dayjs from '@/utils/dayjs'
+import type { ExpenseData } from '@/api/expense'
+import type { CategoryData } from '@/api/category'
+import type { TagData } from '@/api/tag'
+
+interface ExpenseWithCategory {
+  id: string
+  date: string
+  category: string
+  amount: number
+  description: string
+  tags: string[]
+  createdAt: string
+}
 
 const props = defineProps<{
-  expenses: Array<{
-    _id: string;
-    date: string;
-    category: string;
-    amount: number;
-    description: string;
-  }>;
-  showRefresh?: boolean;
-  maxItems?: number;
-  emptyText?: string;
-  finishedText?: string;
-  showDelete?: boolean;
-}>();
+  expenses: ExpenseWithCategory[]
+  showRefresh?: boolean
+  showDelete?: boolean
+  maxItems?: number
+  emptyText?: string
+  finishedText?: string
+}>()
 
 const emit = defineEmits<{
-  (e: 'refresh'): void;
-}>();
+  (e: 'refresh'): void
+  (e: 'delete', expense: ExpenseWithCategory): void
+}>()
 
 // 设置默认值
-const showRefresh = computed(() => props.showRefresh ?? true);
-const maxItems = computed(() => props.maxItems ?? 0);
-const emptyText = computed(() => props.emptyText ?? '暂无支出记录');
-const finishedText = computed(() => props.finishedText ?? '没有更多了');
-const showDelete = computed(() => props.showDelete ?? false);
+const showRefresh = computed(() => props.showRefresh ?? true)
+const maxItems = computed(() => props.maxItems ?? 0)
+const emptyText = computed(() => props.emptyText ?? '暂无支出记录')
+const finishedText = computed(() => props.finishedText ?? '没有更多了')
+const showDelete = computed(() => props.showDelete ?? false)
 
-const expenseStore = useExpenseStore();
-const categoryStore = useCategoryStore();
-const refreshing = ref(false);
-const loading = ref(false);
-const finished = ref(false);
-const showDeleteDialog = ref(false);
-const expenseToDelete = ref<{ _id: string } | null>(null);
+const expenseStore = useExpenseStore()
+const categoryStore = useCategoryStore()
+const refreshing = ref(false)
+const loading = ref(false)
+const finished = ref(false)
+const showDeleteDialog = ref(false)
+const expenseToDelete = ref<{ id: string } | null>(null)
 
 // 显示的支出列表（可能被限制数量）
 const displayExpenses = computed(() => {
   if (maxItems.value > 0) {
-    return props.expenses.slice(0, maxItems.value);
+    return props.expenses.slice(0, maxItems.value)
   }
-  return props.expenses;
-});
+  return props.expenses
+})
 
 // 加载分类数据
 onMounted(async () => {
   try {
-    await categoryStore.fetchCategories();
+    await categoryStore.fetchCategories()
   } catch (error) {
-    console.error('Failed to load categories:', error);
+    console.error('Failed to load categories:', error)
   }
-});
+})
 
 // 获取分类名称
-const getCategoryName = (categoryId: string) => {
-  if (!categoryStore.categories || !Array.isArray(categoryStore.categories)) {
-    return '未知分类';
+const getCategoryName = (category: string | CategoryData) => {
+  if (typeof category === 'string') {
+    const foundCategory = categoryStore.categories.find(c => c.id === category)
+    return foundCategory?.name || '未知分类'
   }
-  const category = categoryStore.categories.find(c => c.id === categoryId);
-  return category?.name || '未知分类';
-};
+  return category.name || '未知分类'
+}
 
 // 获取分类图标
-const getCategoryIcon = (categoryId: string) => {
-  if (!categoryStore.categories || !Array.isArray(categoryStore.categories)) {
-    return '📦';
+const getCategoryIcon = (category: string | CategoryData) => {
+  if (typeof category === 'string') {
+    const foundCategory = categoryStore.categories.find(c => c.id === category)
+    return foundCategory?.icon || '📦'
   }
-  const category = categoryStore.categories.find(c => c.id === categoryId);
-  return category?.icon || '📦';
-};
+  return category.icon || '📦'
+}
 
 // 格式化日期
 const formatDate = (date: string) => {
-  const now = dayjs();
-  const target = dayjs(date);
-  
-  if (now.isSame(target, 'day')) {
-    return '今天';
-  } else if (now.isSame(target, 'year')) {
-    return target.format('MM月DD日');
-  } else {
-    return target.format('YYYY年MM月DD日');
-  }
-};
+  return dayjs(date).format('YYYY-MM-DD')
+}
 
 // 格式化金额
-const formatAmount = (amount: number | undefined) => {
-  if (amount === undefined || amount === null) {
-    return '¥0.00';
-  }
-  return `¥${amount.toFixed(2)}`;
-};
+const formatAmount = (amount: number) => {
+  return `¥${amount.toFixed(2)}`
+}
 
+// 处理刷新
 const onRefresh = () => {
-  refreshing.value = true;
-  emit('refresh');
-  refreshing.value = false;
-};
+  finished.value = false
+  emit('refresh')
+  refreshing.value = false
+}
 
+// 处理加载更多
 const onLoad = () => {
-  loading.value = false;
-  finished.value = true;
-};
+  if (maxItems.value > 0 && props.expenses.length >= maxItems.value) {
+    finished.value = true
+  }
+  loading.value = false
+}
 
-// 处理删除点击
-const handleDelete = (expense: { _id: string }) => {
-  expenseToDelete.value = expense;
-  showDeleteDialog.value = true;
-};
+// 处理删除
+const handleDelete = async (expense: ExpenseWithCategory) => {
+  try {
+    await showDialog({
+      title: '确认删除',
+      message: '确定要删除这条支出记录吗？',
+      confirmButtonText: '删除',
+      confirmButtonColor: '#ef4444'
+    })
+    emit('delete', expense)
+  } catch (error) {
+    if (error) {
+      console.error('Failed to delete expense:', error)
+      showToast('删除失败')
+    }
+  }
+}
 
 // 确认删除
 const confirmDelete = async () => {
-  if (!expenseToDelete.value) return;
+  if (!expenseToDelete.value) return
   
   try {
-    await expenseStore.deleteExpense(expenseToDelete.value._id);
-    showToast('删除成功');
-    emit('refresh');
+    await expenseStore.deleteExpense(expenseToDelete.value.id)
+    showToast('删除成功')
+    emit('refresh')
   } catch (error) {
-    console.error('删除支出记录失败:', error);
-    showToast('删除失败');
+    console.error('删除支出记录失败:', error)
+    showToast('删除失败')
   } finally {
-    expenseToDelete.value = null;
+    expenseToDelete.value = null
   }
-};
+}
 </script>
 
 <style scoped>

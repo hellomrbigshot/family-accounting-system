@@ -6,6 +6,7 @@ export interface IExpense {
   category: Schema.Types.ObjectId;
   amount: number;
   description?: string;
+  tags: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +34,11 @@ const expenseSchema = new Schema<IExpense>({
   description: {
     type: String,
     maxlength: 200
-  }
+  },
+  tags: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Tag'
+  }]
 }, {
   timestamps: true
 });
@@ -41,5 +46,6 @@ const expenseSchema = new Schema<IExpense>({
 // 创建索引以提高查询性能
 expenseSchema.index({ userId: 1, date: -1 });
 expenseSchema.index({ category: 1 });
+expenseSchema.index({ tags: 1 });
 
 export const Expense = model<IExpense>('Expense', expenseSchema); 

@@ -3,13 +3,18 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: 
+globs: 
+alwaysApply: true
+---
 
 # 本地运行环境
 
 - 使用 nvm 作为 node 版本管理器，本地已安装 node@22 版本，不要重复安装。
 - 项目运行的 node 版本为 node@22
 - 使用 pnpm 作为包管理器
-- 代码中不出现 ;
+- js/ts 代码中不出现 ;
 
 # 前端项目管理
 
@@ -28,3 +33,7 @@ alwaysApply: true
 - 使用 mongoose 管理 mongoDB 数据库
 - 使用 jsonwebtoken 实现 jwt 认证
 - 使用 bcryptjs 加密
+
+# 代码管理
+
+- 请记住，代码是写给人看的，只是机器恰好可以运行

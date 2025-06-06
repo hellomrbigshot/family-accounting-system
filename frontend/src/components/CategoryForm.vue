@@ -67,7 +67,7 @@ import { reactive, watch, onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import type { CategoryData } from '@/api/category';
 import dayjs from '@/utils/dayjs';
-import { showToast } from 'vant';
+;
 
 const props = defineProps<{
   category?: CategoryData;

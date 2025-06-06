@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { budgetApi } from '@/api/budget';
-import { showToast } from 'vant';
+;
 import type { Budget } from '@/types/budget';
 
 const defaultBudget: Budget = {

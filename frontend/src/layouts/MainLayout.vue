@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-    <nav class="bg-white shadow-sm border-b border-gray-100">
+  <div class="h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- 顶部导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm border-b border-gray-100">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-8">
@@ -22,6 +23,7 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
+            <span class="text-gray-700">{{ currentPageTitle }}</span>
             <button 
               @click="handleLogout" 
               class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
@@ -32,8 +34,16 @@
         </div>
       </div>
     </nav>
+
+    <!-- 中间内容区域 -->
+    <main class="h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)] mt-16 overflow-y-auto bg-gradient-to-b from-blue-50 to-white">
+      <div class="container mx-auto pt-4">
+        <router-view></router-view>
+      </div>
+    </main>
+
     <!-- 移动端底部导航 -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+    <div class="fixed bottom-0 left-0 right-0 z-10 md:hidden bg-white border-t border-gray-200">
       <div class="grid grid-cols-4 h-16">
         <router-link
           v-for="item in navItems"
@@ -53,15 +63,13 @@
         </router-link>
       </div>
     </div>
-    <main class="py-6 pb-20 md:pb-6">
-      <router-view></router-view>
-    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { computed } from 'vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -72,6 +80,12 @@ const navItems = [
   { name: '分类', path: '/categories', icon: '📋' },
   { name: '报表', path: '/reports', icon: '📊' }
 ];
+
+const currentPageTitle = computed(() => {
+  const currentRoute = router.currentRoute.value;
+  const currentNavItem = navItems.find(item => item.path === currentRoute.path);
+  return currentNavItem?.name || '';
+});
 
 const isActive = (path: string) => {
   return router.currentRoute.value.path === path;

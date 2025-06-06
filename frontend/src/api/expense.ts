@@ -1,24 +1,27 @@
 import axios from '@/utils/axios'
 
 export interface ExpenseData {
-  _id: string
+  id: string
   date: string
   category: string
   amount: number
   description: string
   createdAt: string
+  tags: string[]
 }
 
 export interface ExpenseQuery {
   startDate?: string
   endDate?: string
   category?: string
+  tags?: string[]
 }
 
 export interface ExpenseStats {
   total: number
   byCategory: Record<string, number>
   byDate: Record<string, number>
+  byTag: Record<string, number>
 }
 
 class ExpenseApi {
@@ -29,7 +32,7 @@ class ExpenseApi {
     return response.data
   }
 
-  async create(expense: Omit<ExpenseData, '_id' | 'createdAt'>) {
+  async create(expense: Omit<ExpenseData, 'id' | 'createdAt'>) {
     const response = await axios.post(this.baseUrl, expense)
     return response.data
   }

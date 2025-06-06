@@ -131,7 +131,7 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
-import { showToast } from 'vant';
+;
 import dayjs from '@/utils/dayjs';
 
 const props = defineProps<{

@@ -1,19 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- 顶部导航栏 -->
-    <van-nav-bar
-      title="家庭记账"
-      left-arrow
-      @click-left="onClickLeft"
-      class="bg-white"
-    />
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-    <!-- 主要内容区域 -->
-    <div class="p-4">
       <!-- 预算卡片 -->
       <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-900">本月预算</h2>
+          <h2 class="text-lg font-medium text-gray-900">本月总览</h2>
           <van-button
             type="primary"
             size="small"
@@ -57,19 +49,29 @@
       <div class="bg-white rounded-lg shadow-sm p-4">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-medium text-gray-900">最近支出</h2>
-          <van-button
-            type="default"
-            size="small"
-            @click="router.push('/expenses')"
-          >
-            查看全部
-          </van-button>
+          <div class="flex space-x-2">
+            <van-button
+              type="default"
+              size="small"
+              @click="router.push('/expenses')"
+            >
+              查看全部
+            </van-button>
+            <van-button
+              type="primary"
+              size="small"
+              @click="router.push('/categories')"
+            >
+              分类管理
+            </van-button>
+          </div>
         </div>
         <ExpenseList
           :expenses="expenseStore.expenses"
           :show-refresh="true"
           :max-items="5"
           empty-text="最近7天暂无支出记录"
+          finished-text="只显示最近7天支出记录"
           @refresh="handleRefresh"
         />
       </div>
@@ -101,22 +103,31 @@ import { useRouter } from 'vue-router';
 import { useBudgetStore } from '@/stores/budget';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
-import { showToast } from 'vant';
+import { useTagStore } from '@/stores/tag';
+;
 import dayjs from 'dayjs';
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import AddExpenseDialog from '@/components/AddExpenseDialog.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
 import type { CategoryData } from '@/api/category';
 import type { ExpenseData } from '@/api/expense';
+import type { TagData } from '@/api/tag';
 
-interface ExpenseWithCategory extends Omit<ExpenseData, 'category'> {
+interface ExpenseWithCategory {
+  id: string;
+  date: string;
   category: CategoryData;
+  amount: number;
+  description: string;
+  createdAt: string;
+  tags: TagData[];
 }
 
 const router = useRouter();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
+const tagStore = useTagStore();
 
 // 预算对话框
 const showBudgetDialog = ref(false);
@@ -124,19 +135,65 @@ const showBudgetDialog = ref(false);
 // 添加支出对话框
 const showAddExpenseDialog = ref(false);
 
+// 本月统计数据
+const monthlyStats = computed(() => {
+  const now = dayjs();
+  const startOfMonth = now.startOf('month').format('YYYY-MM-DD');
+  const endOfMonth = now.endOf('month').format('YYYY-MM-DD');
+  
+  const totalExpense = expenses.value
+    .filter(expense => {
+      const date = dayjs(expense.date);
+      return date.isAfter(startOfMonth) && date.isBefore(endOfMonth);
+    })
+    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+  
+  // 暂时总收入为0，因为还没有实现收入功能
+  const totalIncome = 0;
+  
+  return {
+    totalExpense,
+    totalIncome,
+    balance: totalIncome - totalExpense
+  };
+});
+
+// 格式化货币
+const formatCurrency = (amount: number) => {
+  return `¥${amount.toFixed(2)}`;
+};
+
 // 确保 expenseStore.expenses 的类型正确
 const expenses = computed<ExpenseWithCategory[]>(() => {
-  return expenseStore.expenses.map(expense => ({
-    ...expense,
-    category: categoryStore.categories.find(c => c.id === expense.category) || {
+  return expenseStore.expenses.map(expense => {
+    const category = categoryStore.categories.find(c => c.id === expense.category) || {
       id: '',
       name: '未分类',
       type: 'expense',
       icon: '💰',
       color: '#e5e7eb',
       createdAt: dayjs().format()
-    }
-  }));
+    };
+
+    const tags = expense.tags.map(tagId => 
+      tagStore.tags.find(t => t.id === tagId) || {
+        id: tagId,
+        name: '未知标签',
+        color: '#e5e7eb',
+        createdAt: dayjs().format()
+      }
+    );
+
+    return {
+      id: expense.id,
+      date: expense.date,
+      category,
+      amount: expense.amount,
+      description: expense.description,
+      createdAt: expense.createdAt,
+      tags
+    };
+  });
 });
 
 // 本月支出
@@ -225,10 +282,18 @@ onMounted(async () => {
       await categoryStore.fetchCategories();
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-      showToast('获取分类列表失败');
+      showToast('获取分类失败');
+    }
+
+    try {
+      await tagStore.fetchTags();
+    } catch (error) {
+      console.error('Failed to fetch tags:', error);
+      showToast('获取标签失败');
     }
   } catch (error) {
-    console.error('Failed to load initial data:', error);
+    console.error('Failed to initialize:', error);
+    showToast('初始化失败');
   }
 });
 
