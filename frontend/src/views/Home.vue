@@ -104,7 +104,6 @@ import { useBudgetStore } from '@/stores/budget';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
-;
 import dayjs from 'dayjs';
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import AddExpenseDialog from '@/components/AddExpenseDialog.vue';

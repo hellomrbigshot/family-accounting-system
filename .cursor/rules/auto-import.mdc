@@ -1,0 +1,32 @@
+---
+description: 
+globs: frontend/*/*.ts,frontend/*/*.vue
+alwaysApply: false
+---
+[
+  {
+    "name": "Vue Core Auto Imports",
+    "pattern": "^(ref|reactive|computed|watch|watchEffect|onMounted|onUnmounted|nextTick|defineProps|defineEmits|defineExpose|withDefaults|toRef|toRefs)$",
+    "action": "skip_import"
+  },
+  {
+    "name": "Vue Router Auto Imports",
+    "pattern": "^(useRouter|useRoute|RouteLocationRaw|RouteRecordRaw)$",
+    "action": "skip_import"
+  },
+  {
+    "name": "Pinia Auto Imports",
+    "pattern": "^(defineStore|storeToRefs)$",
+    "action": "skip_import"
+  },
+  {
+    "name": "Third Party Auto Imports",
+    "pattern": "^(Cookies|dayjs|localForage|axios)$",
+    "action": "skip_import"
+  },
+  {
+    "name": "Vant UI Auto Imports",
+    "pattern": "^(showToast|showDialog|showNotify|showLoadingToast|closeToast|closeDialog|closeNotify|closeLoadingToast)$",
+    "action": "skip_import"
+  }
+]

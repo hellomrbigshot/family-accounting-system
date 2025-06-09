@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 ---
-description: 
+description: 系统规则
 globs: 
 alwaysApply: true
 ---
