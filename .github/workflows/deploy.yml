@@ -1,0 +1,97 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.11.0'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+    
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+    
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+    
+    # - name: Install Dependencies
+    #   run: |
+    #     cd frontend
+    #     pnpm install
+    #     cd ../backend
+    #     pnpm install
+    
+    # - name: Build Frontend
+    #   run: |
+    #     cd frontend
+    #     pnpm run build
+    
+    - name: Deploy to Aliyun
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.ALIYUN_HOST }}
+        username: ${{ secrets.ALIYUN_USERNAME }}
+        key: ${{ secrets.ALIYUN_SSH_KEY }}
+        script: |
+          # 设置环境变量
+          export NODE_ENV=production
+          export MONGODB_URI=${{ secrets.MONGODB_URI }}
+          export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          
+          # 进入项目目录
+          cd /var/www/family-accounting
+          
+          # 拉取最新代码
+          git pull origin main
+          
+          # 部署前端
+          echo "Deploying frontend..."
+          cd frontend
+          pnpm install
+          pnpm run build
+          
+          # 部署后端
+          echo "Deploying backend..."
+          cd ../backend
+          pnpm install
+          pnpm run build
+          
+          # 重启服务
+          echo "Restarting services..."
+          pm2 restart family-accounting || pm2 start ecosystem.config.js
+          
+          # 等待服务启动
+          echo "Waiting for service to start..."
+          sleep 10
+          
+          # 健康检查
+          echo "Performing health check..."
+          if curl -f http://localhost:3000/api/health; then
+            echo "Deployment successful!"
+          else
+            echo "Health check failed!"
+            exit 1
+          fi 

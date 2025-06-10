@@ -23,6 +23,7 @@ declare module 'vue' {
     ReportOverview: typeof import('./components/ReportOverview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TagForm: typeof import('./components/TagForm.vue')['default']
     TagList: typeof import('./components/TagList.vue')['default']
     TransferDialog: typeof import('./components/TransferDialog.vue')['default']
     TransferForm: typeof import('./components/TransferForm.vue')['default']
@@ -46,6 +47,8 @@ declare module 'vue' {
     VanPullRefresh: typeof import('vant/es')['PullRefresh']
     VanSearch: typeof import('vant/es')['Search']
     VanSwipeCell: typeof import('vant/es')['SwipeCell']
+    VanTabbar: typeof import('vant/es')['Tabbar']
+    VanTabbarItem: typeof import('vant/es')['TabbarItem']
     VanTag: typeof import('vant/es')['Tag']
   }
 }
