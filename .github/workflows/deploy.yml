@@ -10,36 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - name: 安装 pnpm
+      uses: pnpm/action-setup@v4
       with:
-        node-version: '22.11.0'
+        version: 10
+    - name: 使用 Nnode.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.12.0
         cache: 'pnpm'
-    
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
-        run_install: false
-    
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-    
-    - name: Setup pnpm cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
-    
-    - name: Install dependencies
-      run: |
-        pnpm install
+    - name: 安装依赖
+      run: pnpm install
     
     - name: Build frontend
       run: |
@@ -64,6 +46,14 @@ jobs:
           export NODE_ENV=production
           export MONGODB_URI=${{ secrets.MONGODB_URI }}
           export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          
+          # 安装 pnpm（如果尚未安装）
+          if ! command -v pnpm &> /dev/null; then
+            echo "Installing pnpm..."
+            curl -fsSL https://get.pnpm.io/install.sh | sh -
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME:$PATH"
+          fi
           
           # 进入项目目录
           cd /home/family-accounting
