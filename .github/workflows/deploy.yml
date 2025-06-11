@@ -37,17 +37,21 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
     
-    # - name: Install Dependencies
-    #   run: |
-    #     cd frontend
-    #     pnpm install
-    #     cd ../backend
-    #     pnpm install
+    - name: Install dependencies
+      run: |
+        pnpm install
     
-    # - name: Build Frontend
-    #   run: |
-    #     cd frontend
-    #     pnpm run build
+    - name: Build frontend
+      run: |
+        cd frontend
+        pnpm install
+        pnpm run build
+    
+    - name: Build backend
+      run: |
+        cd backend
+        pnpm install
+        pnpm run build
     
     - name: Deploy to Aliyun
       uses: appleboy/ssh-action@master
@@ -62,7 +66,7 @@ jobs:
           export JWT_SECRET=${{ secrets.JWT_SECRET }}
           
           # 进入项目目录
-          cd /var/www/family-accounting
+          cd /home/family-accounting
           
           # 拉取最新代码
           git pull origin main
