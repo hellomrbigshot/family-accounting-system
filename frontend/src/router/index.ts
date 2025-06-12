@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import Tags from '@/views/Tags.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,20 +69,23 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+// 等待路由准备就绪
+router.isReady().then(() => {
+  router.beforeEach(async (to, from, next) => {
+    const authStore = useAuthStore();
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-  // 等待认证检查完成
-  const isAuthenticated = await authStore.isAuthenticated();
+    // 等待认证检查完成
+    const isAuthenticated = await authStore.isAuthenticated();
 
-  if (requiresAuth && !isAuthenticated) {
-    next('/login');
-  } else if (!requiresAuth && isAuthenticated) {
-    next('/');
-  } else {
-    next();
-  }
+    if (requiresAuth && !isAuthenticated) {
+      next('/login');
+    } else if (!requiresAuth && isAuthenticated) {
+      next('/');
+    } else {
+      next();
+    }
+  });
 });
 
 export default router; 

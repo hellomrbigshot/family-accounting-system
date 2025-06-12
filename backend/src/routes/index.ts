@@ -6,6 +6,7 @@ import tagRoutes from './tag';
 import expenseRoutes from './expense';
 import accountRoutes from './account';
 import healthRoutes from './health';
+import budgetRoutes from './budget';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/tags', tagRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/accounts', accountRoutes);
 router.use('/health', healthRoutes);
+router.use('/budgets', budgetRoutes);
 
 export default router; 

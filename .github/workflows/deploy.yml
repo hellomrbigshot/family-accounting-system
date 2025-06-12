@@ -29,13 +29,11 @@ jobs:
     - name: Build frontend
       run: |
         cd frontend
-        pnpm install
         pnpm run build
     
     - name: Build backend
       run: |
         cd backend
-        pnpm install
         pnpm run build
     
     - name: Deploy to Aliyun
@@ -63,17 +61,16 @@ jobs:
           
           # 拉取最新代码
           git pull origin main
+          pnpm install
           
           # 部署前端
           echo "Deploying frontend..."
           cd frontend
-          pnpm install
           pnpm run build
           
           # 部署后端
           echo "Deploying backend..."
           cd ../backend
-          pnpm install
           pnpm run build
           
           # 重启服务

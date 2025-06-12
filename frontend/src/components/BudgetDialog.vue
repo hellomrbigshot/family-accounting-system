@@ -34,7 +34,7 @@
       <div class="mb-4">
         <div class="text-sm text-gray-500 mb-2">预算金额</div>
         <van-field
-          v-model="budgetAmount"
+          :model-value="budgetAmount"
           readonly
           clickable
           label=""
@@ -50,7 +50,8 @@
     <!-- 数字键盘 -->
     <van-number-keyboard
       v-model:show="showNumberKeyboard"
-      v-model="budgetAmount"
+      :model-value="budgetAmount"
+      @update:model-value="budgetAmount = $event"
       @input="onAmountInput"
       @delete="onAmountDelete"
       @blur="showNumberKeyboard = false"
@@ -67,7 +68,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useBudgetStore } from '@/stores/budget';
-;
+import { showToast } from 'vant';
 import dayjs from 'dayjs';
 
 const props = defineProps<{

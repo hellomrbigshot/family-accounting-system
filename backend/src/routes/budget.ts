@@ -4,7 +4,9 @@ import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/current', authMiddleware, getCurrentBudget);
-router.put('/current', authMiddleware, updateBudget);
+router.use(authMiddleware);
+
+router.get('/current', getCurrentBudget);
+router.put('/current', updateBudget);
 
 export default router; 

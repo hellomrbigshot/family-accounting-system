@@ -48,8 +48,12 @@ if ('serviceWorker' in navigator) {
 }
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 
-app.mount('#app')
+// 等待路由准备就绪
+router.isReady().then(() => {
+  app.mount('#app')
+})
