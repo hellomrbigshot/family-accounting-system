@@ -73,6 +73,7 @@ jobs:
           
           # 重启服务
           echo "Restarting services..."
+          cd ..
           pm2 restart family-accounting || pm2 start ecosystem.config.js
           
           # 等待服务启动
