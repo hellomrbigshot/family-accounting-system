@@ -14,8 +14,6 @@ jobs:
     
     - name: 安装 pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: 9.14.4
     
     - name: 使用 Node.js 22
       uses: actions/setup-node@v4
