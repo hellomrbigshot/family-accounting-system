@@ -72,11 +72,6 @@ debug.log
 *.swp
 *.swo
 
-# Package manager specific files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
 # Frontend specific
 frontend/dist
 frontend/node_modules
