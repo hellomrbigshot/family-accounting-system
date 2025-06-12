@@ -10,30 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: 安装 pnpm
-      uses: pnpm/action-setup@v4
-    
-    - name: 使用 Node.js 22
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22.12.0
-        cache: 'pnpm'
-    
-    - name: 安装依赖
-      run: pnpm install
-    
-    - name: Build frontend
-      run: |
-        cd frontend
-        pnpm run build
-    
-    - name: Build backend
-      run: |
-        cd backend
-        pnpm run build
-    
     - name: Deploy to Aliyun
       uses: appleboy/ssh-action@master
       with:
