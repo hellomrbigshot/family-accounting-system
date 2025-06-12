@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 
-const router = Router();
+const router: Router = Router();
 
 router.get('/', async (req, res) => {
   try {

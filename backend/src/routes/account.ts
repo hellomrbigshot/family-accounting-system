@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authMiddleware } from '../middleware/auth';
 import {
   getAllAccounts,
   getAccountById,
@@ -7,9 +8,11 @@ import {
   deleteAccount,
   transfer,
   adjustBalance
-} from '../controllers/accountController';
+} from '../controllers/account';
 
-const router = Router();
+const router: Router = Router();
+
+router.use(authMiddleware);
 
 // 账户管理路由
 router.get('/', getAllAccounts);

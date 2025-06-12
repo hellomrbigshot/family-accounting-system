@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -6,7 +6,7 @@ import routes from './routes';
 
 dotenv.config();
 
-const app = express();
+const app: Express = express();
 
 // 中间件
 app.use(cors());

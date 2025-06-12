@@ -1,11 +1,16 @@
 import { Router } from 'express';
-import { getTags, createTag, updateTag, deleteTag } from '../controllers/tag';
-import { auth } from '../middlewares/auth';
+import { authMiddleware } from '../middleware/auth';
+import {
+  getTags,
+  createTag,
+  updateTag,
+  deleteTag
+} from '../controllers/tag';
 
-const router = Router();
+const router: Router = Router();
 
 // 所有路由都需要认证
-router.use(auth);
+router.use(authMiddleware);
 
 // 获取标签列表
 router.get('/', getTags);

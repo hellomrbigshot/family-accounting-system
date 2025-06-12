@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Account, IAccount } from '../models/account';
+import { Account } from '../models/account';
 import { Transfer } from '../models/transfer';
 
 // 获取所有账户

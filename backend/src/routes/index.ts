@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import authRoutes from './auth';
 import userRoutes from './user';
 import categoryRoutes from './category';
@@ -8,7 +8,7 @@ import accountRoutes from './account';
 import healthRoutes from './health';
 import budgetRoutes from './budget';
 
-const router = Router();
+const router: Router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);

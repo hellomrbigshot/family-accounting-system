@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getCurrentBudget, updateBudget } from '../controllers/budget';
 import { authMiddleware } from '../middleware/auth';
 
-const router = Router();
+const router: Router = Router();
 
 router.use(authMiddleware);
 
