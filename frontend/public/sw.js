@@ -19,7 +19,6 @@ const urlsToCache = [
 
 // 需要动态缓存的资源类型
 const CACHEABLE_RESOURCES = [
-  '/api/',
   '/assets/',
   '.js',
   '.css',
@@ -73,6 +72,21 @@ self.addEventListener('fetch', event => {
   // 检查是否是 API 请求
   const isApiRequest = event.request.url.includes('/api/');
   
+  // API 请求直接走网络，不进行缓存
+  if (isApiRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          // API 请求失败时返回错误响应
+          return new Response('API request failed', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+          });
+        })
+    );
+    return;
+  }
+  
   // 检查是否是可缓存的资源
   const shouldCache = CACHEABLE_RESOURCES.some(resource => 
     event.request.url.includes(resource)
@@ -86,19 +100,6 @@ self.addEventListener('fetch', event => {
       .then(response => {
         // 如果在缓存中找到响应，则返回缓存的响应
         if (response) {
-          // 对于 API 请求，在返回缓存的同时发起网络请求更新缓存
-          if (isApiRequest) {
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse.ok) {
-                  caches.open(CACHE_NAME)
-                    .then(cache => cache.put(event.request, networkResponse));
-                }
-              })
-              .catch(() => {
-                // 网络请求失败时忽略错误
-              });
-          }
           return response;
         }
 

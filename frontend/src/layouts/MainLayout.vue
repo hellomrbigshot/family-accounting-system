@@ -21,7 +21,7 @@
 
     <!-- 中间内容区域 -->
     <main class="flex-1 overflow-y-auto bg-gradient-to-b from-blue-50 to-white">
-      <div class="container mx-auto pt-4">
+      <div class="container mx-auto pt-4 pb-14">
         <router-view></router-view>
       </div>
     </main>
