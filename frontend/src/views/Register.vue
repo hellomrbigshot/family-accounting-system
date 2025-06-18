@@ -74,10 +74,8 @@ const validateConfirmPassword = (value: string) => {
 const onSubmit = async () => {
   loading.value = true
   try {
-    const success = await userStore.register(roomNumber.value, password.value)
-    if (success) {
-      router.push('/')
-    }
+    await userStore.register(roomNumber.value, password.value)
+    router.push('/')
   } finally {
     loading.value = false
   }

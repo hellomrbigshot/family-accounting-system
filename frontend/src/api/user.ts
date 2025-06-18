@@ -15,7 +15,7 @@ export interface RegisterRequest {
 }
 
 class UserApi {
-  private baseUrl = '/users'
+  private baseUrl = '/auth'
 
   async login(roomNumber: string, password: string) {
     const response = await axios.post(`${this.baseUrl}/login`, {
@@ -25,8 +25,11 @@ class UserApi {
     return response.data
   }
 
-  async register(data: RegisterRequest) {
-    const response = await axios.post(`${this.baseUrl}/register`, data)
+  async register(roomNumber: string, password: string) {
+    const response = await axios.post(`${this.baseUrl}/register`, {
+      roomNumber,
+      password
+    })
     return response.data
   }
 }

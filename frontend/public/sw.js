@@ -77,7 +77,10 @@ self.addEventListener('fetch', event => {
   const shouldCache = CACHEABLE_RESOURCES.some(resource => 
     event.request.url.includes(resource)
   );
-
+  if(!event.request.url.startsWith('http')){
+    //skip request
+    return
+  }
   event.respondWith(
     caches.match(event.request)
       .then(response => {

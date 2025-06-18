@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Room from '../models/room';
 import CryptoJS from 'crypto-js';
-import { JwtPayload } from '../utils/jwt';
 
 // 加密密钥（应该与前端保持一致，实际项目中应该从环境变量获取）
 const ENCRYPTION_KEY = 'your-secure-encryption-key-32-chars-long!!';
@@ -92,16 +91,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { roomNumber, password: encrypted, timestamp, nonce } = req.body;
+    // const { roomNumber, password: encrypted, timestamp, nonce } = req.body;
+    const { roomNumber, password } = req.body;
 
     // 验证必要参数
-    if (!encrypted || !timestamp || !nonce) {
-      res.status(400).json({ message: '缺少必要的参数' });
-      return;
-    }
+    // if (!encrypted || !timestamp || !nonce) {
+    //   res.status(400).json({ message: '缺少必要的参数' });
+    //   return;
+    // }
 
     // 解密密码
-    const password = decryptPassword(encrypted, timestamp, nonce);
+    // const password = decryptPassword(encrypted, timestamp, nonce);
 
     // 检查房间号是否已存在
     const existingRoom = await Room.findOne({ roomNumber });

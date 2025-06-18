@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
-;
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -34,6 +32,7 @@ instance.interceptors.response.use(
   async (error) => {
     if (error.response) {
       const { status } = error.response;
+      const { message } = error.response?.data || {}
       const authStore = useAuthStore();
 
       if (status === 401) {
@@ -48,7 +47,10 @@ instance.interceptors.response.use(
           return Promise.reject(refreshError);
         }
       }
-
+      if (message) {
+        showToast(message)
+        return
+      }
       if (status === 403) {
         showToast('没有权限执行此操作');
       }
