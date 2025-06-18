@@ -40,14 +40,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { computed, ref } from 'vue';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+
 const active = computed(() => {
-  const index = navItems.findIndex(item => item.path === router.currentRoute.value.path);
+  const index = navItems.findIndex(item => item.path === route.path);
   return index !== -1 ? index : 0;
 });
 
@@ -64,7 +64,6 @@ const handleTabChange = (index: number) => {
 
 const handleLogout = async () => {
   await authStore.logout();
-  router.push('/login');
 };
 </script>
 
