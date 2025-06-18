@@ -78,12 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import dayjs from '@/utils/dayjs';
 import TrendAnalysis from '@/components/TrendAnalysis.vue';
 import CategoryAnalysis from '@/components/CategoryAnalysis.vue';
 import { useReportStore } from '@/stores/report';
 import type { ReportData } from '@/api/report';
+import dayjs from '@/utils/dayjs';
 
 const reportStore = useReportStore();
 const loading = ref(false);

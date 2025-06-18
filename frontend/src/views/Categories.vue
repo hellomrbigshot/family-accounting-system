@@ -37,7 +37,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import CategoryList from '@/components/CategoryList.vue';
 import TagList from '@/components/TagList.vue';
 

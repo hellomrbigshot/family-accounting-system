@@ -145,11 +145,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
-;
 import dayjs from '@/utils/dayjs';
 
 const router = useRouter();

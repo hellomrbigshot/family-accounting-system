@@ -98,18 +98,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { useBudgetStore } from '@/stores/budget';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
-import dayjs from 'dayjs';
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import AddExpenseDialog from '@/components/AddExpenseDialog.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
 import type { CategoryData } from '@/api/category';
-import type { ExpenseData } from '@/api/expense';
 import type { TagData } from '@/api/tag';
 
 interface ExpenseWithCategory {
@@ -122,7 +118,6 @@ interface ExpenseWithCategory {
   tags: TagData[];
 }
 
-const router = useRouter();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();

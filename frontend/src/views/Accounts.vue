@@ -129,7 +129,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { accountApi, type Account, type CreateAccountDto, type UpdateAccountDto, type TransferDto } from '@/api/account';
 import AccountForm from '@/components/AccountForm.vue';
 import TransferDialog from '@/components/TransferDialog.vue';

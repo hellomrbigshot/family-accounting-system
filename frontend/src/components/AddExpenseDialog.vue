@@ -162,10 +162,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue'
 import { useExpenseStore } from '@/stores/expense'
 import { useCategoryStore } from '@/stores/category'
-import { useTagStore } from '../stores/tag'
+import { useTagStore } from '@/stores/tag'
 
 import dayjs from 'dayjs'
 import type { TagData } from '@/api/tag'
