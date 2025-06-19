@@ -35,7 +35,8 @@ export const getCategories = async (req: Request, res: Response) => {
       name: cat.name,
       type: cat.type,
       icon: cat.icon,
-      color: cat.color
+      color: cat.color,
+      createdAt: cat.createdAt
     }));
 
     res.json(formattedCategories);

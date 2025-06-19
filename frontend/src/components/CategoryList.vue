@@ -24,7 +24,7 @@
             </div>
             <div>
               <p class="font-medium text-gray-900">{{ category.name }}</p>
-              <p class="text-sm text-gray-500">创建于 {{ formatDate(category.createdAt) }}</p>
+              <p class="text-sm text-gray-500 whitespace-nowrap">创建于 {{ formatDate(category.createdAt) }}</p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
@@ -87,11 +87,11 @@ const formatDate = (date: string) => {
   const target = dayjs(date);
   
   if (now.isSame(target, 'day')) {
-    return '今天 ' + target.format('HH:mm');
+    return '今天';
   } else if (now.isSame(target, 'year')) {
-    return target.format('MM月DD日 HH:mm');
+    return target.format('MM月DD日');
   } else {
-    return target.format('YYYY年MM月DD日');
+    return target.format('YYYY年MM月');
   }
 };
 
