@@ -5,7 +5,7 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-8">
-            <router-link to="/" class="text-xl font-bold text-gray-900">家庭记账</router-link>
+            <router-link to="/" class="text-xl font-bold text-gray-900">家庭账本</router-link>
           </div>
           <div class="flex items-center space-x-4">
             <button 
