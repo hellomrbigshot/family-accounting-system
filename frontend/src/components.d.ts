@@ -20,6 +20,8 @@ declare module 'vue' {
     ExpenseForm: typeof import('./components/ExpenseForm.vue')['default']
     ExpenseList: typeof import('./components/ExpenseList.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    PWAInstallPrompt: typeof import('./components/PWAInstallPrompt.vue')['default']
+    PWAUpdatePrompt: typeof import('./components/PWAUpdatePrompt.vue')['default']
     ReportOverview: typeof import('./components/ReportOverview.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

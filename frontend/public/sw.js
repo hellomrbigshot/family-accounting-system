@@ -1,4 +1,4 @@
-const CACHE_NAME = 'family-accounting-v2';
+const CACHE_NAME = 'family-accounting-v0-0-4';
 const OFFLINE_URL = '/offline.html';
 
 // 需要预缓存的资源
@@ -158,7 +158,7 @@ self.addEventListener('fetch', event => {
 //   };
 
 //   event.waitUntil(
-//     self.registration.showNotification('家庭记账系统', options)
+//     self.registration.showNotification('家庭账本', options)
 //   );
 // });
 

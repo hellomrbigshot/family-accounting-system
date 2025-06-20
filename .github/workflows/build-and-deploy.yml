@@ -1,0 +1,158 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.14.4
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Install dependencies
+      run: |
+        pnpm install
+
+    - name: Check if version was manually updated
+      id: version-check
+      run: |
+        # 检查最近的提交是否包含版本更新
+        LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+        if [[ "$LAST_COMMIT_MSG" == *"chore: bump version"* ]]; then
+          echo "manual_version_update=true" >> $GITHUB_OUTPUT
+          echo "✅ 检测到手动版本更新，跳过自动版本更新"
+        else
+          echo "manual_version_update=false" >> $GITHUB_OUTPUT
+          echo "📝 未检测到手动版本更新，将执行自动版本更新"
+        fi
+
+    - name: Update version and build
+      run: |
+        cd frontend
+        
+        # 只有在没有手动版本更新时才执行版本更新
+        if [[ "${{ steps.version-check.outputs.manual_version_update }}" != "true" ]]; then
+          echo "🔄 执行自动版本更新..."
+          node scripts/version.js patch
+        else
+          echo "⏭️  跳过自动版本更新"
+        fi
+        
+        # 构建前端
+        echo "🔨 构建前端..."
+        pnpm run build
+        
+        # 构建后端
+        echo "🔨 构建后端..."
+        cd ../backend
+        pnpm run build
+
+    - name: Commit version changes
+      if: steps.version-check.outputs.manual_version_update != 'true'
+      run: |
+        # 检查是否有文件变更
+        if [[ -n "$(git status --porcelain)" ]]; then
+          git add .
+          git commit -m "chore: bump version to $(node -p "require('./frontend/package.json').version") [skip ci]"
+          git push origin main
+        fi
+
+    - name: Create Git tag
+      run: |
+        VERSION=$(node -p "require('./frontend/package.json').version")
+        
+        # 检查标签是否已存在
+        if git tag -l "v$VERSION" | grep -q "v$VERSION"; then
+          echo "🏷️  标签 v$VERSION 已存在，跳过创建"
+        else
+          echo "🏷️  创建标签 v$VERSION"
+          git tag -a "v$VERSION" -m "Release version $VERSION"
+          git push origin "v$VERSION"
+        fi
+
+    - name: Deploy to Aliyun
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.ALIYUN_HOST }}
+        username: ${{ secrets.ALIYUN_USERNAME }}
+        key: ${{ secrets.ALIYUN_SSH_KEY }}
+        script: |
+          # 设置环境变量
+          export NODE_ENV=production
+          export MONGODB_URI=${{ secrets.MONGODB_URI }}
+          export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          
+          # 安装 pnpm（如果尚未安装）
+          if ! command -v pnpm &> /dev/null; then
+            echo "Installing pnpm..."
+            curl -fsSL https://get.pnpm.io/install.sh | sh -
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME:$PATH"
+          fi
+          
+          # 进入项目目录
+          cd /home/family-accounting-system
+          
+          # 拉取最新代码和标签
+          git pull origin main
+          git fetch --tags
+          
+          # 获取最新版本
+          LATEST_VERSION=$(git describe --tags --abbrev=0)
+          echo "Deploying version: $LATEST_VERSION"
+          
+          # 安装依赖
+          pnpm install
+          
+          # 部署前端
+          echo "Deploying frontend..."
+          cd frontend
+          pnpm run build
+          
+          # 部署后端
+          echo "Deploying backend..."
+          cd ../backend
+          pnpm run build
+          
+          # 重启服务
+          echo "Restarting services..."
+          cd ..
+          pm2 restart family-accounting || pm2 start ecosystem.config.js
+          
+          # 等待服务启动
+          echo "Waiting for service to start..."
+          sleep 10
+          
+          # 健康检查
+          echo "Performing health check..."
+          if curl -f http://localhost:3000/api/health; then
+            echo "Deployment successful! Version: $LATEST_VERSION"
+          else
+            echo "Health check failed!"
+            exit 1
+          fi 
