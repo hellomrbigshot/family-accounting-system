@@ -125,12 +125,12 @@ jobs:
           echo "Deploying version: $LATEST_VERSION"
           
           # 安装依赖
+          echo "Cleaning and installing dependencies..."
           rm -rf node_modules
-          rm -rf frontend/node_modules
-          rm -rf backend/node_modules
           pnpm install
           
           # 部署项目
+          echo "Building project..."
           pnpm build
           
           # 重启服务
