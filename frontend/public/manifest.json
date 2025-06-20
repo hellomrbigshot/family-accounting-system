@@ -3,9 +3,12 @@
   "short_name": "账本",
   "description": "一个简单易用的家庭账本，帮助您更好地管理家庭财务",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#6366F1",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
