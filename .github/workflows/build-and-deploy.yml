@@ -127,19 +127,11 @@ jobs:
           # 安装依赖
           pnpm install
           
-          # 部署前端
-          echo "Deploying frontend..."
-          cd frontend
-          pnpm run build
-          
-          # 部署后端
-          echo "Deploying backend..."
-          cd ../backend
-          pnpm run build
+          # 部署项目
+          pnpm build
           
           # 重启服务
           echo "Restarting services..."
-          cd ..
           pm2 restart family-accounting || pm2 start ecosystem.config.js
           
           # 等待服务启动
