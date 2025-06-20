@@ -61,14 +61,14 @@ jobs:
           echo "⏭️  跳过自动版本更新"
         fi
         
-        # 构建前端
-        echo "🔨 构建前端..."
-        pnpm run build
+        # # 构建前端
+        # echo "🔨 构建前端..."
+        # pnpm run build
         
-        # 构建后端
-        echo "🔨 构建后端..."
-        cd ../backend
-        pnpm run build
+        # # 构建后端
+        # echo "🔨 构建后端..."
+        # cd ../backend
+        # pnpm run build
 
     - name: Commit version changes
       if: steps.version-check.outputs.manual_version_update != 'true'
@@ -125,6 +125,9 @@ jobs:
           echo "Deploying version: $LATEST_VERSION"
           
           # 安装依赖
+          rm -rf node_modules
+          rm -rf frontend/node_modules
+          rm -rf backend/node_modules
           pnpm install
           
           # 部署项目
