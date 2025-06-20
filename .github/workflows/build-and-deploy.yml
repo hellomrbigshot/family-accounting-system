@@ -61,14 +61,14 @@ jobs:
           echo "⏭️  跳过自动版本更新"
         fi
         
-        # 构建前端
-        echo "🔨 构建前端..."
-        pnpm run build
+        # # 构建前端
+        # echo "🔨 构建前端..."
+        # pnpm run build
         
-        # 构建后端
-        echo "🔨 构建后端..."
-        cd ../backend
-        pnpm run build
+        # # 构建后端
+        # echo "🔨 构建后端..."
+        # cd ../backend
+        # pnpm run build
 
     - name: Commit version changes
       if: steps.version-check.outputs.manual_version_update != 'true'
@@ -125,21 +125,17 @@ jobs:
           echo "Deploying version: $LATEST_VERSION"
           
           # 安装依赖
-          pnpm install
+          echo "Cleaning and installing dependencies..."
+          rm -rf node_modules
+          # 临时设置 NODE_ENV 为开发环境以安装 devDependencies
+          NODE_ENV=development pnpm install
           
-          # 部署前端
-          echo "Deploying frontend..."
-          cd frontend
-          pnpm run build
-          
-          # 部署后端
-          echo "Deploying backend..."
-          cd ../backend
-          pnpm run build
+          # 部署项目
+          echo "Building project..."
+          pnpm build
           
           # 重启服务
           echo "Restarting services..."
-          cd ..
           pm2 restart family-accounting || pm2 start ecosystem.config.js
           
           # 等待服务启动
