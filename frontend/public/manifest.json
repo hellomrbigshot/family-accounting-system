@@ -1,7 +1,7 @@
 {
-  "name": "家庭记账系统",
-  "short_name": "记账",
-  "description": "一个简单易用的家庭记账系统，帮助您更好地管理家庭财务",
+  "name": "家庭账本",
+  "short_name": "账本",
+  "description": "一个简单易用的家庭账本，帮助您更好地管理家庭财务",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -11,7 +11,7 @@
             </div>
           </div>
           <h2 class="text-3xl font-bold text-gray-900">
-            家庭记账系统
+            家庭账本
           </h2>
           <p class="text-gray-500">
             您的家庭财务管理助手
