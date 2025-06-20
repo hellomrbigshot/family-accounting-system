@@ -98,6 +98,7 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { useBudgetStore } from '@/stores/budget';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
@@ -105,19 +106,9 @@ import { useTagStore } from '@/stores/tag';
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import AddExpenseDialog from '@/components/AddExpenseDialog.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
-import type { CategoryData } from '@/api/category';
-import type { TagData } from '@/api/tag';
+import type { ExpenseData } from '@/api/expense';
 
-interface ExpenseWithCategory {
-  id: string;
-  date: string;
-  category: CategoryData;
-  amount: number;
-  description: string;
-  createdAt: string;
-  tags: TagData[];
-}
-
+const router = useRouter();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
@@ -129,110 +120,36 @@ const showBudgetDialog = ref(false);
 // 添加支出对话框
 const showAddExpenseDialog = ref(false);
 
-// 本月统计数据
-const monthlyStats = computed(() => {
+// 本月支出
+const monthlyExpense = computed(() => {
   const now = dayjs();
   const startOfMonth = now.startOf('month').format('YYYY-MM-DD');
   const endOfMonth = now.endOf('month').format('YYYY-MM-DD');
   
-  const totalExpense = expenses.value
-    .filter(expense => {
+  return expenseStore.expenses
+    .filter((expense: ExpenseData) => {
       const date = dayjs(expense.date);
       return date.isAfter(startOfMonth) && date.isBefore(endOfMonth);
     })
-    .reduce((sum, expense) => sum + (expense.amount || 0), 0);
-  
-  // 暂时总收入为0，因为还没有实现收入功能
-  const totalIncome = 0;
-  
-  return {
-    totalExpense,
-    totalIncome,
-    balance: totalIncome - totalExpense
-  };
-});
-
-// 格式化货币
-const formatCurrency = (amount: number) => {
-  return `¥${amount.toFixed(2)}`;
-};
-
-// 确保 expenseStore.expenses 的类型正确
-const expenses = computed<ExpenseWithCategory[]>(() => {
-  return expenseStore.expenses.map(expense => {
-    const category = categoryStore.categories.find(c => c.id === expense.category) || {
-      id: '',
-      name: '未分类',
-      type: 'expense',
-      icon: '💰',
-      color: '#e5e7eb',
-      createdAt: dayjs().format()
-    };
-
-    const tags = expense.tags.map(tagId => 
-      tagStore.tags.find(t => t.id === tagId) || {
-        id: tagId,
-        name: '未知标签',
-        color: '#e5e7eb',
-        createdAt: dayjs().format()
-      }
-    );
-
-    return {
-      id: expense.id,
-      date: expense.date,
-      category,
-      amount: expense.amount,
-      description: expense.description,
-      createdAt: expense.createdAt,
-      tags
-    };
-  });
-});
-
-// 本月支出
-const monthlyExpense = computed(() => {
-  if (!Array.isArray(expenses.value)) return 0
-  
-  const now = dayjs()
-  const startOfMonth = now.startOf('month').format('YYYY-MM-DD')
-  const endOfMonth = now.endOf('month').format('YYYY-MM-DD')
-  
-  return expenses.value
-    .filter(expense => {
-      const date = dayjs(expense.date)
-      return date.isAfter(startOfMonth) && date.isBefore(endOfMonth)
-    })
-    .reduce((sum, expense) => sum + (expense.amount || 0), 0)
+    .reduce((sum: number, expense: ExpenseData) => sum + (expense.amount || 0), 0);
 });
 
 // 是否超出预算
 const isOverBudget = computed(() => {
-  if (!budgetStore.currentBudget) return false
-  return monthlyExpense.value > (budgetStore.currentBudget.amount || 0)
-});
-
-// 预算使用进度
-const budgetProgress = computed(() => {
-  if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0
-  return Math.min((monthlyExpense.value / budgetStore.currentBudget.amount) * 100, 100)
+  if (!budgetStore.currentBudget) return false;
+  return monthlyExpense.value > (budgetStore.currentBudget.amount || 0);
 });
 
 // 实际进度（可能超过100%）
 const actualProgress = computed(() => {
-  if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0
-  return (monthlyExpense.value / budgetStore.currentBudget.amount) * 100
+  if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0;
+  return (monthlyExpense.value / budgetStore.currentBudget.amount) * 100;
 });
 
 // 格式化金额
 const formatAmount = (amount?: number) => {
   if (!amount) return '¥0.00';
   return `¥${amount.toFixed(2)}`;
-};
-
-// 返回上一页
-const onClickLeft = () => {
-  router.back()
 };
 
 // 处理刷新
