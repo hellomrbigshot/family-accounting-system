@@ -1,4 +1,4 @@
-const CACHE_NAME = 'family-accounting-v0-0-5';
+const CACHE_NAME = 'family-accounting-v0-0-6';
 const OFFLINE_URL = '/offline.html';
 
 // 需要预缓存的资源
