@@ -90,7 +90,7 @@
     <BudgetDialog v-model:show="showBudgetDialog" />
 
     <!-- 添加支出对话框 -->
-    <AddExpenseDialog 
+    <ExpenseForm 
       v-model:show="showAddExpenseDialog" 
       @success="handleRefresh"
     />
@@ -104,7 +104,7 @@ import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
 import BudgetDialog from '@/components/BudgetDialog.vue';
-import AddExpenseDialog from '@/components/AddExpenseDialog.vue';
+import ExpenseForm from '@/components/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
 import type { ExpenseData } from '@/api/expense';
 

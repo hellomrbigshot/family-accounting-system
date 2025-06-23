@@ -66,10 +66,11 @@ const updateSW = registerSW({
       })
   },
   onOfflineReady() {
-    showToast({
-      type: 'success',
-      message: '应用已准备就绪，可离线使用'
-    })
+    // showToast({
+    //   type: 'success',
+    //   message: '应用已准备就绪，可离线使用'
+    // })
+    console.log('应用已准备就绪，可离线使用')
   },
   onRegistered(swRegistration: ServiceWorkerRegistration) {
     console.log('Service Worker 已注册:', swRegistration)

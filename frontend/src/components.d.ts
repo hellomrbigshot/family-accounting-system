@@ -10,7 +10,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AccountForm: typeof import('./components/AccountForm.vue')['default']
     AccountList: typeof import('./components/AccountList.vue')['default']
-    AddExpenseDialog: typeof import('./components/AddExpenseDialog.vue')['default']
     AdjustBalanceDialog: typeof import('./components/AdjustBalanceDialog.vue')['default']
     AdjustBalanceForm: typeof import('./components/AdjustBalanceForm.vue')['default']
     BudgetDialog: typeof import('./components/BudgetDialog.vue')['default']

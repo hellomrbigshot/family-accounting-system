@@ -27,16 +27,18 @@
                   <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                     {{ expense.description }}
                   </div>
-                  <div class="flex flex-wrap gap-1 mt-1">
-                    <van-tag
-                      v-for="tag in expense.tags"
+                  <div v-if="getExpenseTags(expense).length > 0" class="flex flex-wrap gap-0.5 mt-1 w-full">
+                    <div
+                      v-for="tag in getExpenseTags(expense)"
                       :key="tag.id"
-                      :color="tag.color"
-                      plain
-                      class="text-xs"
+                      class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 rounded-full text-xs"
                     >
-                      {{ tag.name }}
-                    </van-tag>
+                      <div 
+                        class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+                        :style="{ backgroundColor: tag.color }"
+                      ></div>
+                      <span class="text-gray-700">{{ tag.name }}</span>
+                    </div>
                   </div>
                   <div class="text-gray-500 text-xs mt-1">
                     {{ formatDate(expense.date) }}
@@ -73,16 +75,18 @@
                 <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                   {{ expense.description }}
                 </div>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  <van-tag
-                    v-for="tag in expense.tags"
+                <div v-if="getExpenseTags(expense).length > 0" class="flex flex-wrap gap-0.5 mt-1 w-full">
+                  <div
+                    v-for="tag in getExpenseTags(expense)"
                     :key="tag.id"
-                    :color="tag.color"
-                    plain
-                    class="text-xs"
+                    class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 rounded-full text-xs"
                   >
-                    {{ tag.name }}
-                  </van-tag>
+                    <div 
+                      class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+                      :style="{ backgroundColor: tag.color }"
+                    ></div>
+                    <span class="text-gray-700">{{ tag.name }}</span>
+                  </div>
                 </div>
                 <div class="text-gray-500 text-xs mt-1">
                   {{ formatDate(expense.date) }}
@@ -120,16 +124,18 @@
                   <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                     {{ expense.description }}
                   </div>
-                  <div class="flex flex-wrap gap-1 mt-1">
-                    <van-tag
-                      v-for="tag in expense.tags"
+                  <div v-if="getExpenseTags(expense).length > 0" class="flex flex-wrap gap-0.5 mt-1 w-full">
+                    <div
+                      v-for="tag in getExpenseTags(expense)"
                       :key="tag.id"
-                      :color="tag.color"
-                      plain
-                      class="text-xs"
+                      class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 rounded-full text-xs"
                     >
-                      {{ tag.name }}
-                    </van-tag>
+                      <div 
+                        class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+                        :style="{ backgroundColor: tag.color }"
+                      ></div>
+                      <span class="text-gray-700">{{ tag.name }}</span>
+                    </div>
                   </div>
                   <div class="text-gray-500 text-xs mt-1">
                     {{ formatDate(expense.date) }}
@@ -166,16 +172,18 @@
                 <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
                   {{ expense.description }}
                 </div>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  <van-tag
-                    v-for="tag in expense.tags"
+                <div v-if="getExpenseTags(expense).length > 0" class="flex flex-wrap gap-0.5 mt-1 w-full">
+                  <div
+                    v-for="tag in getExpenseTags(expense)"
                     :key="tag.id"
-                    :color="tag.color"
-                    plain
-                    class="text-xs"
+                    class="inline-flex items-center px-1.5 py-0.5 bg-gray-100 rounded-full text-xs"
                   >
-                    {{ tag.name }}
-                  </van-tag>
+                    <div 
+                      class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+                      :style="{ backgroundColor: tag.color }"
+                    ></div>
+                    <span class="text-gray-700">{{ tag.name }}</span>
+                  </div>
                 </div>
                 <div class="text-gray-500 text-xs mt-1">
                   {{ formatDate(expense.date) }}
@@ -205,8 +213,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useExpenseStore } from '@/stores/expense'
 import { useCategoryStore } from '@/stores/category'
+import { useTagStore } from '@/stores/tag'
 import dayjs from '@/utils/dayjs'
-import type { ExpenseData } from '@/api/expense'
 import type { CategoryData } from '@/api/category'
 import type { TagData } from '@/api/tag'
 
@@ -243,6 +251,7 @@ const showDelete = computed(() => props.showDelete ?? false)
 
 const expenseStore = useExpenseStore()
 const categoryStore = useCategoryStore()
+const tagStore = useTagStore()
 const refreshing = ref(false)
 const loading = ref(false)
 const finished = ref(false)
@@ -257,10 +266,28 @@ const displayExpenses = computed(() => {
   return props.expenses
 })
 
+// 根据标签ID获取标签对象
+const getTagById = (tagId: string): TagData | null => {
+  return tagStore.tags.find(tag => tag.id === tagId) || null
+}
+
+// 获取支出的标签对象数组
+const getExpenseTags = (expense: ExpenseWithCategory): TagData[] => {
+  if (!expense.tags || expense.tags.length === 0) {
+    return []
+  }
+  
+  // 将字符串数组转换为对象数组
+  return expense.tags
+    .map(tagId => getTagById(tagId))
+    .filter((tag): tag is TagData => tag !== null)
+}
+
 // 加载分类数据
 onMounted(async () => {
   try {
     await categoryStore.fetchCategories()
+    await tagStore.fetchTags()
   } catch (error) {
     console.error('Failed to load categories:', error)
   }
@@ -359,10 +386,6 @@ const confirmDelete = async () => {
   @apply text-base font-medium text-red-600;
   flex-shrink: 0;
   margin-left: 1rem;
-}
-
-.van-tag {
-  @apply text-xs;
 }
 
 .line-clamp-2 {

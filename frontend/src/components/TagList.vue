@@ -70,10 +70,6 @@ import { showToast } from 'vant';
 import type { TagData } from '@/api/tag';
 import TagForm from './TagForm.vue';
 
-interface TagWithId extends TagData {
-  _id: string;
-}
-
 const tagStore = useTagStore();
 
 const showTagForm = ref(false);
@@ -81,10 +77,7 @@ const editingTag = ref<TagData | undefined>(undefined);
 const showDeleteConfirm = ref(false);
 const deletingTag = ref<TagData | undefined>();
 
-const tags = computed(() => (tagStore.tags as TagWithId[]).map(tag => ({
-  ...tag,
-  id: tag._id
-})));
+const tags = computed(() => tagStore.tags);
 
 const tagCount = computed(() => tags.value.length);
 

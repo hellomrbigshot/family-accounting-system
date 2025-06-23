@@ -1,49 +1,65 @@
 <template>
-  <van-dialog
+  <van-popup
     :show="show"
-    @update:show="emit('update:show', $event)"
-    title="设置预算"
-    :show-cancel-button="true"
-    class="budget-dialog"
-    :before-close="handleBeforeClose"
+    @update:show="handleShowUpdate"
+    position="center"
+    round
+    :style="{ width: '90%', maxWidth: '400px' }"
+    :z-index="3000"
+    teleport="body"
   >
-    <div class="p-4">
-      <div class="mb-4">
-        <div class="text-sm text-gray-500 mb-2">选择月份</div>
-        <van-field
-          :model-value="formattedMonth"
-          readonly
-          clickable
-          label=""
-          placeholder="选择月份"
-          @click="showMonthPicker = true"
-        />
-        <van-popup v-model:show="showMonthPicker" position="bottom">
-          <van-date-picker
-            v-model="selectedMonth"
-            type="year-month"
-            title="选择月份"
-            :min-date="minDate"
-            :max-date="maxDate"
-            :columns-type="['year', 'month']"
-            @confirm="onMonthConfirm"
-            @cancel="showMonthPicker = false"
-          />
-        </van-popup>
+    <div class="flex flex-col">
+      <!-- 头部 -->
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">设置预算</h2>
+        <van-icon name="cross" size="20" @click="handleClose" />
       </div>
-      <div class="mb-4">
-        <div class="text-sm text-gray-500 mb-2">预算金额</div>
-        <van-field
-          :model-value="budgetAmount"
-          readonly
-          clickable
-          label=""
-          placeholder="请输入金额"
-          @click="showNumberKeyboard = true"
-          class="amount-field"
-          :label-width="0"
-          left-icon="￥"
-        />
+
+      <!-- 内容 -->
+      <div class="p-4">
+        <div class="mb-4">
+          <div class="text-sm text-gray-500 mb-2">选择月份</div>
+          <van-field
+            :model-value="formattedMonth"
+            readonly
+            clickable
+            label=""
+            placeholder="选择月份"
+            @click="showMonthPicker = true"
+          />
+          <van-popup v-model:show="showMonthPicker" position="bottom" round :z-index="3001" teleport="body">
+            <van-date-picker
+              v-model="selectedMonth"
+              type="year-month"
+              title="选择月份"
+              :min-date="minDate"
+              :max-date="maxDate"
+              :columns-type="['year', 'month']"
+              @confirm="onMonthConfirm"
+              @cancel="showMonthPicker = false"
+            />
+          </van-popup>
+        </div>
+        <div class="mb-4">
+          <div class="text-sm text-gray-500 mb-2">预算金额</div>
+          <van-field
+            :model-value="budgetAmount"
+            readonly
+            clickable
+            label=""
+            placeholder="请输入金额"
+            @click="showNumberKeyboard = true"
+            class="amount-field"
+            :label-width="0"
+            left-icon="￥"
+          />
+        </div>
+      </div>
+
+      <!-- 按钮 -->
+      <div class="flex justify-end space-x-3 p-4 border-t border-gray-200">
+        <van-button type="default" @click="handleClose">取消</van-button>
+        <van-button type="primary" @click="handleConfirm" :loading="loading">确定</van-button>
       </div>
     </div>
 
@@ -59,10 +75,10 @@
       theme="custom"
       close-button-text="完成"
       :extra-key="['00', '.']"
-      :z-index="3000"
+      :z-index="3002"
       teleport="body"
     />
-  </van-dialog>
+  </van-popup>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +98,7 @@ const budgetStore = useBudgetStore();
 const showNumberKeyboard = ref(false);
 const budgetAmount = ref('');
 const showMonthPicker = ref(false);
+const loading = ref(false);
 const selectedMonth = ref<string[]>([
   dayjs().year().toString(),
   (dayjs().month() + 1).toString().padStart(2, '0')
@@ -185,6 +202,25 @@ const onAmountInput = (value: string) => {
 // 处理删除
 const onAmountDelete = () => {
   budgetAmount.value = budgetAmount.value.slice(0, -1);
+};
+
+const handleShowUpdate = (value: boolean) => {
+  emit('update:show', value);
+};
+
+const handleClose = () => {
+  handleShowUpdate(false);
+};
+
+const handleConfirm = async () => {
+  loading.value = true;
+  try {
+    if (await handleBeforeClose('confirm')) {
+      handleShowUpdate(false);
+    }
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
