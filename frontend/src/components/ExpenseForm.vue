@@ -54,7 +54,7 @@
               { required: true, message: '请输入金额' },
               { validator: amountValidator, message: '金额必须大于0且最多保留两位小数' }
             ]"
-            @click="showNumberKeyboard = true"
+            @click="handleAmountFieldClick"
           >
             <template #button>
               <span class="text-gray-500">¥</span>
@@ -147,15 +147,16 @@
   <van-number-keyboard
     v-model:show="showNumberKeyboard"
     v-model="form.amount"
-    @input="onAmountInput"
-    @delete="onAmountDelete"
-    @blur="showNumberKeyboard = false"
     :maxlength="10"
     theme="custom"
     close-button-text="完成"
     :extra-key="['00', '.']"
     :z-index="3002"
     teleport="body"
+    @input="onAmountInput"
+    @delete="onAmountDelete"
+    @blur="handleAmountFieldBlur"
+    @close="showNumberKeyboard = false"
   />
 
   <!-- 标签选择器 -->
@@ -229,8 +230,6 @@ const checkboxRefs = ref<any[]>([]);
 
 // 添加 toggle 方法
 const toggle = (index: number) => {
-  console.log(index)
-  console.log(checkboxRefs.value[index]);
   checkboxRefs.value[index]?.toggle();
 };
 
@@ -246,6 +245,7 @@ const resetForm = () => {
   form.amount = '';
   form.description = '';
   form.tags = [];
+  showNumberKeyboard.value = false;
 };
 
 // 表单数据
@@ -343,6 +343,7 @@ const onAmountDelete = () => {
 
 // 关闭弹窗
 const handleClose = () => {
+  showNumberKeyboard.value = false;
   emit('update:show', false);
 };
 
@@ -411,6 +412,21 @@ onMounted(async () => {
     showToast('加载数据失败');
   }
 });
+
+// 金额输入框点击事件
+const handleAmountFieldClick = () => {
+  // 只在数字键盘隐藏时才显示，避免与 blur 事件冲突
+  if (!showNumberKeyboard.value) {
+    showNumberKeyboard.value = true;
+  }
+};
+
+// 金额输入框失去焦点事件
+const handleAmountFieldBlur = () => {
+  setTimeout(() => {
+    showNumberKeyboard.value = false;
+  }, 300);
+};
 </script>
 
 <style scoped>

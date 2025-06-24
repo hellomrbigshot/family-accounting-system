@@ -1,12 +1,11 @@
 <template>
   <van-popup
     :show="show"
-    @update:show="handleShowUpdate"
     position="center"
     round
     :style="{ width: '90%', maxWidth: '400px' }"
-    :z-index="3000"
     teleport="body"
+    @update:show="handleShowUpdate"
   >
     <div class="flex flex-col">
       <!-- 头部 -->
@@ -18,12 +17,11 @@
       <!-- 内容 -->
       <div class="p-4">
         <div class="mb-4">
-          <div class="text-sm text-gray-500 mb-2">选择月份</div>
           <van-field
             :model-value="formattedMonth"
             readonly
             clickable
-            label=""
+            label="选择月份"
             placeholder="选择月份"
             @click="showMonthPicker = true"
           />
@@ -32,6 +30,7 @@
               v-model="selectedMonth"
               type="year-month"
               title="选择月份"
+              is-link
               :min-date="minDate"
               :max-date="maxDate"
               :columns-type="['year', 'month']"
@@ -41,25 +40,26 @@
           </van-popup>
         </div>
         <div class="mb-4">
-          <div class="text-sm text-gray-500 mb-2">预算金额</div>
           <van-field
             :model-value="budgetAmount"
             readonly
             clickable
-            label=""
+            label="预算金额"
             placeholder="请输入金额"
-            @click="showNumberKeyboard = true"
-            class="amount-field"
-            :label-width="0"
-            left-icon="￥"
-          />
+            is-link
+            @click="handleAmountFieldClick"
+          >
+            <template #button>
+              <span class="text-gray-500 font-medium">¥</span>
+            </template>
+          </van-field>
         </div>
       </div>
 
       <!-- 按钮 -->
       <div class="flex justify-end space-x-3 p-4 border-t border-gray-200">
         <van-button type="default" @click="handleClose">取消</van-button>
-        <van-button type="primary" @click="handleConfirm" :loading="loading">确定</van-button>
+        <van-button type="primary" :loading="loading" @click="handleConfirm">确定</van-button>
       </div>
     </div>
 
@@ -67,16 +67,17 @@
     <van-number-keyboard
       v-model:show="showNumberKeyboard"
       :model-value="budgetAmount"
-      @update:model-value="budgetAmount = $event"
-      @input="onAmountInput"
-      @delete="onAmountDelete"
-      @blur="showNumberKeyboard = false"
       :maxlength="10"
       theme="custom"
       close-button-text="完成"
       :extra-key="['00', '.']"
       :z-index="3002"
       teleport="body"
+      @update:model-value="budgetAmount = $event"
+      @input="onAmountInput"
+      @delete="onAmountDelete"
+      @blur="handleAmountFieldBlur"
+      @close="showNumberKeyboard = false"
     />
   </van-popup>
 </template>
@@ -204,11 +205,30 @@ const onAmountDelete = () => {
   budgetAmount.value = budgetAmount.value.slice(0, -1);
 };
 
+// 重置表单数据
+const resetForm = () => {
+  budgetAmount.value = '';
+  selectedMonth.value = [
+    dayjs().year().toString(),
+    (dayjs().month() + 1).toString().padStart(2, '0')
+  ];
+  showNumberKeyboard.value = false;
+  showMonthPicker.value = false;
+};
+
 const handleShowUpdate = (value: boolean) => {
+  if (value) {
+    // 弹窗显示时初始化表单
+    resetForm();
+  } else {
+    // 弹窗关闭时重置表单
+    resetForm();
+  }
   emit('update:show', value);
 };
 
 const handleClose = () => {
+  resetForm();
   handleShowUpdate(false);
 };
 
@@ -216,11 +236,27 @@ const handleConfirm = async () => {
   loading.value = true;
   try {
     if (await handleBeforeClose('confirm')) {
+      resetForm();
       handleShowUpdate(false);
     }
   } finally {
     loading.value = false;
   }
+};
+
+// 金额输入框点击事件
+const handleAmountFieldClick = () => {
+  // 只在数字键盘隐藏时才显示，避免与 blur 事件冲突
+  if (!showNumberKeyboard.value) {
+    showNumberKeyboard.value = true;
+  }
+};
+
+// 金额输入框失去焦点事件
+const handleAmountFieldBlur = () => {
+  setTimeout(() => {
+    showNumberKeyboard.value = false;
+  }, 300);
 };
 </script>
 
@@ -229,16 +265,7 @@ const handleConfirm = async () => {
   max-height: 60vh;
   overflow-y: auto;
 }
-
-.amount-field :deep(.van-field__control) {
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  padding-left: 0 !important;
-}
-
-.amount-field :deep(.van-field__left-icon) {
-  margin-right: 8px;
-  font-size: 16px;
-  font-weight: 500;
+:deep(.van-cell) {
+  @apply px-2;
 }
 </style> 

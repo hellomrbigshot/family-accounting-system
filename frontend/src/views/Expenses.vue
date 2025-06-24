@@ -50,7 +50,12 @@
           <h2 class="text-lg font-medium text-gray-800">支出记录</h2>
         </div>
 
-        <ExpenseList :expenses="filteredExpenses" @refresh="handleRefresh" show-delete />
+        <ExpenseList
+          :expenses="filteredExpenses"
+          show-delete
+          :show-refresh="false"
+          @refresh="handleRefresh"
+        />
       </div>
 
       <!-- 新增支出表单弹窗 -->

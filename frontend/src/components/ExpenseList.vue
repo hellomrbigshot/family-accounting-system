@@ -16,7 +16,6 @@
             <van-cell
               :title="getCategoryName(expense.category)"
               :value="formatAmount(expense.amount)"
-              :border="false"
             >
               <template #title>
                 <div class="flex flex-col w-full">
@@ -63,7 +62,6 @@
             :key="expense.id"
             :title="getCategoryName(expense.category)"
             :value="formatAmount(expense.amount)"
-            :border="false"
             class="mb-2"
           >
             <template #title>
@@ -113,7 +111,6 @@
             <van-cell
               :title="getCategoryName(expense.category)"
               :value="formatAmount(expense.amount)"
-              :border="false"
             >
               <template #title>
                 <div class="flex flex-col w-full">
@@ -206,7 +203,7 @@
         确定要删除这条支出记录吗？
       </div>
     </van-dialog>
-  </div>
+  </div> 
 </template>
 
 <script setup lang="ts">
@@ -372,20 +369,24 @@ const confirmDelete = async () => {
 </script>
 
 <style scoped>
-.van-cell {
-  @apply bg-white rounded-lg shadow-sm;
+:deep(.van-cell) {
+  @apply bg-white px-2;
+}
+:deep(.van-cell::after) {
+  left: 8px;
+  right: 8px;
 }
 
-.van-cell__title {
+:deep(.van-cell__title) {
   @apply text-base text-gray-900;
-  flex: 1;
+  flex: 70%;
   min-width: 0;
 }
 
-.van-cell__value {
-  @apply text-base font-medium text-red-600;
+:deep(.van-cell__value) {
+  @apply text-base font-medium text-red-600 ml-2;
   flex-shrink: 0;
-  margin-left: 1rem;
+  flex: 30%;
 }
 
 .line-clamp-2 {
@@ -395,22 +396,21 @@ const confirmDelete = async () => {
   overflow: hidden;
 }
 
-.van-swipe-cell {
+:deep(.van-swipe-cell) {
   @apply rounded-lg overflow-hidden mb-2;
-  height: 80px;
 }
 
-.van-swipe-cell__right {
+:deep(.van-swipe-cell__right) {
   @apply h-full;
   width: 65px;
 }
 
-.van-button--danger {
+:deep(.van-button--danger) {
   @apply bg-red-500 border-red-500 h-full w-full;
   border-radius: 0;
 }
 
-.van-button--danger:active {
+:deep(.van-button--danger:active) {
   @apply bg-red-600 border-red-600;
 }
 </style> 
