@@ -14,20 +14,12 @@ const defaultReportData: ReportData = {
   expenses: {
     total: 0,
     byCategory: {},
-    byPaymentMethod: {},
-    byDate: {}
-  },
-  incomes: {
-    total: 0,
-    byCategory: {},
-    byPaymentMethod: {},
+    byTag: {},
     byDate: {}
   },
   balance: 0,
   trends: {
-    daily: {},
-    weekly: {},
-    monthly: {}
+    expenses: {}
   }
 };
 
@@ -44,28 +36,13 @@ export const useReportStore = defineStore('report', {
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount);
     },
-    incomeCategories: (state) => {
-      return Object.entries(state.data.incomes.byCategory)
-        .map(([name, amount]) => ({ name, amount }))
-        .sort((a, b) => b.amount - a.amount);
-    },
-    paymentMethods: (state) => {
-      return Object.entries(state.data.expenses.byPaymentMethod)
+    expenseTags: (state) => {
+      return Object.entries(state.data.expenses.byTag)
         .map(([name, amount]) => ({ name, amount }))
         .sort((a, b) => b.amount - a.amount);
     },
     dailyTrends: (state) => {
-      return Object.entries(state.data.trends.daily)
-        .map(([date, amount]) => ({ date, amount }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    },
-    weeklyTrends: (state) => {
-      return Object.entries(state.data.trends.weekly)
-        .map(([date, amount]) => ({ date, amount }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    },
-    monthlyTrends: (state) => {
-      return Object.entries(state.data.trends.monthly)
+      return Object.entries(state.data.trends.expenses)
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     },

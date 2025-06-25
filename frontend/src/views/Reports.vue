@@ -1,79 +1,89 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-white rounded-xl shadow-sm p-6 border">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">报表分析</h1>
-        
-        <!-- 搜索区域 -->
-        <div class="mb-6">
-          <van-form @submit="handleSearch" class="space-y-4">
-            <van-cell-group inset>
-              <van-field
-                v-model="query.startDate"
-                name="startDate"
-                label="开始日期"
-                readonly
-                is-link
-                @click="showStartDatePicker = true"
-                class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
-              />
-              <van-field
-                v-model="query.endDate"
-                name="endDate"
-                label="结束日期"
-                readonly
-                is-link
-                @click="showEndDatePicker = true"
-                class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
-              />
-            </van-cell-group>
-            <div class="flex justify-end">
-              <van-button type="primary" native-type="submit" class="w-24">
-                查询
-              </van-button>
-            </div>
-          </van-form>
-        </div>
-
-        <!-- 报表内容 -->
-        <div class="space-y-6">
-          <trend-analysis
-            :data="reportData.trend"
-            :loading="loading"
-            class="bg-white rounded-xl shadow-sm p-6 border"
-          />
-          
-          <category-analysis
-            :data="reportData.category"
-            :loading="loading"
-            class="bg-white rounded-xl shadow-sm p-6 border"
-          />
-        </div>
+  <div class="min-h-screen">
+    <div class="mx-auto px-4 pb-6 pt-2">
+      <!-- 欢迎区域 -->
+      <div class="mb-2">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">报表分析</h1>
+        <p class="text-sm text-gray-500 font-medium">今天是 {{ currentDate }}</p>
       </div>
+
+      <!-- 搜索区域 -->
+       <div class="py-2.5">
+        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
+          <div class="grid grid-cols-2 gap-4">
+            <van-field
+              v-model="query.startDate"
+              readonly
+              is-link
+              placeholder="开始日期"
+              class="custom-field"
+              @click="showStartDatePicker = true"
+            />
+            <van-field
+              v-model="query.endDate"
+              readonly
+              is-link
+              placeholder="结束日期"
+              class="custom-field"
+              @click="showEndDatePicker = true"
+            />
+          </div>
+
+          <div class="mt-4">
+            <van-button size="small" type="primary" class="w-full" @click="handleSearch">
+              查询
+            </van-button>
+          </div>
+        </div>
+       </div>
+
+      <!-- 报表内容区域 -->
+      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-medium text-gray-800">趋势分析</h2>
+        </div>
+        
+        <trend-analysis
+          :data="reportData.trend"
+          :loading="loading"
+        />
+      </div>
+
+      <!-- 分类分析区域 -->
+      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-medium text-gray-800">分类分析</h2>
+        </div>
+        
+        <category-analysis
+          :data="reportData.category"
+          :loading="loading"
+        />
+      </div>
+
+      <!-- 日期选择器 -->
+      <van-popup v-model:show="showStartDatePicker" position="bottom" round>
+        <van-date-picker
+          v-model="currentStartDate"
+          title="选择开始日期"
+          :min-date="minDate"
+          :max-date="maxDate"
+          @confirm="onStartDateConfirm"
+          @cancel="showStartDatePicker = false"
+        />
+      </van-popup>
+
+      <van-popup v-model:show="showEndDatePicker" position="bottom" round>
+        <van-date-picker
+          v-model="currentEndDate"
+          title="选择结束日期"
+          :min-date="minDate"
+          :max-date="maxDate"
+          @confirm="onEndDateConfirm"
+          @cancel="showEndDatePicker = false"
+        />
+      </van-popup>
     </div>
-
-    <!-- 日期选择器 -->
-    <van-popup v-model:show="showStartDatePicker" position="bottom">
-      <van-date-picker
-        v-model="currentStartDate"
-        title="选择开始日期"
-        :min-date="minDate"
-        :max-date="maxDate"
-        @confirm="onStartDateConfirm"
-        @cancel="showStartDatePicker = false"
-      />
-    </van-popup>
-
-    <van-popup v-model:show="showEndDatePicker" position="bottom">
-      <van-date-picker
-        v-model="currentEndDate"
-        title="选择结束日期"
-        :min-date="minDate"
-        :max-date="maxDate"
-        @confirm="onEndDateConfirm"
-        @cancel="showEndDatePicker = false"
-      />
-    </van-popup>
   </div>
 </template>
 
@@ -89,8 +99,13 @@ const loading = ref(false);
 const showStartDatePicker = ref(false);
 const showEndDatePicker = ref(false);
 
-const minDate = new Date(2020, 0, 1);
-const maxDate = new Date();
+// 当前日期
+const currentDate = computed(() => {
+  return dayjs().format('YYYY年MM月DD日');
+});
+
+const minDate = dayjs('2020-01-01').toDate();
+const maxDate = dayjs().toDate();
 
 const query = reactive({
   startDate: dayjs().subtract(1, 'month').format('YYYY-MM-DD'),
@@ -99,9 +114,8 @@ const query = reactive({
 
 const reportData = reactive({
   trend: {
-    daily: {} as Record<string, number>,
-    weekly: {} as Record<string, number>,
-    monthly: {} as Record<string, number>
+    expenses: {} as Record<string, number>,
+    incomes: {} as Record<string, number>
   },
   category: {} as Record<string, number>
 });
@@ -146,15 +160,18 @@ const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
 };
 
 // 初始加载
-handleSearch();
+onMounted(() => {
+  handleSearch();
+});
 </script>
 
-<style>
-.van-button--primary {
-  @apply bg-indigo-600 border-indigo-600;
+<style scoped>
+.custom-field :deep(.van-field__control) {
+  font-size: 14px !important;
+  color: #1e293b !important;
 }
 
-.van-button--primary:active {
-  @apply bg-indigo-700 border-indigo-700;
+.custom-field :deep(.van-field__placeholder) {
+  color: #94a3b8 !important;
 }
 </style> 

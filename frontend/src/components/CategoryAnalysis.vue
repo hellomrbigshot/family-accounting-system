@@ -1,21 +1,66 @@
 <template>
-  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+  <div class="space-y-6">
+    <!-- 支出分类饼图 -->
     <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="p-5">
-        <h3 class="text-lg font-medium text-gray-900">支出分类</h3>
-        <div class="mt-4">
-          <div v-for="item in expenseCategories" :key="item.name" class="mb-2">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">{{ item.name }}</span>
-              <span class="text-sm font-medium text-gray-900">
-                ¥{{ item.amount.toFixed(2) }}
-              </span>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">支出分类</h3>
+        <div v-if="loading" class="flex justify-center items-center h-64">
+          <van-loading type="spinner" size="24px">加载中...</van-loading>
+        </div>
+        <div v-else-if="expenseChartData.length === 0" class="flex justify-center items-center h-64 text-gray-500">
+          暂无支出数据
+        </div>
+        <div v-else>
+          <div ref="expenseChartRef" class="h-64"></div>
+          <!-- 图例 -->
+          <div class="mt-4 space-y-2">
+            <div 
+              v-for="item in expenseChartData" 
+              :key="item.name"
+              class="flex items-center justify-between text-sm"
+            >
+              <div class="flex items-center space-x-2">
+                <div 
+                  class="w-3 h-3 rounded-full"
+                  :style="{ backgroundColor: item.color }"
+                ></div>
+                <span class="text-lg mr-2">{{ item.icon }}</span>
+                <span class="text-gray-600">{{ item.name }}</span>
+              </div>
+              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
             </div>
-            <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
-              <div
-                class="bg-red-600 h-2 rounded-full"
-                :style="{ width: `${(item.amount / totalExpense) * 100}%` }"
-              />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支出标签饼图 -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">支出标签</h3>
+        <div v-if="loading" class="flex justify-center items-center h-64">
+          <van-loading type="spinner" size="24px">加载中...</van-loading>
+        </div>
+        <div v-else-if="tagChartData.length === 0" class="flex justify-center items-center h-64 text-gray-500">
+          暂无标签数据
+        </div>
+        <div v-else>
+          <div ref="tagChartRef" class="h-64"></div>
+          <!-- 图例 -->
+          <div class="mt-4 space-y-2">
+            <div 
+              v-for="item in tagChartData" 
+              :key="item.name"
+              class="flex items-center justify-between text-sm"
+            >
+              <div class="flex items-center space-x-2">
+                <div 
+                  class="w-3 h-3 rounded-full"
+                  :style="{ backgroundColor: item.color }"
+                ></div>
+                <span class="text-gray-600">{{ item.name }}</span>
+              </div>
+              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -25,14 +70,213 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useReportStore } from '@/stores/report';
+import { useCategoryStore } from '@/stores/category';
+import { useTagStore } from '@/stores/tag';
+import * as echarts from 'echarts';
+
+interface Props {
+  data: Record<string, number>;
+  loading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false
+});
 
 const reportStore = useReportStore();
+const categoryStore = useCategoryStore();
+const tagStore = useTagStore();
 
-const expenseCategories = computed(() => reportStore.expenseCategories);
+const expenseChartRef = ref<HTMLElement>();
+const tagChartRef = ref<HTMLElement>();
+let expenseChart: echarts.ECharts | null = null;
+let tagChart: echarts.ECharts | null = null;
 
-const totalExpense = computed(() => {
-  return expenseCategories.value.reduce((sum, item) => sum + item.amount, 0);
+// 预定义的颜色数组 - 重新设计确保对比度
+const colors = [
+  '#EF4444', // 红色 - 高对比度
+  '#10B981', // 绿色 - 与红色形成强对比
+  '#3B82F6', // 蓝色 - 与红绿形成三原色对比
+  '#F59E0B', // 橙色 - 与蓝色形成互补
+  '#8B5CF6', // 紫色 - 与橙色形成对比
+  '#06B6D4', // 青色 - 与紫色形成对比
+  '#F97316', // 深橙色 - 与青色形成对比
+  '#84CC16', // 浅绿色 - 与深橙色形成对比
+  '#EC4899', // 粉色 - 与浅绿色形成对比
+  '#059669', // 深绿色 - 与粉色形成对比
+  '#D97706', // 棕色 - 与深绿色形成对比
+  '#6366F1', // 靛蓝色 - 与棕色形成对比
+  '#F43F5E', // 玫红色 - 与靛蓝色形成对比
+  '#14B8A6', // 青绿色 - 与玫红色形成对比
+  '#A855F7'  // 紫罗兰 - 与青绿色形成对比
+];
+
+// 转换分类数据格式，将分类 ID 映射为分类名称和图标
+const transformCategoryData = (data: Record<string, number> | undefined) => {
+  const result: Array<{ name: string; value: number; color: string; icon: string }> = [];
+  
+  if (!data) return result;
+  
+  Object.entries(data).forEach(([categoryId, amount], index) => {
+    const category = categoryStore.categories.find(c => c.id === categoryId && c.type === 'expense');
+    if (category && amount > 0) {
+      result.push({
+        name: category.name,
+        value: amount,
+        color: colors[index % colors.length],
+        icon: category.icon || '📦'
+      });
+    }
+  });
+  
+  return result.sort((a, b) => b.value - a.value);
+};
+
+// 转换标签数据格式，将标签 ID 映射为标签名称
+const transformTagData = (data: Record<string, number> | undefined) => {
+  const result: Array<{ name: string; value: number; color: string }> = [];
+  
+  if (!data) return result;
+  
+  Object.entries(data).forEach(([tagId, amount], index) => {
+    const tag = tagStore.tags.find(t => t.id === tagId);
+    if (tag && amount > 0) {
+      result.push({
+        name: tag.name,
+        value: amount,
+        color: tag.color || colors[index % colors.length]
+      });
+    }
+  });
+  
+  return result.sort((a, b) => b.value - a.value);
+};
+
+// 计算属性：支出分类数据
+const expenseChartData = computed(() => {
+  return transformCategoryData(reportStore.data.expenses.byCategory);
+});
+
+// 计算属性：支出标签数据
+const tagChartData = computed(() => {
+  return transformTagData(reportStore.data.expenses.byTag);
+});
+
+// 初始化图表
+const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: number; color: string }>) => {
+  const chart = echarts.init(chartRef);
+  
+  const option = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: ¥{c} ({d}%)'
+    },
+    series: [
+      {
+        name: '分类',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '50%'],
+        data: data.map(item => ({
+          name: item.name,
+          value: item.value,
+          itemStyle: {
+            color: item.color
+          }
+        })),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
+        label: {
+          show: false
+        },
+        labelLine: {
+          show: false
+        }
+      }
+    ]
+  };
+  
+  chart.setOption(option);
+  return chart;
+};
+
+// 更新图表
+const updateChart = (chart: echarts.ECharts | null, data: Array<{ name: string; value: number; color: string }>) => {
+  if (chart) {
+    const option = {
+      series: [
+        {
+          data: data.map(item => ({
+            name: item.name,
+            value: item.value,
+            itemStyle: {
+              color: item.color
+            }
+          }))
+        }
+      ]
+    };
+    chart.setOption(option);
+  }
+};
+
+// 监听数据变化
+watch([expenseChartData, tagChartData], () => {
+  nextTick(() => {
+    updateChart(expenseChart, expenseChartData.value);
+    updateChart(tagChart, tagChartData.value);
+  });
+});
+
+// 监听加载状态
+watch(() => props.loading, (loading) => {
+  if (!loading) {
+    nextTick(() => {
+      if (expenseChartRef.value && expenseChartData.value.length > 0) {
+        if (!expenseChart) {
+          expenseChart = initChart(expenseChartRef.value, expenseChartData.value);
+        } else {
+          updateChart(expenseChart, expenseChartData.value);
+        }
+      }
+      
+      if (tagChartRef.value && tagChartData.value.length > 0) {
+        if (!tagChart) {
+          tagChart = initChart(tagChartRef.value, tagChartData.value);
+        } else {
+          updateChart(tagChart, tagChartData.value);
+        }
+      }
+    });
+  }
+});
+
+onMounted(async () => {
+  // 确保分类和标签数据已加载
+  if (categoryStore.categories.length === 0) {
+    await categoryStore.fetchCategories();
+  }
+  
+  if (tagStore.tags.length === 0) {
+    await tagStore.fetchTags();
+  }
+  
+  // 初始化图表
+  nextTick(() => {
+    if (expenseChartRef.value && expenseChartData.value.length > 0) {
+      expenseChart = initChart(expenseChartRef.value, expenseChartData.value);
+    }
+    
+    if (tagChartRef.value && tagChartData.value.length > 0) {
+      tagChart = initChart(tagChartRef.value, tagChartData.value);
+    }
+  });
 });
 </script> 
