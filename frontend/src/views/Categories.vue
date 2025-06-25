@@ -1,11 +1,9 @@
 <template>
   <div class="min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">分类管理</h1>
-          <p class="mt-1 text-sm text-gray-500">管理您的支出分类和标签，方便记录日常开销</p>
-        </div>
+    <div class="mx-auto px-4 pb-6 pt-2">
+      <div class="mb-2">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">分类管理</h1>
+        <p class="text-sm text-gray-500 font-medium">管理您的支出分类和标签，方便记录日常开销</p>
       </div>
 
       <!-- Tab 切换 -->
@@ -14,13 +12,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
             :class="[
               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
               activeTab === tab.id
                 ? 'border-indigo-500 text-indigo-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
+            @click="activeTab = tab.id"
           >
             {{ tab.name }}
           </button>

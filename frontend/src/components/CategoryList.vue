@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-6 bg-white rounded-b-xl shadow-sm">
-    <div class="p-6 border-b border-gray-200">
+  <div class="bg-white rounded-b-xl shadow-sm">
+    <div class="p-5 border-b border-gray-200">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
@@ -11,36 +11,34 @@
         <van-button type="primary" size="small" icon="plus" @click="showCategoryForm = true" />
       </div>
     </div>
-    <div class="p-6">
-      <div class="space-y-4">
-        <div
-          v-for="category in categories"
-          :key="category.id"
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-        >
-          <div class="flex items-center space-x-4">
-            <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
-              <span class="text-lg text-indigo-600">{{ category.icon }}</span>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">{{ category.name }}</p>
-              <p class="text-sm text-gray-500 whitespace-nowrap">创建于 {{ formatDate(category.createdAt) }}</p>
-            </div>
+    <div class="space-y-4 p-4">
+      <div
+        v-for="category in categories"
+        :key="category.id"
+        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+      >
+        <div class="flex items-center space-x-4">
+          <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+            <span class="text-lg text-indigo-600">{{ category.icon }}</span>
           </div>
-          <div class="flex items-center space-x-2">
-            <van-button
-              type="primary"
-              size="small"
-              icon="edit"
-              @click="handleEdit(category)"
-            />
-            <van-button
-              type="danger"
-              size="small"
-              icon="delete"
-              @click="handleDelete(category)"
-            />
+          <div>
+            <p class="font-medium text-gray-900">{{ category.name }}</p>
+            <p class="text-sm text-gray-500 whitespace-nowrap">创建于 {{ formatDate(category.createdAt) }}</p>
           </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <van-button
+            type="primary"
+            size="small"
+            icon="edit"
+            @click="handleEdit(category)"
+          />
+          <van-button
+            type="danger"
+            size="small"
+            icon="delete"
+            @click="handleDelete(category)"
+          />
         </div>
       </div>
     </div>
