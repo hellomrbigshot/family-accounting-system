@@ -4,13 +4,7 @@
     <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="p-5">
         <h3 class="text-lg font-medium text-gray-900 mb-4">支出分类</h3>
-        <div v-if="loading" class="flex justify-center items-center h-64">
-          <van-loading type="spinner" size="24px">加载中...</van-loading>
-        </div>
-        <div v-else-if="categoryChartData.length === 0" class="flex justify-center items-center h-64 text-gray-500">
-          暂无支出数据
-        </div>
-        <div v-else>
+        <div>
           <div ref="categoryChartRef" class="h-64"></div>
           <!-- 图例 -->
           <div class="mt-4 space-y-2">
@@ -38,13 +32,7 @@
     <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="p-5">
         <h3 class="text-lg font-medium text-gray-900 mb-4">支出标签</h3>
-        <div v-if="loading" class="flex justify-center items-center h-64">
-          <van-loading type="spinner" size="24px">加载中...</van-loading>
-        </div>
-        <div v-else-if="tagChartData.length === 0" class="flex justify-center items-center h-64 text-gray-500">
-          暂无标签数据
-        </div>
-        <div v-else>
+        <div>
           <div ref="tagChartRef" class="h-64"></div>
           <!-- 图例 -->
           <div class="mt-4 space-y-2">
@@ -119,13 +107,11 @@ const transformCategoryData = (data: Record<string, number> | undefined) => {
   const result: Array<{ name: string; value: number; color: string; icon: string }> = [];
   
   if (!data || typeof data !== 'object') {
-    console.log('分类数据无效:', data);
     return result;
   }
   
   Object.entries(data).forEach(([categoryId, amount], index) => {
     if (typeof amount !== 'number' || amount <= 0) {
-      console.log('跳过无效的分类金额:', categoryId, amount);
       return;
     }
     
@@ -137,12 +123,9 @@ const transformCategoryData = (data: Record<string, number> | undefined) => {
         color: colors[index % colors.length],
         icon: category.icon || '📦'
       });
-    } else {
-      console.log('未找到分类:', categoryId);
     }
   });
   
-  console.log('转换后的分类数据:', result);
   return result.sort((a, b) => b.value - a.value);
 };
 
@@ -151,13 +134,11 @@ const transformTagData = (data: Record<string, number> | undefined) => {
   const result: Array<{ name: string; value: number; color: string }> = [];
   
   if (!data || typeof data !== 'object') {
-    console.log('标签数据无效:', data);
     return result;
   }
   
   Object.entries(data).forEach(([tagId, amount], index) => {
     if (typeof amount !== 'number' || amount <= 0) {
-      console.log('跳过无效的标签金额:', tagId, amount);
       return;
     }
     
@@ -168,12 +149,9 @@ const transformTagData = (data: Record<string, number> | undefined) => {
         value: amount,
         color: tag.color || colors[index % colors.length]
       });
-    } else {
-      console.log('未找到标签:', tagId);
     }
   });
   
-  console.log('转换后的标签数据:', result);
   return result.sort((a, b) => b.value - a.value);
 };
 
@@ -192,7 +170,6 @@ const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: num
   // 检查 DOM 元素上是否已有图表实例
   const existingChart = echarts.getInstanceByDom(chartRef);
   if (existingChart) {
-    console.log('DOM 元素上已有图表实例，先销毁');
     existingChart.dispose();
   }
   
@@ -259,40 +236,47 @@ const updateChart = (chart: echarts.ECharts | null, data: Array<{ name: string; 
 
 // 监听数据变化
 watch([categoryChartData, tagChartData], () => {
-  console.log('数据变化，更新图表:', {
-    categoryData: categoryChartData.value,
-    tagData: tagChartData.value
-  });
   nextTick(() => {
-    if (categoryChart && categoryChartData.value.length > 0) {
-      updateChart(categoryChart, categoryChartData.value);
+    // 分类图表处理
+    if (categoryChartData.value.length === 0 && categoryChart) {
+      categoryChart.dispose();
+      categoryChart = null;
+    } else if (categoryChartData.value.length > 0) {
+      if (!categoryChart && categoryChartRef.value) {
+        categoryChart = initChart(categoryChartRef.value, categoryChartData.value);
+      } else if (categoryChart) {
+        updateChart(categoryChart, categoryChartData.value);
+      }
     }
-    if (tagChart && tagChartData.value.length > 0) {
-      updateChart(tagChart, tagChartData.value);
+    // 标签图表处理
+    if (tagChartData.value.length === 0 && tagChart) {
+      tagChart.dispose();
+      tagChart = null;
+    } else if (tagChartData.value.length > 0) {
+      if (!tagChart && tagChartRef.value) {
+        tagChart = initChart(tagChartRef.value, tagChartData.value);
+      } else if (tagChart) {
+        updateChart(tagChart, tagChartData.value);
+      }
     }
   });
 }, { deep: true });
 
 // 监听加载状态
 watch(() => props.loading, (loading) => {
-  console.log('加载状态变化:', loading);
   if (!loading) {
     nextTick(() => {
       // 只在有数据时更新图表，不重新初始化
       if (categoryChart && categoryChartData.value.length > 0) {
-        console.log('更新分类图表数据');
         updateChart(categoryChart, categoryChartData.value);
       } else if (categoryChart && categoryChartData.value.length === 0) {
-        console.log('分类数据为空，销毁图表');
         categoryChart.dispose();
         categoryChart = null;
       }
       
       if (tagChart && tagChartData.value.length > 0) {
-        console.log('更新标签图表数据');
         updateChart(tagChart, tagChartData.value);
       } else if (tagChart && tagChartData.value.length === 0) {
-        console.log('标签数据为空，销毁图表');
         tagChart.dispose();
         tagChart = null;
       }
@@ -301,33 +285,23 @@ watch(() => props.loading, (loading) => {
 });
 
 onMounted(async () => {
-  console.log('CategoryAnalysis 组件挂载');
   // 确保分类和标签数据已加载
   if (categoryStore.categories.length === 0) {
-    console.log('加载分类数据');
     await categoryStore.fetchCategories();
   }
   
   if (tagStore.tags.length === 0) {
-    console.log('加载标签数据');
     await tagStore.fetchTags();
   }
   
   // 初始化图表 - 只在有数据时初始化
   nextTick(() => {
-    console.log('初始化图表，数据:', {
-      categoryData: categoryChartData.value,
-      tagData: tagChartData.value
-    });
-    
     // 只在有数据且 DOM 元素存在时初始化图表
     if (categoryChartRef.value && categoryChartData.value.length > 0) {
-      console.log('创建分类图表');
       categoryChart = initChart(categoryChartRef.value, categoryChartData.value);
     }
     
     if (tagChartRef.value && tagChartData.value.length > 0) {
-      console.log('创建标签图表');
       tagChart = initChart(tagChartRef.value, tagChartData.value);
     }
   });
@@ -335,7 +309,6 @@ onMounted(async () => {
 
 // 组件卸载时清理图表实例
 onUnmounted(() => {
-  console.log('CategoryAnalysis 组件卸载，清理图表');
   if (categoryChart) {
     categoryChart.dispose();
     categoryChart = null;

@@ -40,16 +40,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-
-const active = computed(() => {
-  const index = navItems.findIndex(item => item.path === route.path);
-  return index !== -1 ? index : 0;
-});
 
 const navItems = [
   { name: '首页', path: '/', icon: 'home-o' },
@@ -57,6 +53,15 @@ const navItems = [
   { name: '分类', path: '/categories', icon: 'apps-o' },
   { name: '报表', path: '/reports', icon: 'chart-trending-o' }
 ];
+
+// 将 active 改为 ref，初始值根据当前路由计算
+const active = ref(0);
+
+// 监听路由变化，自动更新 active 值
+watch(() => route.path, (newPath) => {
+  const index = navItems.findIndex(item => item.path === newPath);
+  active.value = index !== -1 ? index : 0;
+}, { immediate: true });
 
 const handleTabChange = (index: number) => {
   router.push(navItems[index].path);
@@ -79,4 +84,4 @@ const handleLogout = async () => {
 .van-tabbar-item--active {
   @apply text-indigo-600;
 }
-</style> 
+</style>
