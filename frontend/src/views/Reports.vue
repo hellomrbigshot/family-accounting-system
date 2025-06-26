@@ -56,7 +56,7 @@
         </div>
         
         <category-analysis
-          :data="reportData.category"
+          :data="reportStore.data"
           :loading="loading"
         />
       </div>
@@ -114,10 +114,8 @@ const query = reactive({
 
 const reportData = reactive({
   trend: {
-    expenses: {} as Record<string, number>,
-    incomes: {} as Record<string, number>
-  },
-  category: {} as Record<string, number>
+    expenses: {} as Record<string, number>
+  }
 });
 
 const currentStartDate = ref<string[]>([
@@ -138,7 +136,6 @@ const handleSearch = async () => {
     await reportStore.fetchReport(query);
     if (reportStore.data) {
       reportData.trend = reportStore.data.trends;
-      reportData.category = reportStore.data.expenses.byCategory;
     }
   } catch (error) {
     console.error('Failed to fetch reports:', error);

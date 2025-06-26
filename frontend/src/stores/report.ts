@@ -46,6 +46,49 @@ export const useReportStore = defineStore('report', {
         .map(([date, amount]) => ({ date, amount }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     },
+    weeklyTrends: (state) => {
+      const dailyData = Object.entries(state.data.trends.expenses)
+        .map(([date, amount]) => ({ date, amount }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      // 按周聚合
+      const weeklyMap = new Map<string, number>();
+      
+      dailyData.forEach(({ date, amount }) => {
+        const d = new Date(date);
+        // 获取该周的周一作为周标识
+        const dayOfWeek = d.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const monday = new Date(d);
+        monday.setDate(d.getDate() - daysToMonday);
+        const weekKey = monday.toISOString().split('T')[0];
+        
+        weeklyMap.set(weekKey, (weeklyMap.get(weekKey) || 0) + amount);
+      });
+      
+      return Array.from(weeklyMap.entries())
+        .map(([date, amount]) => ({ date, amount }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    },
+    monthlyTrends: (state) => {
+      const dailyData = Object.entries(state.data.trends.expenses)
+        .map(([date, amount]) => ({ date, amount }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      // 按月聚合
+      const monthlyMap = new Map<string, number>();
+      
+      dailyData.forEach(({ date, amount }) => {
+        const d = new Date(date);
+        const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        
+        monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + amount);
+      });
+      
+      return Array.from(monthlyMap.entries())
+        .map(([date, amount]) => ({ date, amount }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    },
   },
 
   actions: {
