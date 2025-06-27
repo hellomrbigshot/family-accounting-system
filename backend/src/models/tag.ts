@@ -1,7 +1,7 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 export interface ITag {
-  userId: Types.ObjectId;
+  roomNumber: string; // 家庭房间号
   name: string;
   color?: string;
   createdAt: Date;
@@ -9,10 +9,10 @@ export interface ITag {
 }
 
 const tagSchema = new Schema<ITag>({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  roomNumber: {
+    type: String,
+    required: true,
+    trim: true
   },
   name: {
     type: String,
@@ -28,15 +28,7 @@ const tagSchema = new Schema<ITag>({
 });
 
 // 创建索引以提高查询性能
-tagSchema.index({ userId: 1 });
+tagSchema.index({ roomNumber: 1 });
+tagSchema.index({ roomNumber: 1, name: 1 });
 
-// 默认标签
-const defaultTags = [
-  { name: '备婚', color: '#EC4899' },
-  { name: '618大促', color: '#F59E0B' },
-  { name: '双十一大促', color: '#EF4444' },
-  { name: '装修', color: '#10B981' }
-];
-
-export const Tag = model<ITag>('Tag', tagSchema);
-export { defaultTags }; 
+export const Tag = model<ITag>('Tag', tagSchema); 

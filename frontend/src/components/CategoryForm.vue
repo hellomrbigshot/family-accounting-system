@@ -67,6 +67,7 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
 import { useCategoryStore } from '@/stores/category';
+import { showToast } from 'vant';
 import type { CategoryData } from '@/api/category';
 
 const props = defineProps<{
@@ -88,40 +89,42 @@ const form = reactive<Omit<CategoryData, 'id' | 'createdAt'>>({
   type: 'expense'
 });
 
+// 重置表单数据
+const resetForm = () => {
+  form.name = '';
+  form.icon = '';
+  form.type = 'expense';
+};
+
 const handleShowUpdate = (value: boolean) => {
   emit('update:show', value);
   if (!value) {
     // 关闭弹窗时清空表单
-    form.name = '';
-    form.icon = '';
-    form.type = 'expense';
+    resetForm();
   }
 };
 
 const handleCancel = () => {
   emit('cancel');
   // 取消时清空表单
-  form.name = '';
-  form.icon = '';
-  form.type = 'expense';
+  resetForm();
 };
 
 const handleSubmit = async () => {
-  try {
-    let success;
-    if (props.category) {
-      success = await categoryStore.updateCategory(props.category.id, form);
-    } else {
-      success = await categoryStore.createCategory(form);
-    }
-    if (success) {
-      showToast(props.category ? '更新成功' : '创建成功');
-      emit('success');
-    }
-  } catch (error) {
-    console.error(props.category ? '更新分类失败:' : '创建分类失败:', error);
-    showToast(props.category ? '更新分类失败' : '创建分类失败');
+  if (props.category) {
+    await categoryStore.updateCategory(props.category.id, form);
+  } else {
+    await categoryStore.createCategory(form);
   }
+  showToast(props.category ? '更新成功' : '创建成功');
+  emit('success');
+  
+  // 根据模式处理表单数据
+  if (!props.category) {
+    // 新建模式：提交成功后重置表单，方便继续创建
+    resetForm();
+  }
+  // 编辑模式：保持当前数据不变，用户可能还需要进一步编辑
 };
 
 // 监听编辑状态
@@ -131,21 +134,59 @@ watch(() => props.category, (newCategory) => {
     form.icon = newCategory.icon || '';
     form.type = newCategory.type;
   } else {
-    form.name = '';
-    form.icon = '';
-    form.type = 'expense';
+    resetForm();
   }
 }, { immediate: true });
 
-// 常用图标列表
+// 常用图标列表 - 按消费场景分类
 const icons = [
-  '📦', '🍔', '🚗', '🏠', '👕', '📱', '💊', '🎓',
-  '🎮', '🎬', '✈️', '🚌', '🚇', '🚲', '🚕', '🚢',
-  '💼', '🎁', '🎂', '🎄', '🎈', '🎉', '🎊', '🎯',
-  '🎨', '🎭', '🎪', '🎫', '🎟️', '🎠', '🎡', '🎢',
-  '🏀', '⚽', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱',
-  '🏓', '🏸', '🏒', '🏑', '🏏', '🎿', '⛷️', '🏂',
-  '🏋️', '🤼', '🤸', '⛹️', '🤾', '🏇', '🧘'
+  // 基础生活
+  '🏠', '🍔', '👕', '📱', '💊', '🛏️', '🚿', '🧴',
+  
+  // 交通出行
+  '🚗', '🚌', '🚇', '✈️', '🚕', '🚲', '🚢', '🚁',
+  
+  // 娱乐休闲
+  '🎬', '🎮', '🎭', '🎫', '🎪', '🎨', '🎯', '🎲',
+  
+  // 运动健身
+  '⚽', '🏃‍♂️', '🏋️', '🧘', '🏊‍♂️', '🚴‍♂️',
+  
+  // 医疗健康
+  '🏥', '🩺', '💉', '🦷', '👁️', '🫀', '🧬',
+  
+  // 教育学习
+  '📚', '✏️', '🎓', '📝', '🔬', '📖', '🎒',
+  
+  // 数码科技
+  '💻', '⌚', '📷', '🎧', '🔋', '💾', '🖥️',
+  
+  // 美容美妆
+  '💄', '💅', '💇‍♀️', '🧴', '🪞', '💋', '👄',
+  
+  // 宠物服务
+  '🐕', '🐱', '🐦', '🐠', '🐰', '🐹', '🦜',
+  
+  // 家居装修
+  '🛋️', '🪑', '🛏️', '🚪', '🪟', '🛁', '🚽',
+  
+  // 购物消费
+  '🛒', '🛍️', '💰', '💳', '📦', '🎁', '🛍️',
+  
+  // 餐饮美食
+  '🍕', '🍜', '🍣', '🍰', '☕', '🍺', '🍷',
+  
+  // 水果食品
+  '🍎', '🍌', '🍊', '🍇', '🍓', '🥝', '🥭',
+  
+  // 旅游度假
+  '🏖️', '🗺️', '🏝️', '🌴', '🏔️', '🗽', '🗼',
+  
+  // 金融服务
+  '💰', '💳', '📈', '🏦', '💎', '🏛️', '📊',
+  
+  // 通讯网络
+  '📞', '🌐', '📡', '📶', '💻', '📺'
 ];
 </script>
 

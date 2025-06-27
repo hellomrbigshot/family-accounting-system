@@ -11,7 +11,7 @@ interface AuthenticatedRequest extends Request {
 
 export const createExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { date, category, amount, description } = req.body;
+    const { date, category, amount, description, tags } = req.body;
 
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
@@ -22,14 +22,26 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
       date,
       category,
       amount,
-      description
+      description,
+      tags: tags || []
     });
 
     await expense.save();
 
+    // 格式化返回数据
+    const formattedExpense = {
+      id: expense._id,
+      date: expense.date,
+      category: expense.category,
+      amount: expense.amount,
+      description: expense.description,
+      tags: expense.tags,
+      createdAt: expense.createdAt
+    };
+
     res.status(201).json({
       message: '支出记录创建成功',
-      expense
+      expense: formattedExpense
     });
   } catch (error) {
     console.error('创建支出记录失败:', error);
@@ -69,7 +81,18 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
       .sort({ date: -1, updatedAt: -1 })
       .exec();
 
-    res.json(expenses);
+    // 格式化响应数据
+    const formattedExpenses = expenses.map(expense => ({
+      id: expense._id,
+      date: expense.date,
+      category: expense.category,
+      amount: expense.amount,
+      description: expense.description,
+      tags: expense.tags,
+      createdAt: expense.createdAt
+    }));
+
+    res.json(formattedExpenses);
   } catch (error) {
     console.error('获取支出记录失败:', error);
     if (error instanceof Error) {

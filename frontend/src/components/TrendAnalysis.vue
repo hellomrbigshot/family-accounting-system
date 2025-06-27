@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white overflow-hidden shadow rounded-lg">
     <div class="p-5">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-medium text-gray-900">趋势分析</h3>
         <div class="flex space-x-2">
           <button
@@ -41,41 +41,37 @@
       </div>
 
       <div class="mt-4">
-        <div class="h-64 flex items-end space-x-1">
-          <div
-            v-for="item in currentTrendData"
-            :key="item.date"
-            class="flex-1 flex flex-col items-center"
-          >
-            <div class="w-full flex justify-center space-x-1">
-              <div
-                class="w-1/2 bg-red-600 rounded-t"
-                :style="{ height: `${(item.amount / maxAmount) * 100}%` }"
-              />
-              <div
-                class="w-1/2 bg-green-600 rounded-t"
-                :style="{ height: `${(item.amount / maxAmount) * 100}%` }"
-              />
-            </div>
-            <div class="mt-2 text-xs text-gray-500">
-              {{ formatDate(item.date) }}
-            </div>
-          </div>
-        </div>
+        <div ref="chartRef" class="h-64"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { useReportStore } from '@/stores/report';
 import dayjs from '@/utils/dayjs';
+import * as echarts from 'echarts';
+
+interface Props {
+  loading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false
+});
+
+interface TrendItem {
+  date: string;
+  amount: number;
+}
 
 const reportStore = useReportStore();
 const currentTrend = ref<'daily' | 'weekly' | 'monthly'>('daily');
+const chartRef = ref<HTMLElement>();
+let chart: echarts.ECharts | null = null;
 
-const currentTrendData = computed(() => {
+const currentTrendData = computed((): TrendItem[] => {
   switch (currentTrend.value) {
     case 'daily':
       return reportStore.dailyTrends;
@@ -87,7 +83,8 @@ const currentTrendData = computed(() => {
 });
 
 const maxAmount = computed(() => {
-  return Math.max(...currentTrendData.value.map(item => item.amount));
+  if (currentTrendData.value.length === 0) return 1;
+  return Math.max(...currentTrendData.value.map((item: TrendItem) => item.amount));
 });
 
 const formatDate = (date: string) => {
@@ -101,4 +98,194 @@ const formatDate = (date: string) => {
       return d.format('YYYY/MM');
   }
 };
+
+// 初始化图表
+const initChart = (chartRef: HTMLElement) => {
+  // 检查 DOM 元素上是否已有图表实例
+  const existingChart = echarts.getInstanceByDom(chartRef);
+  if (existingChart) {
+    existingChart.dispose();
+  }
+  
+  const chart = echarts.init(chartRef);
+  
+  const option = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        return `${data.name}<br/>支出: ¥${data.value.toFixed(2)}`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      top: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: currentTrendData.value.map(item => formatDate(item.date)),
+      axisLabel: {
+        rotate: 45,
+        fontSize: 12
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '¥{value}'
+      }
+    },
+    series: [
+      {
+        name: '支出',
+        type: 'bar',
+        data: currentTrendData.value.map(item => item.amount),
+        itemStyle: {
+          color: function(params: any) {
+            const value = params.value;
+            const max = maxAmount.value;
+            // 最高值使用深色，其他使用浅色
+            return value === max ? '#EF4444' : '#F87171';
+          },
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+  
+  chart.setOption(option);
+  return chart;
+};
+
+// 更新图表
+const updateChart = () => {
+  if (!chart || !chartRef.value) {
+    return;
+  }
+  
+  if (currentTrendData.value.length === 0) {
+    chart.dispose();
+    chart = null;
+    return;
+  }
+  
+  const option = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: function(params: any) {
+        const data = params[0];
+        return `${data.name}<br/>支出: ¥${data.value.toFixed(2)}`;
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      top: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: currentTrendData.value.map(item => formatDate(item.date)),
+      axisLabel: {
+        rotate: 45,
+        fontSize: 12
+      }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: '¥{value}'
+      }
+    },
+    series: [
+      {
+        name: '支出',
+        type: 'bar',
+        data: currentTrendData.value.map(item => item.amount),
+        itemStyle: {
+          color: function(params: any) {
+            const value = params.value;
+            const max = maxAmount.value;
+            return value === max ? '#EF4444' : '#F87171';
+          },
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  };
+  
+  chart.setOption(option, true); // 添加 true 参数，强制更新
+};
+
+// 监听数据变化
+watch([currentTrendData, currentTrend], () => {
+  nextTick(() => {
+    if (chartRef.value && currentTrendData.value.length > 0) {
+      if (!chart) {
+        chart = initChart(chartRef.value);
+      } else {
+        updateChart();
+      }
+    } else if (chart && currentTrendData.value.length === 0) {
+      chart.dispose();
+      chart = null;
+    }
+  });
+}, { deep: true });
+
+// 监听加载状态
+watch(() => props.loading, (loading) => {
+  if (!loading) {
+    nextTick(() => {
+      if (chartRef.value && currentTrendData.value.length > 0) {
+        if (!chart) {
+          chart = initChart(chartRef.value);
+        } else {
+          updateChart();
+        }
+      }
+    });
+  }
+});
+
+onMounted(() => {
+  // 初始化图表
+  nextTick(() => {
+    if (chartRef.value && currentTrendData.value.length > 0) {
+      chart = initChart(chartRef.value);
+    }
+  });
+});
+
+// 组件卸载时清理图表实例
+onUnmounted(() => {
+  if (chart) {
+    chart.dispose();
+    chart = null;
+  }
+});
 </script> 

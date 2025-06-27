@@ -10,7 +10,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AccountForm: typeof import('./components/AccountForm.vue')['default']
     AccountList: typeof import('./components/AccountList.vue')['default']
-    AddExpenseDialog: typeof import('./components/AddExpenseDialog.vue')['default']
     AdjustBalanceDialog: typeof import('./components/AdjustBalanceDialog.vue')['default']
     AdjustBalanceForm: typeof import('./components/AdjustBalanceForm.vue')['default']
     BudgetDialog: typeof import('./components/BudgetDialog.vue')['default']
@@ -42,6 +41,7 @@ declare module 'vue' {
     VanForm: typeof import('vant/es')['Form']
     VanIcon: typeof import('vant/es')['Icon']
     VanList: typeof import('vant/es')['List']
+    VanLoading: typeof import('vant/es')['Loading']
     VanNavBar: typeof import('vant/es')['NavBar']
     VanNumberKeyboard: typeof import('vant/es')['NumberKeyboard']
     VanPicker: typeof import('vant/es')['Picker']

@@ -5,17 +5,12 @@ export interface ReportData {
   expenses: {
     total: number;
     byCategory: Record<string, number>;
-    byDate: Record<string, number>;
-  };
-  incomes: {
-    total: number;
-    byCategory: Record<string, number>;
+    byTag: Record<string, number>;
     byDate: Record<string, number>;
   };
   balance: number;
   trends: {
     expenses: Record<string, number>;
-    incomes: Record<string, number>;
   };
 }
 

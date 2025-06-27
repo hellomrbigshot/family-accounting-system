@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-6 bg-white rounded-b-xl shadow-sm">
-    <div class="p-6 border-b border-gray-200">
+  <div class="bg-white rounded-b-xl shadow-sm">
+    <div class="p-5 border-b border-gray-200">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
@@ -11,31 +11,29 @@
         <van-button size="small" type="primary" icon="plus" @click="showTagForm = true" />
       </div>
     </div>
-    <div class="p-6">
-      <div class="space-y-4">
-        <div
-          v-for="tag in tags"
-          :key="tag.id"
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-        >
-          <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
-            <span class="text-gray-900">{{ tag.name }}</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <van-button
-              type="primary"
-              size="small"
-              icon="edit"
-              @click="handleEdit(tag)"
-            />
-            <van-button
-              type="danger"
-              size="small"
-              icon="delete"
-              @click="handleDelete(tag)"
-            />
-          </div>
+    <div class="space-y-4 p-4">
+      <div
+        v-for="tag in tags"
+        :key="tag.id"
+        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+      >
+        <div class="flex items-center space-x-3">
+          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
+          <span class="text-gray-900">{{ tag.name }}</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <van-button
+            type="primary"
+            size="small"
+            icon="edit"
+            @click="handleEdit(tag)"
+          />
+          <van-button
+            type="danger"
+            size="small"
+            icon="delete"
+            @click="handleDelete(tag)"
+          />
         </div>
       </div>
     </div>
@@ -70,10 +68,6 @@ import { showToast } from 'vant';
 import type { TagData } from '@/api/tag';
 import TagForm from './TagForm.vue';
 
-interface TagWithId extends TagData {
-  _id: string;
-}
-
 const tagStore = useTagStore();
 
 const showTagForm = ref(false);
@@ -81,10 +75,7 @@ const editingTag = ref<TagData | undefined>(undefined);
 const showDeleteConfirm = ref(false);
 const deletingTag = ref<TagData | undefined>();
 
-const tags = computed(() => (tagStore.tags as TagWithId[]).map(tag => ({
-  ...tag,
-  id: tag._id
-})));
+const tags = computed(() => tagStore.tags);
 
 const tagCount = computed(() => tags.value.length);
 

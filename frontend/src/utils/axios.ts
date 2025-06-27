@@ -37,7 +37,7 @@ instance.interceptors.response.use(
 
       if (status === 401) {
         try {
-          await authStore.refreshToken();
+          await authStore.refreshAccessToken();
           const config = error.config;
           config.headers.Authorization = `Bearer ${authStore.token}`;
           return instance(config);
@@ -47,19 +47,15 @@ instance.interceptors.response.use(
           return Promise.reject(refreshError);
         }
       }
+      
+      // 显示错误消息，但仍然抛出错误
       if (message) {
-        showToast(message)
-        return
-      }
-      if (status === 403) {
+        showToast(message);
+      } else if (status === 403) {
         showToast('没有权限执行此操作');
-      }
-
-      if (status === 404) {
+      } else if (status === 404) {
         showToast('请求的资源不存在');
-      }
-
-      if (status === 500) {
+      } else if (status === 500) {
         showToast('服务器错误，请稍后重试');
       }
     } else if (error.request) {

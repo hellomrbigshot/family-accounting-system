@@ -127,23 +127,23 @@ export default defineConfig({
             purpose: 'any maskable'
           }
         ],
-        screenshots: [
-          {
-            src: '/screenshots/desktop.png',
-            sizes: '1280x720',
-            type: 'image/png',
-            form_factor: 'wide'
-          },
-          {
-            src: '/screenshots/mobile.png',
-            sizes: '390x844',
-            type: 'image/png',
-            form_factor: 'narrow'
-          }
-        ]
+        // screenshots: [
+        //   {
+        //     src: '/screenshots/desktop.png',
+        //     sizes: '1280x720',
+        //     type: 'image/png',
+        //     form_factor: 'wide'
+        //   },
+        //   {
+        //     src: '/screenshots/mobile.png',
+        //     sizes: '390x844',
+        //     type: 'image/png',
+        //     form_factor: 'narrow'
+        //   }
+        // ]
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: 'module'
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],

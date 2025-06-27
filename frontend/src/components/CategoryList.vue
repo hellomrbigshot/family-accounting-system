@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-6 bg-white rounded-b-xl shadow-sm">
-    <div class="p-6 border-b border-gray-200">
+  <div class="bg-white rounded-b-xl shadow-sm">
+    <div class="p-5 border-b border-gray-200">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
@@ -11,38 +11,83 @@
         <van-button type="primary" size="small" icon="plus" @click="showCategoryForm = true" />
       </div>
     </div>
-    <div class="p-6">
-      <div class="space-y-4">
+    
+    <!-- 系统固定分类 -->
+    <div v-if="systemCategories.length > 0" class="p-4 border-b border-gray-100">
+      <div class="flex items-center space-x-2 mb-3">
+        <h3 class="text-sm font-medium text-gray-700">系统固定分类</h3>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          {{ systemCategories.length }} 个
+        </span>
+      </div>
+      <div class="space-y-3">
         <div
-          v-for="category in categories"
+          v-for="category in systemCategories"
           :key="category.id"
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
         >
-          <div class="flex items-center space-x-4">
-            <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
-              <span class="text-lg text-indigo-600">{{ category.icon }}</span>
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <span class="text-base text-gray-600">{{ category.icon }}</span>
             </div>
             <div>
               <p class="font-medium text-gray-900">{{ category.name }}</p>
-              <p class="text-sm text-gray-500 whitespace-nowrap">创建于 {{ formatDate(category.createdAt) }}</p>
+              <p class="text-xs text-gray-500">系统固定</p>
             </div>
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              固定
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 家庭自定义分类 -->
+    <div v-if="customCategories.length > 0" class="p-4">
+      <div class="flex items-center space-x-2 mb-3">
+        <h3 class="text-sm font-medium text-gray-700">家庭自定义分类</h3>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-600">
+          {{ customCategories.length }} 个
+        </span>
+      </div>
+      <div class="space-y-3">
+        <div
+          v-for="category in customCategories"
+          :key="category.id"
+          class="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <span class="text-base text-blue-600">{{ category.icon }}</span>
+            </div>
+            <div>
+              <p class="font-medium text-gray-900">{{ category.name }}</p>
+              <p class="text-xs text-gray-500">创建于 {{ formatDate(category.createdAt) }}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1">
             <van-button
               type="primary"
-              size="small"
+              size="mini"
               icon="edit"
               @click="handleEdit(category)"
             />
             <van-button
               type="danger"
-              size="small"
+              size="mini"
               icon="delete"
               @click="handleDelete(category)"
             />
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div v-if="categories.length === 0" class="p-8 text-center">
+      <p class="text-gray-500">暂无分类</p>
     </div>
 
     <!-- 分类表单弹窗 -->
@@ -80,6 +125,16 @@ const editingCategory = ref<CategoryData | null>(null);
 const showDeleteConfirm = ref(false);
 
 const categories = ref<CategoryData[]>([]);
+
+// 分离系统分类和家庭分类
+const systemCategories = computed(() => 
+  categories.value.filter(cat => cat.isSystem)
+);
+
+const customCategories = computed(() => 
+  categories.value.filter(cat => !cat.isSystem)
+);
+
 const categoryCount = computed(() => categories.value.length);
 
 const formatDate = (date: string) => {

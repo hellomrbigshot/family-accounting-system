@@ -1,7 +1,15 @@
 {
+<<<<<<< HEAD
   "version": "0.0.10",
   "buildTime": "2025-06-20T08:32:42.775Z",
   "buildNumber": "7",
   "gitCommit": "main-8bf4332",
  
+=======
+  "version": "0.0.13",
+  "buildTime": "2025-06-27T10:27:26.511Z",
+  "buildNumber": "16",
+  "gitCommit": "main-d5a1641",
+  "environment": "ci"
+>>>>>>> 4cd402c1cd8712e8b30ed383f3a8c2ce56fee218
 }

@@ -94,6 +94,12 @@ const form = reactive<{
   color: '#6366F1'
 });
 
+// 重置表单数据
+const resetForm = () => {
+  form.name = '';
+  form.color = '#6366F1';
+};
+
 // 常用颜色列表
 const colorOptions = [
   '#6366F1', // 靛蓝色
@@ -126,16 +132,14 @@ const handleShowUpdate = (value: boolean) => {
   emit('update:show', value);
   if (!value) {
     // 关闭弹窗时清空表单
-    form.name = '';
-    form.color = '#6366F1';
+    resetForm();
   }
 };
 
 const handleCancel = () => {
   emit('cancel');
   // 取消时清空表单
-  form.name = '';
-  form.color = '#6366F1';
+  resetForm();
 };
 
 const handleSubmit = async () => {
@@ -144,21 +148,19 @@ const handleSubmit = async () => {
     return;
   }
 
-  try {
-    let success;
-    if (props.tag) {
-      success = await tagStore.updateTag(props.tag.id, form);
+  if (props.tag) {
+      await tagStore.updateTag(props.tag.id, form);
     } else {
-      success = await tagStore.createTag(form);
+      await tagStore.createTag(form);
     }
-    if (success) {
-      showToast(props.tag ? '更新成功' : '创建成功');
-      emit('success');
+    showToast(props.tag ? '更新成功' : '创建成功');
+    emit('success');
+    
+    // 根据模式处理表单数据
+    if (!props.tag) {
+      // 新建模式：提交成功后重置表单，方便继续创建
+      resetForm();
     }
-  } catch (error) {
-    console.error(props.tag ? '更新标签失败:' : '创建标签失败:', error);
-    showToast(props.tag ? '更新标签失败' : '创建标签失败');
-  }
 };
 
 // 监听编辑状态
@@ -167,8 +169,8 @@ watch(() => props.tag, (newTag) => {
     form.name = newTag.name;
     form.color = newTag.color || '';
   } else {
-    form.name = '';
-    form.color = '';
+    // 新建模式：使用统一的重置方法
+    resetForm();
   }
 }, { immediate: true });
 </script>

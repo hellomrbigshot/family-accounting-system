@@ -5,6 +5,8 @@
     position="bottom"
     round
     :style="{ height: '90%' }"
+    :z-index="3000"
+    teleport="body"
   >
     <div class="h-full flex flex-col">
       <!-- 头部 -->
@@ -15,7 +17,7 @@
 
       <!-- 表单内容 -->
       <div class="flex-1 overflow-y-auto p-4">
-        <van-form @submit="handleSubmit" class="space-y-4">
+        <van-form class="space-y-4" @submit="handleSubmit">
           <!-- 日期选择 -->
           <van-field
             v-model="form.date"
@@ -52,7 +54,7 @@
               { required: true, message: '请输入金额' },
               { validator: amountValidator, message: '金额必须大于0且最多保留两位小数' }
             ]"
-            @click="showNumberKeyboard = true"
+            @click="handleAmountFieldClick"
           >
             <template #button>
               <span class="text-gray-500">¥</span>
@@ -72,6 +74,34 @@
             show-word-limit
           />
 
+          <!-- 标签选择 -->
+          <van-field
+            name="tags"
+            label="标签"
+            readonly
+            is-link
+            @click="showTagPicker = true"
+          >
+            <template #input>
+              <div class="flex flex-wrap gap-2 min-h-[24px]">
+                <div
+                  v-for="tag in selectedTags"
+                  :key="tag.id"
+                  class="inline-flex items-center px-2 py-1 bg-gray-100 rounded-full text-xs"
+                >
+                  <div 
+                    class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
+                    :style="{ backgroundColor: tag.color }"
+                  ></div>
+                  <span class="text-gray-700">{{ tag.name }}</span>
+                </div>
+                <span v-if="selectedTags.length === 0" class="text-gray-400 text-sm">
+                  请选择标签（选填）
+                </span>
+              </div>
+            </template>
+          </van-field>
+
           <!-- 提交按钮 -->
           <div class="mt-6 px-4">
             <van-button
@@ -88,50 +118,97 @@
         </van-form>
       </div>
     </div>
+  </van-popup>
 
-    <!-- 日期选择器 -->
-    <van-popup v-model:show="showDatePicker" position="bottom">
-      <van-date-picker
-        v-model="currentDate"
-        title="选择日期"
-        :min-date="minDate"
-        :max-date="maxDate"
-        @confirm="onDateConfirm"
-        @cancel="showDatePicker = false"
-      />
-    </van-popup>
-
-    <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom">
-      <van-picker
-        :columns="categoryColumns"
-        show-toolbar
-        title="选择分类"
-        @confirm="onCategoryConfirm"
-        @cancel="showCategoryPicker = false"
-      />
-    </van-popup>
-
-    <!-- 数字键盘 -->
-    <van-number-keyboard
-      v-model:show="showNumberKeyboard"
-      v-model="form.amount"
-      @input="onAmountInput"
-      @delete="onAmountDelete"
-      @blur="showNumberKeyboard = false"
-      :maxlength="10"
-      theme="custom"
-      close-button-text="完成"
-      :extra-key="['00', '.']"
+  <!-- 日期选择器 -->
+  <van-popup v-model:show="showDatePicker" position="bottom" round :z-index="3001" teleport="body">
+    <van-date-picker
+      v-model="currentDate"
+      title="选择日期"
+      :min-date="minDate"
+      :max-date="maxDate"
+      @confirm="onDateConfirm"
+      @cancel="showDatePicker = false"
     />
+  </van-popup>
+
+  <!-- 分类选择器 -->
+  <van-popup v-model:show="showCategoryPicker" position="bottom" round :z-index="3001" teleport="body">
+    <van-picker
+      :columns="categoryColumns"
+      show-toolbar
+      title="选择分类"
+      @confirm="onCategoryConfirm"
+      @cancel="showCategoryPicker = false"
+    />
+  </van-popup>
+
+  <!-- 数字键盘 -->
+  <van-number-keyboard
+    v-model:show="showNumberKeyboard"
+    v-model="form.amount"
+    :maxlength="10"
+    theme="custom"
+    close-button-text="完成"
+    :extra-key="['00', '.']"
+    :z-index="3002"
+    teleport="body"
+    @input="onAmountInput"
+    @delete="onAmountDelete"
+    @blur="handleAmountFieldBlur"
+    @close="showNumberKeyboard = false"
+  />
+
+  <!-- 标签选择器 -->
+  <van-popup v-model:show="showTagPicker" position="bottom" round :z-index="3001" teleport="body">
+    <div class="p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium">选择标签</h3>
+        <van-icon name="cross" @click="showTagPicker = false" />
+      </div>
+      <div class="space-y-2 max-h-60 overflow-y-auto">
+        <van-checkbox-group v-model="form.tags">
+          <van-cell
+            v-for="(tag, index) in tagStore.tags"
+            :key="tag.id"
+            clickable
+            class="tag-cell"
+            @click="toggle(index)"
+          >
+            <template #title>
+              <div class="flex items-center space-x-3">
+                <div 
+                  class="w-4 h-4 rounded-full flex-shrink-0"
+                  :style="{ backgroundColor: tag.color }"
+                ></div>
+                <span class="text-gray-900">{{ tag.name }}</span>
+              </div>
+            </template>
+            <template #right-icon>
+              <van-checkbox 
+                :name="tag.id"
+                :ref="el => checkboxRefs[index] = el"
+                @click.stop
+              />
+            </template>
+          </van-cell>
+        </van-checkbox-group>
+      </div>
+      <div class="mt-4 flex justify-end space-x-2">
+        <van-button type="default" @click="showTagPicker = false">取消</van-button>
+        <van-button type="primary" @click="showTagPicker = false">确定</van-button>
+      </div>
+    </div>
   </van-popup>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted, onBeforeUpdate } from 'vue';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
-;
+import { useTagStore } from '@/stores/tag';
+import { showToast } from 'vant';
+import type { TagData } from '@/api/tag';
 import dayjs from '@/utils/dayjs';
 
 const props = defineProps<{
@@ -145,14 +222,39 @@ const emit = defineEmits<{
 
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
+const tagStore = useTagStore();
 const loading = ref(false);
+
+// 添加 checkbox 引用数组
+const checkboxRefs = ref<any[]>([]);
+
+// 添加 toggle 方法
+const toggle = (index: number) => {
+  checkboxRefs.value[index]?.toggle();
+};
+
+// 在组件更新前清空 checkboxRefs 数组
+onBeforeUpdate(() => {
+  checkboxRefs.value = [];
+});
+
+// 重置表单数据
+const resetForm = () => {
+  form.date = dayjs().format('YYYY-MM-DD');
+  form.category = '';
+  form.amount = '';
+  form.description = '';
+  form.tags = [];
+  showNumberKeyboard.value = false;
+};
 
 // 表单数据
 const form = reactive({
   date: dayjs().format('YYYY-MM-DD'),
   category: '',
   amount: '',
-  description: ''
+  description: '',
+  tags: [] as string[]
 });
 
 const categoryName = computed(() => {
@@ -190,6 +292,21 @@ const categoryColumns = computed(() => {
 // 数字键盘
 const showNumberKeyboard = ref(false);
 
+// 标签选择器
+const showTagPicker = ref(false);
+
+// 已选标签文本
+const selectedTagsText = computed(() => {
+  if (form.tags.length === 0) return '';
+  const selectedTags = tagStore.tags.filter(tag => form.tags.includes(tag.id));
+  return selectedTags.map(tag => tag.name).join(', ');
+});
+
+// 已选标签
+const selectedTags = computed(() => {
+  return tagStore.tags.filter((tag: TagData) => form.tags.includes(tag.id));
+});
+
 // 金额验证
 const amountValidator = (value: string) => {
   if (!value) return false;
@@ -226,6 +343,7 @@ const onAmountDelete = () => {
 
 // 关闭弹窗
 const handleClose = () => {
+  showNumberKeyboard.value = false;
   emit('update:show', false);
 };
 
@@ -239,6 +357,7 @@ const handleSubmit = async () => {
     });
     showToast('保存成功');
     emit('success');
+    resetForm(); // 提交成功后重置表单
     handleClose();
   } catch (error) {
     console.error('Failed to create expense:', error);
@@ -257,10 +376,7 @@ const handleShowUpdate = (value: boolean) => {
 watch(() => props.show, async (newValue) => {
   if (newValue) {
     // 重置表单
-    form.date = dayjs().format('YYYY-MM-DD');
-    form.category = '';
-    form.amount = '';
-    form.description = '';
+    resetForm();
     
     // 确保分类列表已加载
     if (categoryStore.categories.length === 0) {
@@ -271,34 +387,62 @@ watch(() => props.show, async (newValue) => {
         showToast('获取分类列表失败');
       }
     }
+    
+    // 确保标签列表已加载
+    if (tagStore.tags.length === 0) {
+      try {
+        await tagStore.fetchTags();
+      } catch (error) {
+        console.error('Failed to fetch tags:', error);
+        showToast('获取标签列表失败');
+      }
+    }
   }
 });
 
-// 在组件挂载时加载分类数据
+// 在组件挂载时加载数据
 onMounted(async () => {
   try {
-    await categoryStore.fetchCategories();
+    await Promise.all([
+      categoryStore.fetchCategories(),
+      tagStore.fetchTags()
+    ]);
   } catch (error) {
-    console.error('Failed to load categories:', error);
-    showToast('加载分类失败');
+    console.error('Failed to load data:', error);
+    showToast('加载数据失败');
   }
 });
+
+// 金额输入框点击事件
+const handleAmountFieldClick = () => {
+  // 只在数字键盘隐藏时才显示，避免与 blur 事件冲突
+  if (!showNumberKeyboard.value) {
+    showNumberKeyboard.value = true;
+  }
+};
+
+// 金额输入框失去焦点事件
+const handleAmountFieldBlur = () => {
+  setTimeout(() => {
+    showNumberKeyboard.value = false;
+  }, 300);
+};
 </script>
 
-<style>
-.van-button--primary {
-  @apply bg-indigo-600 border-indigo-600;
+<style scoped>
+:deep(.van-field__label) {
+  width: 60px;
 }
 
-.van-button--primary:active {
-  @apply bg-indigo-700 border-indigo-700;
+:deep(.van-popup__content) {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.van-field__label {
-  @apply text-gray-700 font-medium;
+.tag-cell :deep(.van-cell__title) {
+  flex: 1;
 }
 
-.van-field__control {
-  @apply text-gray-900;
+.tag-cell :deep(.van-checkbox) {
+  margin-left: auto;
 }
 </style> 

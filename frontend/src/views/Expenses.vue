@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-    <div class="container mx-auto px-4 py-6">
+  <div class="min-h-screen">
+    <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
-      <div class="mb-8">
+      <div class="mb-2">
         <h1 class="text-2xl font-bold text-gray-800 mb-2">支出记录</h1>
         <p class="text-sm text-gray-500 font-medium">今天是 {{ currentDate }}</p>
       </div>
@@ -50,7 +50,12 @@
           <h2 class="text-lg font-medium text-gray-800">支出记录</h2>
         </div>
 
-        <ExpenseList :expenses="filteredExpenses" @refresh="handleRefresh" show-delete />
+        <ExpenseList
+          :expenses="filteredExpenses"
+          show-delete
+          :show-refresh="false"
+          @refresh="handleRefresh"
+        />
       </div>
 
       <!-- 新增支出表单弹窗 -->
