@@ -122,14 +122,24 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
       })
     }
 
-    // 生成趋势数据（最近30天）
+    // 生成趋势数据（使用传入的日期范围或默认最近30天）
     const trends = {
       expenses: {} as Record<string, number>
     }
 
-    const trendQuery = { 
-      userId: new Types.ObjectId(req.user._id),
-      date: {
+    // 构建趋势查询条件
+    const trendQuery: any = { 
+      userId: new Types.ObjectId(req.user._id)
+    }
+
+    // 如果有传入日期范围，使用传入的范围；否则使用最近30天
+    if (startDate && endDate) {
+      trendQuery.date = {
+        $gte: new Date(startDate as string),
+        $lte: new Date(endDate as string)
+      }
+    } else {
+      trendQuery.date = {
         $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       }
     }
