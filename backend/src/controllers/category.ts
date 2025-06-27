@@ -1,12 +1,21 @@
 import { Request, Response } from 'express';
-import { Category, defaultCategories, IDefaultCategory } from '../models/category';
+import { Category } from '../models/category';
 import Room from '../models/room';
 import { Types } from 'mongoose';
 
-export const getCategories = async (req: Request, res: Response) => {
+interface AuthenticatedRequest extends Request {
+  user?: {
+    _id: string;
+    roomNumber: string;
+  };
+}
+
+export const getCategories = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    if (!userId) {
+    const roomNumber = req.user?.roomNumber;
+    
+    if (!userId || !roomNumber) {
       return res.status(401).json({ message: '未授权' });
     }
 
@@ -16,40 +25,50 @@ export const getCategories = async (req: Request, res: Response) => {
       return res.status(404).json({ message: '房间不存在' });
     }
 
-    // 获取房间的所有分类
-    let categories = await Category.find({ userId });
+    // 获取系统固定分类
+    const systemCategories = await Category.find({ isSystem: true });
 
-    // 如果没有分类，创建默认分类
-    if (categories.length === 0) {
-      const defaultCategoryDocs = defaultCategories.map((cat: IDefaultCategory) => ({
-        ...cat,
-        userId: new Types.ObjectId(userId)
-      }));
-      const insertedCategories = await Category.insertMany(defaultCategoryDocs);
-      categories = insertedCategories;
-    }
+    // 获取当前家庭的自定义分类
+    const customCategories = await Category.find({ 
+      roomNumber, 
+      isSystem: false 
+    });
 
-    // 格式化响应数据
-    const formattedCategories = categories.map(cat => ({
-      id: cat._id,
-      name: cat.name,
-      type: cat.type,
-      icon: cat.icon,
-      color: cat.color,
-      createdAt: cat.createdAt
-    }));
+    // 合并系统分类和家庭分类，系统分类在前
+    const allCategories = [
+      ...systemCategories.map(cat => ({
+        id: cat._id,
+        name: cat.name,
+        type: cat.type,
+        icon: cat.icon,
+        color: cat.color,
+        isSystem: true,
+        createdAt: cat.createdAt
+      })),
+      ...customCategories.map(cat => ({
+        id: cat._id,
+        name: cat.name,
+        type: cat.type,
+        icon: cat.icon,
+        color: cat.color,
+        isSystem: false,
+        createdAt: cat.createdAt
+      }))
+    ];
 
-    res.json(formattedCategories);
+    res.json(allCategories);
   } catch (error) {
     console.error('获取分类失败:', error);
     res.status(500).json({ message: '获取分类失败' });
   }
 };
 
-export const createCategory = async (req: Request, res: Response) => {
+export const createCategory = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    if (!userId) {
+    const roomNumber = req.user?.roomNumber;
+    
+    if (!userId || !roomNumber) {
       return res.status(401).json({ message: '未授权' });
     }
 
@@ -60,19 +79,33 @@ export const createCategory = async (req: Request, res: Response) => {
       return res.status(400).json({ message: '名称和类型为必填项' });
     }
 
-    // 检查分类是否已存在
-    const existingCategory = await Category.findOne({ userId, name });
+    // 检查家庭自定义分类是否已存在
+    const existingCategory = await Category.findOne({ 
+      roomNumber, 
+      name, 
+      isSystem: false 
+    });
     if (existingCategory) {
       return res.status(400).json({ message: '分类已存在' });
     }
 
-    // 创建新分类
+    // 检查是否与系统分类重名
+    const existingSystemCategory = await Category.findOne({ 
+      name, 
+      isSystem: true 
+    });
+    if (existingSystemCategory) {
+      return res.status(400).json({ message: '分类名称与系统分类重复' });
+    }
+
+    // 创建新的家庭自定义分类
     const category = await Category.create({
-      userId: new Types.ObjectId(userId),
+      roomNumber,
       name,
       type,
       icon: icon || '📦',
-      color: color || '#6366F1'
+      color: color || '#6366F1',
+      isSystem: false
     });
 
     res.status(201).json({
@@ -80,7 +113,8 @@ export const createCategory = async (req: Request, res: Response) => {
       name: category.name,
       type: category.type,
       icon: category.icon,
-      color: category.color
+      color: category.color,
+      isSystem: false
     });
   } catch (error) {
     console.error('创建分类失败:', error);
@@ -88,10 +122,12 @@ export const createCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const updateCategory = async (req: Request, res: Response) => {
+export const updateCategory = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    if (!userId) {
+    const roomNumber = req.user?.roomNumber;
+    
+    if (!userId || !roomNumber) {
       return res.status(401).json({ message: '未授权' });
     }
 
@@ -104,16 +140,39 @@ export const updateCategory = async (req: Request, res: Response) => {
     }
 
     // 检查分类是否存在
-    const category = await Category.findOne({ _id: id, userId });
+    const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ message: '分类不存在' });
     }
 
+    // 系统固定分类不允许编辑
+    if (category.isSystem) {
+      return res.status(403).json({ message: '系统固定分类不允许编辑' });
+    }
+
+    // 只能编辑当前家庭的自定义分类
+    if (category.roomNumber !== roomNumber) {
+      return res.status(403).json({ message: '只能编辑当前家庭的分类' });
+    }
+
     // 检查新名称是否与其他分类重复
     if (name !== category.name) {
-      const existingCategory = await Category.findOne({ userId, name });
+      const existingCategory = await Category.findOne({ 
+        roomNumber, 
+        name, 
+        isSystem: false 
+      });
       if (existingCategory) {
         return res.status(400).json({ message: '分类名称已存在' });
+      }
+
+      // 检查是否与系统分类重名
+      const existingSystemCategory = await Category.findOne({ 
+        name, 
+        isSystem: true 
+      });
+      if (existingSystemCategory) {
+        return res.status(400).json({ message: '分类名称与系统分类重复' });
       }
     }
 
@@ -130,7 +189,8 @@ export const updateCategory = async (req: Request, res: Response) => {
       name: category.name,
       type: category.type,
       icon: category.icon,
-      color: category.color
+      color: category.color,
+      isSystem: false
     });
   } catch (error) {
     console.error('更新分类失败:', error);
@@ -138,19 +198,31 @@ export const updateCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteCategory = async (req: Request, res: Response) => {
+export const deleteCategory = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    if (!userId) {
+    const roomNumber = req.user?.roomNumber;
+    
+    if (!userId || !roomNumber) {
       return res.status(401).json({ message: '未授权' });
     }
 
     const { id } = req.params;
 
     // 检查分类是否存在
-    const category = await Category.findOne({ _id: id, userId });
+    const category = await Category.findById(id);
     if (!category) {
       return res.status(404).json({ message: '分类不存在' });
+    }
+
+    // 系统固定分类不允许删除
+    if (category.isSystem) {
+      return res.status(403).json({ message: '系统固定分类不允许删除' });
+    }
+
+    // 只能删除当前家庭的自定义分类
+    if (category.roomNumber !== roomNumber) {
+      return res.status(403).json({ message: '只能删除当前家庭的分类' });
     }
 
     // 删除分类

@@ -6,6 +6,7 @@ export interface CategoryData {
   type: 'expense' | 'income'
   icon?: string
   color?: string
+  isSystem: boolean
   createdAt: string
 }
 

@@ -118,7 +118,7 @@
                     <span class="mr-2">{{ getCategoryIcon(expense.category) }}</span>
                     <span class="font-medium">{{ getCategoryName(expense.category) }}</span>
                   </div>
-                  <div v-if="expense.description" class="text-gray-600 text-sm mt-1 line-clamp-2">
+                  <div v-if="expense.description" class="text-gray-600 text-xs mt-1 line-clamp-2">
                     {{ expense.description }}
                   </div>
                   <div v-if="getExpenseTags(expense).length > 0" class="flex flex-wrap gap-0.5 mt-1 w-full">
