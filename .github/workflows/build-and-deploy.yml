@@ -127,9 +127,8 @@ jobs:
           # 安装依赖
           echo "Cleaning and installing dependencies..."
           rm -rf node_modules
-          rm -rf frontend/node_modules
-          rm -rf backend/node_modules
-          pnpm install
+          # 临时设置 NODE_ENV 为开发环境以安装 devDependencies
+          NODE_ENV=development pnpm install
           
           # 部署项目
           echo "Building project..."
