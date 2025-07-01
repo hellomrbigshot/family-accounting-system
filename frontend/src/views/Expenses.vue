@@ -104,6 +104,7 @@ import ExpenseForm from '@/components/ExpenseForm.vue';
 import type { ExpenseQuery } from '@/api/expense';
 import dayjs from '@/utils/dayjs';
 
+const route = useRoute();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const tagStore = useTagStore();
@@ -206,7 +207,10 @@ const filteredExpenses = computed(() => {
 
 const fetchExpenses = async () => {
   try {
-    await expenseStore.fetchExpenses(query);
+    await expenseStore.fetchExpenses({
+      startDate: query.startDate,
+      endDate: query.endDate
+    });
   } catch (error) {
     console.error('Failed to fetch expenses:', error);
   }
@@ -215,9 +219,40 @@ const fetchExpenses = async () => {
 // 在组件挂载时设置默认日期范围并加载数据
 onMounted(async () => {
   setDefaultDateRange();
+  
+  // 处理路由查询参数，设置搜索框内容
+  if (route.query.category) {
+    const categoryId = route.query.category as string;
+    const category = categoryStore.categories.find(c => c.id === categoryId);
+    if (category) {
+      searchQuery.value = category.name;
+    }
+  }
+  
+  if (route.query.tags) {
+    const tagsParam = route.query.tags;
+    if (Array.isArray(tagsParam)) {
+      const tagIds = tagsParam.filter(tag => tag !== null) as string[];
+      const tagNames = tagIds.map(tagId => {
+        const tag = tagStore.tags.find(t => t.id === tagId);
+        return tag?.name;
+      }).filter(Boolean);
+      if (tagNames.length > 0) {
+        searchQuery.value = tagNames.join(' ');
+      }
+    } else {
+      const tagId = tagsParam as string;
+      const tag = tagStore.tags.find(t => t.id === tagId);
+      if (tag) {
+        searchQuery.value = tag.name;
+      }
+    }
+  }
+  
   await Promise.all([
     fetchExpenses(),
-    tagStore.fetchTags()
+    tagStore.fetchTags(),
+    categoryStore.fetchCategories()
   ]);
 });
 

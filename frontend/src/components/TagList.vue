@@ -15,13 +15,14 @@
       <div
         v-for="tag in tags"
         :key="tag.id"
-        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+        @click="handleTagClick(tag)"
       >
         <div class="flex items-center space-x-3">
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
           <span class="text-gray-900">{{ tag.name }}</span>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2" @click.stop>
           <van-button
             type="primary"
             size="small"
@@ -62,12 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
 import { useTagStore } from '@/stores/tag';
 import { showToast } from 'vant';
 import type { TagData } from '@/api/tag';
 import TagForm from './TagForm.vue';
 
+const router = useRouter();
 const tagStore = useTagStore();
 
 const showTagForm = ref(false);
@@ -95,6 +96,13 @@ const initData = async () => {
 const handleEdit = (tag: TagData) => {
   editingTag.value = tag;
   showTagForm.value = true;
+};
+
+const handleTagClick = (tag: TagData) => {
+  router.push({
+    path: '/expenses',
+    query: { tags: tag.id }
+  });
 };
 
 const handleDelete = (tag: TagData) => {
