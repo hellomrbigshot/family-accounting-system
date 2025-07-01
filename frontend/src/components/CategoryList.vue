@@ -24,7 +24,8 @@
         <div
           v-for="category in systemCategories"
           :key="category.id"
-          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+          @click="handleCategoryClick(category)"
         >
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -56,7 +57,8 @@
         <div
           v-for="category in customCategories"
           :key="category.id"
-          class="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
+          class="flex items-center justify-between p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+          @click="handleCategoryClick(category)"
         >
           <div class="flex items-center space-x-3">
             <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -67,7 +69,7 @@
               <p class="text-xs text-gray-500">创建于 {{ formatDate(category.createdAt) }}</p>
             </div>
           </div>
-          <div class="flex items-center space-x-1">
+          <div class="flex items-center space-x-1" @click.stop>
             <van-button
               type="primary"
               size="mini"
@@ -114,12 +116,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
 import { categoryApi } from '@/api/category';
 import type { CategoryData } from '@/api/category';
-import dayjs from '@/utils/dayjs';
 import CategoryForm from '@/components/CategoryForm.vue';
 
+const router = useRouter();
 const showCategoryForm = ref(false);
 const editingCategory = ref<CategoryData | null>(null);
 const showDeleteConfirm = ref(false);
@@ -191,6 +192,13 @@ const handleSuccess = () => {
 const handleCancel = () => {
   showCategoryForm.value = false;
   editingCategory.value = null;
+};
+
+const handleCategoryClick = (category: CategoryData) => {
+  router.push({
+    path: '/expenses',
+    query: { category: category.id }
+  });
 };
 
 onMounted(() => {

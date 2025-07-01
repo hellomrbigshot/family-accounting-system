@@ -47,7 +47,12 @@
       <!-- 支出列表 -->
       <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-800">支出记录</h2>
+          <div class="flex items-center space-x-3">
+            <h2 class="text-lg font-medium text-gray-800">支出记录</h2>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-700">
+              总计: ¥{{ totalAmount.toFixed(2) }}
+            </span>
+          </div>
         </div>
 
         <ExpenseList
@@ -93,13 +98,16 @@
 <script setup lang="ts">
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
+import { useTagStore } from '@/stores/tag';
 import ExpenseList from '@/components/ExpenseList.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import type { ExpenseQuery } from '@/api/expense';
 import dayjs from '@/utils/dayjs';
 
+const route = useRoute();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
+const tagStore = useTagStore();
 const showForm = ref(false);
 const showStartDatePicker = ref(false);
 const showEndDatePicker = ref(false);
@@ -181,32 +189,81 @@ const filteredExpenses = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return expenses.value.filter(expense => {
     const category = categoryStore.categories.find(c => c.id === expense.category);
+    
+    // 检查标签匹配
+    const matchedTags = expense.tags?.some(tagId => {
+      const tag = tagStore.tags.find(t => t.id === tagId);
+      return tag?.name.toLowerCase().includes(query);
+    }) || false;
+    
     return (
       expense.description.toLowerCase().includes(query) ||
       (category?.name || '').toLowerCase().includes(query) ||
-      expense.amount.toString().includes(query)
+      expense.amount.toString().includes(query) ||
+      matchedTags
     );
   });
 });
 
 const fetchExpenses = async () => {
   try {
-    await expenseStore.fetchExpenses(query);
+    await expenseStore.fetchExpenses({
+      startDate: query.startDate,
+      endDate: query.endDate
+    });
   } catch (error) {
     console.error('Failed to fetch expenses:', error);
   }
 };
 
 // 在组件挂载时设置默认日期范围并加载数据
-onMounted(() => {
+onMounted(async () => {
   setDefaultDateRange();
-  fetchExpenses();
+  
+  // 处理路由查询参数，设置搜索框内容
+  if (route.query.category) {
+    const categoryId = route.query.category as string;
+    const category = categoryStore.categories.find(c => c.id === categoryId);
+    if (category) {
+      searchQuery.value = category.name;
+    }
+  }
+  
+  if (route.query.tags) {
+    const tagsParam = route.query.tags;
+    if (Array.isArray(tagsParam)) {
+      const tagIds = tagsParam.filter(tag => tag !== null) as string[];
+      const tagNames = tagIds.map(tagId => {
+        const tag = tagStore.tags.find(t => t.id === tagId);
+        return tag?.name;
+      }).filter(Boolean);
+      if (tagNames.length > 0) {
+        searchQuery.value = tagNames.join(' ');
+      }
+    } else {
+      const tagId = tagsParam as string;
+      const tag = tagStore.tags.find(t => t.id === tagId);
+      if (tag) {
+        searchQuery.value = tag.name;
+      }
+    }
+  }
+  
+  await Promise.all([
+    fetchExpenses(),
+    tagStore.fetchTags(),
+    categoryStore.fetchCategories()
+  ]);
 });
 
 // 处理删除成功后的刷新
 const handleRefresh = async () => {
   await fetchExpenses();
 };
+
+const totalAmount = computed(() => {
+  return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0);
+});
 </script>
 
 <style scoped>

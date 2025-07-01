@@ -69,9 +69,9 @@
         <ExpenseList
           :expenses="expenseStore.expenses"
           :show-refresh="true"
-          :max-items="5"
-          empty-text="最近7天暂无支出记录"
-          finished-text="只显示最近7天支出记录"
+          :max-items="20"
+          empty-text="7天内暂无支出"
+          finished-text="只显示7天内近20条支出"
           @refresh="handleRefresh"
         />
       </div>
@@ -81,6 +81,7 @@
     <van-floating-bubble
       axis="xy"
       magnetic="x"
+      :gap="{ x: 24, y: 60 }"
       @click="showAddExpenseDialog = true"
     >
       <van-icon name="plus" size="20" />
@@ -230,10 +231,10 @@ watch(() => dayjs().month(), async (newMonth) => {
 }
 
 .van-floating-bubble {
-  @apply shadow-lg;
+  @apply shadow-lg bg-indigo-600 border-indigo-600;
 }
 
 .van-floating-bubble:active {
-  @apply shadow-xl;
+  @apply shadow-xl bg-indigo-700 border-indigo-700;
 }
 </style> 
