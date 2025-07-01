@@ -37,6 +37,16 @@
         </div>
        </div>
 
+      <!-- 总金额统计卡片 -->
+      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-sm p-4 mb-4">
+        <div class="text-center">
+          <h3 class="text-white text-sm font-medium mb-2">时间段总支出</h3>
+          <div class="text-white text-2xl font-bold">
+            ¥{{ totalAmount.toFixed(2) }}
+          </div>
+        </div>
+      </div>
+
       <!-- 报表内容区域 -->
       <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
         <div class="flex justify-between items-center mb-4">
@@ -155,6 +165,11 @@ const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   query.endDate = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
   showEndDatePicker.value = false;
 };
+
+// 计算总金额
+const totalAmount = computed(() => {
+  return reportStore.data.expenses.total;
+});
 
 // 初始加载
 onMounted(() => {
