@@ -48,20 +48,14 @@
             <template #right>
               <div class="flex h-full">
                 <div
-                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200"
-                  style="background-color: #4f46e5; color: #fff;"
+                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
                   @click="handleEdit(expense)"
-                  @mouseenter="(e) => (e.target as HTMLElement).style.backgroundColor = '#4338ca'"
-                  @mouseleave="(e) => (e.target as HTMLElement).style.backgroundColor = '#4f46e5'"
                 >
                   编辑
                 </div>
                 <div
-                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200"
-                  style="background-color: #ee0a24; color: #fff;"
+                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
                   @click="handleDelete(expense)"
-                  @mouseenter="(e) => (e.target as HTMLElement).style.backgroundColor = '#dc2626'"
-                  @mouseleave="(e) => (e.target as HTMLElement).style.backgroundColor = '#ee0a24'"
                 >
                   删除
                 </div>

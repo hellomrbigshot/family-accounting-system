@@ -4,9 +4,9 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
             {{ categoryCount }} 个分类
-          </span>
+          </div>
         </div>
         <van-button type="primary" size="small" icon="plus" @click="showCategoryForm = true" />
       </div>
@@ -54,36 +54,42 @@
         </span>
       </div>
       <div class="space-y-3">
-        <div
+        <van-swipe-cell
           v-for="category in customCategories"
           :key="category.id"
-          class="flex items-center justify-between p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-          @click="handleCategoryClick(category)"
+          class="mb-2"
         >
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <span class="text-base text-blue-600">{{ category.icon }}</span>
-            </div>
-            <div>
-              <p class="font-medium text-gray-900">{{ category.name }}</p>
-              <p class="text-xs text-gray-500">创建于 {{ formatDate(category.createdAt) }}</p>
+          <div
+            class="flex items-center justify-between p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+            @click="handleCategoryClick(category)"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span class="text-base text-blue-600">{{ category.icon }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ category.name }}</p>
+                <p class="text-xs text-gray-500">创建于 {{ formatDate(category.createdAt) }}</p>
+              </div>
             </div>
           </div>
-          <div class="flex items-center space-x-1" @click.stop>
-            <van-button
-              type="primary"
-              size="mini"
-              icon="edit"
-              @click="handleEdit(category)"
-            />
-            <van-button
-              type="danger"
-              size="mini"
-              icon="delete"
-              @click="handleDelete(category)"
-            />
-          </div>
-        </div>
+          <template #right>
+            <div class="flex h-full">
+              <div
+                class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
+                @click="handleEdit(category)"
+              >
+                编辑
+              </div>
+              <div
+                class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+                @click="handleDelete(category)"
+              >
+                删除
+              </div>
+            </div>
+          </template>
+        </van-swipe-cell>
       </div>
     </div>
 
@@ -205,3 +211,14 @@ onMounted(() => {
   fetchCategories();
 });
 </script>
+
+<style scoped>
+:deep(.van-swipe-cell) {
+  @apply rounded-lg overflow-hidden mb-2;
+}
+
+:deep(.van-swipe-cell__right) {
+  @apply h-full;
+  width: 130px;
+}
+</style>
