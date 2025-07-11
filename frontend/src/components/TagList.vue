@@ -4,39 +4,45 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
             {{ tagCount }} 个标签
-          </span>
+          </div>
         </div>
         <van-button size="small" type="primary" icon="plus" @click="showTagForm = true" />
       </div>
     </div>
     <div class="space-y-4 p-4">
-      <div
+      <van-swipe-cell
         v-for="tag in tags"
         :key="tag.id"
-        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-        @click="handleTagClick(tag)"
+        class="mb-2"
       >
-        <div class="flex items-center space-x-3">
-          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
-          <span class="text-gray-900">{{ tag.name }}</span>
+        <div
+          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+          @click="handleTagClick(tag)"
+        >
+          <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
+            <span class="text-gray-900">{{ tag.name }}</span>
+          </div>
         </div>
-        <div class="flex items-center space-x-2" @click.stop>
-          <van-button
-            type="primary"
-            size="small"
-            icon="edit"
-            @click="handleEdit(tag)"
-          />
-          <van-button
-            type="danger"
-            size="small"
-            icon="delete"
-            @click="handleDelete(tag)"
-          />
-        </div>
-      </div>
+        <template #right>
+          <div class="flex h-full">
+            <div
+              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
+              @click="handleEdit(tag)"
+            >
+              编辑
+            </div>
+            <div
+              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+              @click="handleDelete(tag)"
+            >
+              删除
+            </div>
+          </div>
+        </template>
+      </van-swipe-cell>
     </div>
 
     <!-- 标签表单弹窗 -->
@@ -146,3 +152,14 @@ onMounted(() => {
   initData();
 });
 </script>
+
+<style scoped>
+:deep(.van-swipe-cell) {
+  @apply rounded-lg overflow-hidden mb-2;
+}
+
+:deep(.van-swipe-cell__right) {
+  @apply h-full;
+  width: 130px;
+}
+</style>

@@ -49,6 +49,27 @@ export const useExpenseStore = defineStore('expense', () => {
     }
   };
 
+  const updateExpense = async (id: string, expense: Omit<ExpenseData, 'id' | 'createdAt'>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (expense.amount <= 0) {
+        showToast('支出金额必须大于0');
+        return false;
+      }
+
+      await expenseApi.update(id, expense);
+      showToast('更新支出成功');
+      return true;
+    } catch (error) {
+      console.error('更新支出失败:', error);
+      showToast('更新支出失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const fetchStats = async (query?: Pick<ExpenseQuery, 'startDate' | 'endDate'>) => {
     loading.value = true;
     error.value = null;
@@ -88,6 +109,7 @@ export const useExpenseStore = defineStore('expense', () => {
     totalExpense,
     fetchExpenses,
     createExpense,
+    updateExpense,
     fetchStats,
     deleteExpense
   };

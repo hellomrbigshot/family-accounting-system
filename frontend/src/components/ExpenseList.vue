@@ -46,13 +46,20 @@
               </template>
             </van-cell>
             <template #right>
-              <van-button
-                square
-                type="danger"
-                text="删除"
-                class="h-full"
-                @click="handleDelete(expense)"
-              />
+              <div class="flex h-full">
+                <div
+                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
+                  @click="handleEdit(expense)"
+                >
+                  编辑
+                </div>
+                <div
+                  class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+                  @click="handleDelete(expense)"
+                >
+                  删除
+                </div>
+              </div>
             </template>
           </van-swipe-cell>
         </template>
@@ -141,13 +148,22 @@
               </template>
             </van-cell>
             <template #right>
-              <van-button
-                square
-                type="danger"
-                text="删除"
-                class="h-full"
-                @click="handleDelete(expense)"
-              />
+              <div class="flex h-full">
+                <van-button
+                  square
+                  type="primary"
+                  text="编辑"
+                  class="h-full"
+                  @click="handleEdit(expense)"
+                />
+                <van-button
+                  square
+                  type="danger"
+                  text="删除"
+                  class="h-full"
+                  @click="handleDelete(expense)"
+                />
+              </div>
             </template>
           </van-swipe-cell>
         </template>
@@ -211,6 +227,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useExpenseStore } from '@/stores/expense'
 import { useCategoryStore } from '@/stores/category'
 import { useTagStore } from '@/stores/tag'
+import { showToast } from 'vant'
 import dayjs from '@/utils/dayjs'
 import type { CategoryData } from '@/api/category'
 import type { TagData } from '@/api/tag'
@@ -237,6 +254,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'refresh'): void
   (e: 'delete', expense: ExpenseWithCategory): void
+  (e: 'edit', expense: ExpenseWithCategory): void
 }>()
 
 // 设置默认值
@@ -334,21 +352,14 @@ const onLoad = () => {
 }
 
 // 处理删除
-const handleDelete = async (expense: ExpenseWithCategory) => {
-  try {
-    await showDialog({
-      title: '确认删除',
-      message: '确定要删除这条支出记录吗？',
-      confirmButtonText: '删除',
-      confirmButtonColor: '#ef4444'
-    })
-    emit('delete', expense)
-  } catch (error) {
-    if (error) {
-      console.error('Failed to delete expense:', error)
-      showToast('删除失败')
-    }
-  }
+const handleDelete = (expense: ExpenseWithCategory) => {
+  expenseToDelete.value = expense;
+  showDeleteDialog.value = true;
+}
+
+// 处理编辑
+const handleEdit = (expense: ExpenseWithCategory) => {
+  emit('edit', expense)
 }
 
 // 确认删除
@@ -364,6 +375,7 @@ const confirmDelete = async () => {
     showToast('删除失败')
   } finally {
     expenseToDelete.value = null
+    showDeleteDialog.value = false;
   }
 }
 </script>
@@ -386,7 +398,7 @@ const confirmDelete = async () => {
 :deep(.van-cell__value) {
   @apply text-base font-medium text-red-600 ml-2;
   flex-shrink: 0;
-  flex: 30%;
+  flex: 35%;
 }
 
 .line-clamp-2 {
@@ -402,7 +414,7 @@ const confirmDelete = async () => {
 
 :deep(.van-swipe-cell__right) {
   @apply h-full;
-  width: 65px;
+  width: 130px;
 }
 
 :deep(.van-button--danger) {
@@ -412,5 +424,14 @@ const confirmDelete = async () => {
 
 :deep(.van-button--danger:active) {
   @apply bg-red-600 border-red-600;
+}
+
+:deep(.van-button--primary) {
+  @apply bg-indigo-600 border-indigo-600 h-full w-full;
+  border-radius: 0;
+}
+
+:deep(.van-button--primary:active) {
+  @apply bg-indigo-700 border-indigo-700;
 }
 </style> 

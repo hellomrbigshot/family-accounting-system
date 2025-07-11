@@ -197,4 +197,60 @@ export const deleteExpense = async (req: AuthenticatedRequest, res: Response) =>
       res.status(500).json({ message: '删除支出记录失败' });
     }
   }
+};
+
+export const updateExpense = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { date, category, amount, description, tags } = req.body;
+
+    if (!req.user?._id) {
+      return res.status(401).json({ message: '未授权访问' });
+    }
+
+    const expense = await Expense.findOneAndUpdate(
+      {
+        _id: id,
+        userId: new Types.ObjectId(req.user._id)
+      },
+      {
+        date,
+        category,
+        amount,
+        description,
+        tags: tags || []
+      },
+      { new: true }
+    );
+
+    if (!expense) {
+      return res.status(404).json({ message: '支出记录不存在' });
+    }
+
+    // 格式化返回数据
+    const formattedExpense = {
+      id: expense._id,
+      date: expense.date,
+      category: expense.category,
+      amount: expense.amount,
+      description: expense.description,
+      tags: expense.tags,
+      createdAt: expense.createdAt
+    };
+
+    res.json({
+      message: '支出记录更新成功',
+      expense: formattedExpense
+    });
+  } catch (error) {
+    console.error('更新支出记录失败:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ 
+        message: '更新支出记录失败',
+        error: error.message
+      });
+    } else {
+      res.status(500).json({ message: '更新支出记录失败' });
+    }
+  }
 }; 

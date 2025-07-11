@@ -37,6 +37,11 @@ class ExpenseApi {
     return response.data
   }
 
+  async update(id: string, expense: Omit<ExpenseData, 'id' | 'createdAt'>) {
+    const response = await axios.put(`${this.baseUrl}/${id}`, expense)
+    return response.data
+  }
+
   async getStats(query?: ExpenseQuery) {
     const response = await axios.get(`${this.baseUrl}/stats`, { params: query })
     return response.data
