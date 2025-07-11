@@ -11,7 +11,7 @@
     <div class="h-full flex flex-col">
       <!-- 头部 -->
       <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900">新增支出</h2>
+        <h2 class="text-lg font-medium text-gray-900">{{ isEditMode ? '编辑支出' : '新增支出' }}</h2>
         <van-icon name="cross" size="20" @click="handleClose" />
       </div>
 
@@ -112,7 +112,7 @@
               :loading="loading"
               :disabled="loading"
             >
-              保存
+              {{ isEditMode ? '更新' : '保存' }}
             </van-button>
           </div>
         </van-form>
@@ -213,6 +213,15 @@ import dayjs from '@/utils/dayjs';
 
 const props = defineProps<{
   show: boolean;
+  editMode?: boolean;
+  editData?: {
+    id: string;
+    date: string;
+    category: string;
+    amount: number;
+    description: string;
+    tags: string[];
+  };
 }>();
 
 const emit = defineEmits<{
@@ -224,6 +233,9 @@ const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const tagStore = useTagStore();
 const loading = ref(false);
+
+// 计算属性处理editMode
+const isEditMode = computed(() => props.editMode || false);
 
 // 添加 checkbox 引用数组
 const checkboxRefs = ref<any[]>([]);
@@ -295,13 +307,6 @@ const showNumberKeyboard = ref(false);
 // 标签选择器
 const showTagPicker = ref(false);
 
-// 已选标签文本
-const selectedTagsText = computed(() => {
-  if (form.tags.length === 0) return '';
-  const selectedTags = tagStore.tags.filter(tag => form.tags.includes(tag.id));
-  return selectedTags.map(tag => tag.name).join(', ');
-});
-
 // 已选标签
 const selectedTags = computed(() => {
   return tagStore.tags.filter((tag: TagData) => form.tags.includes(tag.id));
@@ -351,11 +356,19 @@ const handleClose = () => {
 const handleSubmit = async () => {
   try {
     loading.value = true;
-    await expenseStore.createExpense({
-      ...form,
-      amount: parseFloat(form.amount)
-    });
-    showToast('保存成功');
+    if (isEditMode.value && props.editData) {
+      await expenseStore.updateExpense(props.editData.id, {
+        ...form,
+        amount: parseFloat(form.amount)
+      });
+      showToast('更新成功');
+    } else {
+      await expenseStore.createExpense({
+        ...form,
+        amount: parseFloat(form.amount)
+      });
+      showToast('保存成功');
+    }
     emit('success');
     resetForm(); // 提交成功后重置表单
     handleClose();
@@ -396,6 +409,14 @@ watch(() => props.show, async (newValue) => {
         console.error('Failed to fetch tags:', error);
         showToast('获取标签列表失败');
       }
+    }
+
+    if (isEditMode.value && props.editData) {
+      form.date = props.editData.date;
+      form.category = props.editData.category;
+      form.amount = props.editData.amount.toString();
+      form.description = props.editData.description;
+      form.tags = props.editData.tags;
     }
   }
 });

@@ -60,6 +60,7 @@
           show-delete
           :show-refresh="false"
           @refresh="handleRefresh"
+          @edit="handleEdit"
         />
       </div>
 
@@ -67,6 +68,14 @@
       <ExpenseForm
         v-model:show="showForm"
         @success="handleSuccess"
+      />
+
+      <!-- 编辑支出表单弹窗 -->
+      <ExpenseForm
+        v-model:show="showEditForm"
+        :edit-mode="true"
+        :edit-data="editData"
+        @success="handleEditSuccess"
       />
 
       <!-- 日期选择器 -->
@@ -109,6 +118,8 @@ const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const tagStore = useTagStore();
 const showForm = ref(false);
+const showEditForm = ref(false);
+const editData = ref<any>(null);
 const showStartDatePicker = ref(false);
 const showEndDatePicker = ref(false);
 const searchQuery = ref('');
@@ -179,6 +190,16 @@ const handleSearch = () => {
 const handleSuccess = () => {
   showForm.value = false;
   expenseStore.fetchExpenses(query);
+};
+
+const handleEditSuccess = () => {
+  showEditForm.value = false;
+  expenseStore.fetchExpenses(query);
+};
+
+const handleEdit = (expense: any) => {
+  editData.value = expense;
+  showEditForm.value = true;
 };
 
 const expenses = computed(() => expenseStore.expenses);
