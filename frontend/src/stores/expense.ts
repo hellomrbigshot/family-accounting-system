@@ -3,9 +3,12 @@ import { ref } from 'vue';
 import { expenseApi } from '@/api/expense';
 ;
 import type { ExpenseData, ExpenseQuery, ExpenseStats } from '@/api/expense';
+import dayjs from '@/utils/dayjs';
 
 export const useExpenseStore = defineStore('expense', () => {
   const expenses = ref<ExpenseData[]>([]);
+  const monthlyExpenses = ref<ExpenseData[]>([]); // 本月支出数据
+  const recentExpenses = ref<ExpenseData[]>([]); // 最近支出数据
   const stats = ref<ExpenseStats | null>(null);
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
@@ -22,6 +25,53 @@ export const useExpenseStore = defineStore('expense', () => {
     } catch (error) {
       console.error('获取支出列表失败:', error);
       showToast('获取支出列表失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // 获取本月支出数据
+  const fetchMonthlyExpenses = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const now = dayjs();
+      const startOfMonth = now.startOf('month').format('YYYY-MM-DD');
+      const endOfMonth = now.endOf('month').format('YYYY-MM-DD');
+      
+      const response = await expenseApi.getList({
+        startDate: startOfMonth,
+        endDate: endOfMonth
+      });
+      monthlyExpenses.value = response;
+      return true;
+    } catch (error) {
+      console.error('获取本月支出失败:', error);
+      showToast('获取本月支出失败');
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // 获取最近支出数据
+  const fetchRecentExpenses = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const now = dayjs();
+      const sevenDaysAgo = now.subtract(7, 'day');
+      
+      const response = await expenseApi.getList({
+        startDate: sevenDaysAgo.format('YYYY-MM-DD'),
+        endDate: now.format('YYYY-MM-DD')
+      });
+      recentExpenses.value = response;
+      return true;
+    } catch (error) {
+      console.error('获取最近支出失败:', error);
+      showToast('获取最近支出失败');
       return false;
     } finally {
       loading.value = false;
@@ -103,11 +153,15 @@ export const useExpenseStore = defineStore('expense', () => {
 
   return {
     expenses,
+    monthlyExpenses,
+    recentExpenses,
     stats,
     loading,
     error,
     totalExpense,
     fetchExpenses,
+    fetchMonthlyExpenses,
+    fetchRecentExpenses,
     createExpense,
     updateExpense,
     fetchStats,

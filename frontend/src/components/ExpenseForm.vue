@@ -412,7 +412,17 @@ watch(() => props.show, async (newValue) => {
     }
 
     if (isEditMode.value && props.editData) {
-      form.date = props.editData.date;
+      // 格式化日期，确保只保留日期部分，不包含时分秒
+      const formattedDate = dayjs(props.editData.date).format('YYYY-MM-DD');
+      form.date = formattedDate;
+      
+      // 同时更新日期选择器的当前值
+      const dateObj = dayjs(formattedDate);
+      currentDate.value = [
+        dateObj.year().toString(),
+        (dateObj.month() + 1).toString().padStart(2, '0'),
+        dateObj.date().toString().padStart(2, '0')
+      ];
       form.category = props.editData.category;
       form.amount = props.editData.amount.toString();
       form.description = props.editData.description;

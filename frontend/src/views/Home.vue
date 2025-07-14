@@ -67,7 +67,7 @@
           </div>
         </div>
         <ExpenseList
-          :expenses="expenseStore.expenses"
+          :expenses="expenseStore.recentExpenses"
           :show-refresh="true"
           :max-items="20"
           empty-text="7天内暂无支出"
@@ -121,17 +121,9 @@ const showBudgetDialog = ref(false);
 // 添加支出对话框
 const showAddExpenseDialog = ref(false);
 
-// 本月支出
+// 本月支出 - 使用本月支出数据计算
 const monthlyExpense = computed(() => {
-  const now = dayjs();
-  const startOfMonth = now.startOf('month').format('YYYY-MM-DD');
-  const endOfMonth = now.endOf('month').format('YYYY-MM-DD');
-  
-  return expenseStore.expenses
-    .filter((expense: ExpenseData) => {
-      const date = dayjs(expense.date);
-      return date.isAfter(startOfMonth) && date.isBefore(endOfMonth);
-    })
+  return expenseStore.monthlyExpenses
     .reduce((sum: number, expense: ExpenseData) => sum + (expense.amount || 0), 0);
 });
 
@@ -153,15 +145,13 @@ const formatAmount = (amount?: number) => {
   return `¥${amount.toFixed(2)}`;
 };
 
-// 处理刷新
+// 处理刷新 - 同时刷新本月和最近数据
 const handleRefresh = async () => {
   try {
-    const now = dayjs();
-    const sevenDaysAgo = now.subtract(7, 'day');
-    await expenseStore.fetchExpenses({
-      startDate: sevenDaysAgo.format('YYYY-MM-DD'),
-      endDate: now.format('YYYY-MM-DD')
-    });
+    await Promise.all([
+      expenseStore.fetchMonthlyExpenses(),
+      expenseStore.fetchRecentExpenses()
+    ]);
   } catch (error) {
     console.error('Failed to refresh expenses:', error);
     showToast('刷新失败');
@@ -180,11 +170,11 @@ onMounted(async () => {
     }
 
     try {
-      const sevenDaysAgo = now.subtract(7, 'day');
-      await expenseStore.fetchExpenses({
-        startDate: sevenDaysAgo.format('YYYY-MM-DD'),
-        endDate: now.format('YYYY-MM-DD')
-      });
+      // 同时获取本月支出和最近支出数据
+      await Promise.all([
+        expenseStore.fetchMonthlyExpenses(),
+        expenseStore.fetchRecentExpenses()
+      ]);
     } catch (error) {
       console.error('Failed to fetch expenses:', error);
       showToast('获取支出记录失败');
@@ -209,14 +199,17 @@ onMounted(async () => {
   }
 });
 
-// 监听月份变化，自动更新预算
+// 监听月份变化，自动更新预算和本月支出数据
 watch(() => dayjs().month(), async (newMonth) => {
   const now = dayjs();
   try {
-    await budgetStore.fetchCurrentBudget(now.year(), newMonth + 1);
+    await Promise.all([
+      budgetStore.fetchCurrentBudget(now.year(), newMonth + 1),
+      expenseStore.fetchMonthlyExpenses()
+    ]);
   } catch (error) {
-    console.error('Failed to fetch budget:', error);
-    showToast('获取预算失败');
+    console.error('Failed to fetch budget or monthly expenses:', error);
+    showToast('获取预算或本月支出失败');
   }
 });
 </script>
