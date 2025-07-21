@@ -40,7 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();

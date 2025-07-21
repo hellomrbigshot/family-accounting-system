@@ -87,7 +87,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import type { Account } from '@/api/account';
 import type { CreateAccountDto, UpdateAccountDto } from '@/api/account';
 

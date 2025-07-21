@@ -154,7 +154,6 @@ import { categoryApi } from '@/api/category';
 import { userCategoryApi } from '@/api/user-category';
 import type { CategoryData } from '@/api/category';
 import CategoryForm from '@/components/CategoryForm.vue';
-import { showToast } from 'vant';
 
 const router = useRouter();
 const showCategoryForm = ref(false);

@@ -222,12 +222,14 @@
   </div> 
 </template>
 
+/**
+ * 支出列表组件
+ * 支持下拉刷新、无限滚动、编辑和删除功能
+ */
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
 import { useExpenseStore } from '@/stores/expense'
 import { useCategoryStore } from '@/stores/category'
 import { useTagStore } from '@/stores/tag'
-import { showToast } from 'vant'
 import dayjs from '@/utils/dayjs'
 import type { CategoryData } from '@/api/category'
 import type { TagData } from '@/api/tag'

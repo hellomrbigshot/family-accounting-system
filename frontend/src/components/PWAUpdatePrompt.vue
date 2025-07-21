@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { registerSW } from 'virtual:pwa-register'
 
 const showUpdatePrompt = ref(false)

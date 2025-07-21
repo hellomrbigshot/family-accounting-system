@@ -70,7 +70,6 @@
 
 <script setup lang="ts">
 import { useTagStore } from '@/stores/tag';
-import { showToast } from 'vant';
 import type { TagData } from '@/api/tag';
 import TagForm from './TagForm.vue';
 
