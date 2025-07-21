@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Category } from '../models/category';
+import { UserCategory } from '../models/user-category';
 import Room from '../models/room';
 import { Types } from 'mongoose';
 
@@ -14,6 +15,7 @@ export const getCategories = async (req: AuthenticatedRequest, res: Response) =>
   try {
     const userId = req.user?._id;
     const roomNumber = req.user?.roomNumber;
+    const { includeDisabled } = req.query; // 新增参数，是否包含禁用的分类
     
     if (!userId || !roomNumber) {
       return res.status(401).json({ message: '未授权' });
@@ -34,9 +36,27 @@ export const getCategories = async (req: AuthenticatedRequest, res: Response) =>
       isSystem: false 
     });
 
+    // 获取用户对系统分类的权限设置
+    const userCategoryPermissions = await UserCategory.find({ 
+      userId: new Types.ObjectId(userId),
+      isDisabled: true
+    });
+    const disabledCategoryIds = userCategoryPermissions.map(uc => uc.categoryId.toString());
+
+    let availableSystemCategories;
+    if (includeDisabled === 'true') {
+      // 包含所有系统分类（用于映射历史数据）
+      availableSystemCategories = systemCategories;
+    } else {
+      // 过滤掉用户禁用的系统分类（用于选择）
+      availableSystemCategories = systemCategories.filter(cat => 
+        !disabledCategoryIds.includes(cat._id.toString())
+      );
+    }
+
     // 合并系统分类和家庭分类，系统分类在前
     const allCategories = [
-      ...systemCategories.map(cat => ({
+      ...availableSystemCategories.map(cat => ({
         id: cat._id,
         name: cat.name,
         type: cat.type,

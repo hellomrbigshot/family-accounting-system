@@ -61,6 +61,13 @@ categorySchema.index({ roomNumber: 1, type: 1 });
 categorySchema.index({ isSystem: 1, type: 1 });
 categorySchema.index({ roomNumber: 1, name: 1 });
 
+// 添加虚拟字段，用于关联用户分类权限
+categorySchema.virtual('userPermissions', {
+  ref: 'UserCategory',
+  localField: '_id',
+  foreignField: 'categoryId'
+});
+
 // 系统固定分类
 const systemCategories: IDefaultCategory[] = [
   { name: '餐饮', type: 'expense', icon: '🍜', color: '#F59E0B' },

@@ -270,8 +270,8 @@ const form = reactive({
 });
 
 const categoryName = computed(() => {
-  if (!Array.isArray(categoryStore.categories)) return '';
-  const category = categoryStore.categories.find(category => category.id === form.category);
+  if (!Array.isArray(categoryStore.availableCategories)) return '';
+  const category = categoryStore.availableCategories.find(category => category.id === form.category);
   return category ? `${category.icon} ${category.name}` : '';
 });
 
@@ -288,10 +288,10 @@ const currentDate = ref<string[]>([
 // 分类选择器
 const showCategoryPicker = ref(false);
 const categoryColumns = computed(() => {
-  if (!Array.isArray(categoryStore.categories)) {
+  if (!Array.isArray(categoryStore.availableCategories)) {
     return [{ text: '暂无分类', value: '' }];
   }
-  const expenseCategories = categoryStore.categories.filter(category => category.type === 'expense');
+  const expenseCategories = categoryStore.availableCategories.filter(category => category.type === 'expense');
   if (expenseCategories.length === 0) {
     return [{ text: '暂无分类', value: '' }];
   }
@@ -391,15 +391,19 @@ watch(() => props.show, async (newValue) => {
     // 重置表单
     resetForm();
     
-    // 确保分类列表已加载
-    if (categoryStore.categories.length === 0) {
-      try {
-        await categoryStore.fetchCategories();
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-        showToast('获取分类列表失败');
+          // 确保分类列表已加载
+      if (categoryStore.allCategoriesForMapping.length === 0) {
+        try {
+          await Promise.all([
+            categoryStore.fetchCategories(),
+            categoryStore.fetchAllCategoriesForMapping(),
+            categoryStore.fetchUserPermissions()
+          ]);
+        } catch (error) {
+          console.error('Failed to fetch categories:', error);
+          showToast('获取分类列表失败');
+        }
       }
-    }
     
     // 确保标签列表已加载
     if (tagStore.tags.length === 0) {
@@ -436,6 +440,8 @@ onMounted(async () => {
   try {
     await Promise.all([
       categoryStore.fetchCategories(),
+      categoryStore.fetchAllCategoriesForMapping(),
+      categoryStore.fetchUserPermissions(),
       tagStore.fetchTags()
     ]);
   } catch (error) {

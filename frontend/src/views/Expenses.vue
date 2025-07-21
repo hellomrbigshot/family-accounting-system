@@ -209,7 +209,7 @@ const filteredExpenses = computed(() => {
   
   const query = searchQuery.value.toLowerCase();
   return expenses.value.filter(expense => {
-    const category = categoryStore.categories.find(c => c.id === expense.category);
+    const category = categoryStore.allCategoriesForMapping.find(c => c.id === expense.category);
     
     // 检查标签匹配
     const matchedTags = expense.tags?.some(tagId => {
@@ -244,7 +244,7 @@ onMounted(async () => {
   // 处理路由查询参数，设置搜索框内容
   if (route.query.category) {
     const categoryId = route.query.category as string;
-    const category = categoryStore.categories.find(c => c.id === categoryId);
+    const category = categoryStore.allCategoriesForMapping.find(c => c.id === categoryId);
     if (category) {
       searchQuery.value = category.name;
     }

@@ -301,8 +301,12 @@ const getExpenseTags = (expense: ExpenseWithCategory): TagData[] => {
 // 加载分类数据
 onMounted(async () => {
   try {
-    await categoryStore.fetchCategories()
-    await tagStore.fetchTags()
+    await Promise.all([
+      categoryStore.fetchCategories(),
+      categoryStore.fetchAllCategoriesForMapping(),
+      categoryStore.fetchUserPermissions(),
+      tagStore.fetchTags()
+    ])
   } catch (error) {
     console.error('Failed to load categories:', error)
   }
@@ -311,7 +315,7 @@ onMounted(async () => {
 // 获取分类名称
 const getCategoryName = (category: string | CategoryData) => {
   if (typeof category === 'string') {
-    const foundCategory = categoryStore.categories.find(c => c.id === category)
+    const foundCategory = categoryStore.allCategoriesForMapping.find(c => c.id === category)
     return foundCategory?.name || '未知分类'
   }
   return category.name || '未知分类'
@@ -320,7 +324,7 @@ const getCategoryName = (category: string | CategoryData) => {
 // 获取分类图标
 const getCategoryIcon = (category: string | CategoryData) => {
   if (typeof category === 'string') {
-    const foundCategory = categoryStore.categories.find(c => c.id === category)
+    const foundCategory = categoryStore.allCategoriesForMapping.find(c => c.id === category)
     return foundCategory?.icon || '📦'
   }
   return category.icon || '📦'
