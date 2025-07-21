@@ -1,32 +1,114 @@
 ---
-description: 
-globs: frontend/*/*.ts,frontend/*/*.vue
+description: Auto-import 规则配置
+globs: **/*.vue,frontend/**/*.ts
 alwaysApply: false
 ---
-[
-  {
-    "name": "Vue Core Auto Imports",
-    "pattern": "^(ref|reactive|computed|watch|watchEffect|onMounted|onUnmounted|nextTick|defineProps|defineEmits|defineExpose|withDefaults|toRef|toRefs)$",
-    "action": "skip_import"
-  },
-  {
-    "name": "Vue Router Auto Imports",
-    "pattern": "^(useRouter|useRoute|RouteLocationRaw|RouteRecordRaw)$",
-    "action": "skip_import"
-  },
-  {
-    "name": "Pinia Auto Imports",
-    "pattern": "^(defineStore|storeToRefs)$",
-    "action": "skip_import"
-  },
-  {
-    "name": "Third Party Auto Imports",
-    "pattern": "^(Cookies|dayjs|localForage|axios)$",
-    "action": "skip_import"
-  },
-  {
-    "name": "Vant UI Auto Imports",
-    "pattern": "^(showToast|showDialog|showNotify|showLoadingToast|closeToast|closeDialog|closeNotify|closeLoadingToast)$",
-    "action": "skip_import"
-  }
-]
+
+# Cursor 自动导入规则
+
+## 自动导入变量列表
+
+### Vue 3 Composition API
+以下变量已通过 unplugin-auto-import 全局导入，无需手动引入：
+- ref, reactive, computed, watch, watchEffect
+- onMounted, onUnmounted, onBeforeMount, onBeforeUnmount
+- nextTick, getCurrentInstance, defineComponent
+- h, resolveComponent, markRaw, toRaw
+- isRef, isReactive, isProxy, unref, toRef, toRefs
+- shallowRef, shallowReactive, shallowReadonly
+- readonly, customRef, triggerRef
+- effectScope, getCurrentScope, onScopeDispose
+- inject, provide, useAttrs, useSlots
+- useCssModule, useCssVars, useId, useModel
+- useTemplateRef, useLink
+
+### Vue Router
+以下变量已全局导入：
+- useRouter, useRoute, onBeforeRouteLeave, onBeforeRouteUpdate
+
+### Pinia
+以下变量已全局导入：
+- defineStore, storeToRefs, createPinia, getActivePinia
+- setActivePinia, acceptHMRUpdate
+- mapState, mapGetters, mapActions, mapStores, mapWritableState
+
+### Vant UI 组件和函数
+以下组件和函数已全局导入：
+- 组件：VanButton, VanField, VanForm, VanDialog, VanToast 等
+- 函数：showToast, showDialog, showConfirmDialog, showNotify 等
+- 配置：setToastDefaultOptions, setDialogDefaultOptions 等
+
+### 第三方库
+以下变量已全局导入：
+- axios (HTTP客户端)
+- dayjs (日期处理)
+- Cookies (Cookie处理)
+- localForage (本地存储)
+- API (项目API模块)
+- CONFIG (项目配置模块)
+
+## 样式规则
+
+### Tailwind CSS
+项目使用 Tailwind CSS 进行样式管理，参考 `tailwind-css.mdc` 规则文件：
+- 优先使用项目自定义的 primary 色系
+- 遵循移动端优先的响应式设计
+- 使用标准的间距和布局类
+- 合理使用交互状态和过渡效果
+
+## 代码生成规则
+
+### 禁止自动引入的变量
+在生成代码时，不要为以下变量添加 import 语句：
+1. Vue 3 Composition API 的所有函数
+2. Vue Router 的钩子函数
+3. Pinia 的状态管理函数
+4. Vant UI 的组件和函数
+5. 已配置的第三方库变量
+
+### 代码生成模板
+当生成 Vue 组件代码时，使用以下模板结构：
+
+```vue
+<template>
+  <!-- 模板内容 -->
+</template>
+
+<script setup lang="ts">
+// 只引入非自动导入的变量
+import { someCustomFunction } from '@/utils/custom'
+import type { SomeType } from '@/types'
+
+// 使用自动导入的变量（无需import）
+const count = ref(0)
+const router = useRouter()
+const store = defineStore('main', () => {
+  // store 逻辑
+})
+</script>
+
+<style scoped>
+/* 样式 */
+</style>
+```
+
+### 特殊情况处理
+1. **自定义组件**：如果使用 src/components 下的自定义组件，需要手动引入
+2. **类型定义**：TypeScript 类型需要显式引入
+3. **工具函数**：项目自定义的工具函数需要手动引入
+4. **第三方库**：未在自动导入配置中的第三方库需要手动引入
+
+## 验证规则
+生成的代码应该：
+1. 不包含已自动导入变量的 import 语句
+2. 正确使用自动导入的变量
+3. 只引入必要的自定义模块
+4. 符合项目的 TypeScript 和 Vue.js 编码规范
+5. 遵循 Tailwind CSS 使用规范
+
+## 注意事项
+- 在生成代码前，检查变量是否已在 auto-imports.d.ts 中声明
+- 优先使用自动导入的变量，避免重复引入
+- 保持代码的简洁性和可读性
+- 遵循项目的命名约定和代码风格
+- 使用 Tailwind CSS 类名时参考项目现有模式
