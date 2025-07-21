@@ -12,6 +12,7 @@ export interface CategoryData {
 
 export interface CategoryQuery {
   type?: 'expense' | 'income'
+  includeDisabled?: boolean
 }
 
 class CategoryApi {
@@ -19,6 +20,13 @@ class CategoryApi {
 
   async getList(query?: CategoryQuery) {
     const response = await axios.get(this.baseUrl, { params: query })
+    return response.data
+  }
+
+  async getAllList(query?: CategoryQuery) {
+    const response = await axios.get(this.baseUrl, { 
+      params: { ...query, includeDisabled: true }
+    })
     return response.data
   }
 

@@ -155,7 +155,7 @@ const categoryStore = useCategoryStore();
 
 // 获取分类列表
 const categories = computed(() => {
-  return categoryStore.categories
+  return categoryStore.availableCategories
     .filter(category => category.type === form.type)
     .map(category => ({
       text: `${category.icon} ${category.name}`,
@@ -240,7 +240,8 @@ const handleSubmit = async () => {
   try {
     await expenseStore.createExpense({
       ...form,
-      amount: parseFloat(form.amount.toString())
+      amount: parseFloat(form.amount.toString()),
+      tags: [] // 添加缺失的 tags 字段
     });
     showToast('保存成功');
     router.push('/expenses');
@@ -254,6 +255,7 @@ const handleSubmit = async () => {
 onMounted(async () => {
   try {
     await categoryStore.fetchCategories();
+    await categoryStore.fetchUserPermissions();
   } catch (error) {
     console.error('Failed to fetch categories:', error);
     showToast('获取分类列表失败');
