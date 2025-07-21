@@ -21,27 +21,41 @@
         </span>
       </div>
       <div class="space-y-3">
-        <div
+        <van-swipe-cell
           v-for="category in systemCategories"
           :key="category.id"
-          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-          @click="handleCategoryClick(category)"
+          class="mb-2"
         >
-          <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-              <span class="text-base text-gray-600">{{ category.icon }}</span>
+          <div
+            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+            @click="handleCategoryClick(category)"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <span class="text-base text-gray-600">{{ category.icon }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ category.name }}</p>
+                <p class="text-xs text-gray-500">系统固定</p>
+              </div>
             </div>
-            <div>
-              <p class="font-medium text-gray-900">{{ category.name }}</p>
-              <p class="text-xs text-gray-500">系统固定</p>
+            <div class="flex items-center space-x-1">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                固定
+              </span>
             </div>
           </div>
-          <div class="flex items-center space-x-1">
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-              固定
-            </span>
-          </div>
-        </div>
+          <template #right>
+            <div class="flex h-full">
+              <div
+                class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+                @click="handleDisableSystemCategory(category)"
+              >
+                禁用
+              </div>
+            </div>
+          </template>
+        </van-swipe-cell>
       </div>
     </div>
 
@@ -118,18 +132,35 @@
         <p class="text-gray-700">确定要删除分类 "{{ editingCategory?.name }}" 吗？</p>
       </div>
     </van-dialog>
+
+    <!-- 禁用确认对话框 -->
+    <van-dialog
+      v-model:show="showDisableConfirm"
+      title="确认禁用"
+      show-cancel-button
+      @confirm="confirmDisable"
+      class="[&_.van-dialog__header]:text-lg [&_.van-dialog__header]:font-medium"
+    >
+      <div class="p-4">
+        <p class="text-gray-700">确定要禁用系统分类 "{{ editingCategory?.name }}" 吗？</p>
+        <p class="text-sm text-gray-500 mt-2">禁用后该分类将不再显示在支出选择列表中，但不会影响其他用户使用。</p>
+      </div>
+    </van-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { categoryApi } from '@/api/category';
+import { userCategoryApi } from '@/api/user-category';
 import type { CategoryData } from '@/api/category';
 import CategoryForm from '@/components/CategoryForm.vue';
+import { showToast } from 'vant';
 
 const router = useRouter();
 const showCategoryForm = ref(false);
 const editingCategory = ref<CategoryData | null>(null);
 const showDeleteConfirm = ref(false);
+const showDisableConfirm = ref(false);
 
 const categories = ref<CategoryData[]>([]);
 
@@ -205,6 +236,28 @@ const handleCategoryClick = (category: CategoryData) => {
     path: '/expenses',
     query: { category: category.id }
   });
+};
+
+const handleDisableSystemCategory = (category: CategoryData) => {
+  if (!category.isSystem) return;
+  
+  editingCategory.value = category;
+  showDisableConfirm.value = true;
+};
+
+const confirmDisable = async () => {
+  if (!editingCategory.value) return;
+  
+  try {
+    await userCategoryApi.updatePermission(editingCategory.value.id, { isDisabled: true });
+    await fetchCategories(); // 重新获取分类列表
+    showDisableConfirm.value = false;
+    editingCategory.value = null;
+    showToast('分类已禁用');
+  } catch (error) {
+    console.error('禁用分类失败:', error);
+    showToast('禁用分类失败');
+  }
 };
 
 onMounted(() => {

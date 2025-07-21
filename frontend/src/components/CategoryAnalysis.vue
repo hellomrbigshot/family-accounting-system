@@ -115,7 +115,7 @@ const transformCategoryData = (data: Record<string, number> | undefined) => {
       return;
     }
     
-    const category = categoryStore.categories.find(c => c.id === categoryId && c.type === 'expense');
+    const category = categoryStore.allCategoriesForMapping.find(c => c.id === categoryId && c.type === 'expense');
     if (category) {
       result.push({
         name: category.name,
@@ -286,8 +286,11 @@ watch(() => props.loading, (loading) => {
 
 onMounted(async () => {
   // 确保分类和标签数据已加载
-  if (categoryStore.categories.length === 0) {
-    await categoryStore.fetchCategories();
+  if (categoryStore.allCategoriesForMapping.length === 0) {
+    await Promise.all([
+      categoryStore.fetchCategories(),
+      categoryStore.fetchAllCategoriesForMapping()
+    ]);
   }
   
   if (tagStore.tags.length === 0) {
