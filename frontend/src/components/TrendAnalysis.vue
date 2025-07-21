@@ -48,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { useReportStore } from '@/stores/report';
 import dayjs from '@/utils/dayjs';
 import * as echarts from 'echarts';

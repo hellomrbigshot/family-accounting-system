@@ -203,14 +203,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onBeforeUpdate } from 'vue';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
-import { showToast } from 'vant';
 import type { TagData } from '@/api/tag';
 import dayjs from '@/utils/dayjs';
 
+/**
+ * 支出表单组件
+ * 支持新增和编辑支出记录
+ */
+// 组件属性定义
 const props = defineProps<{
   show: boolean;
   editMode?: boolean;
@@ -224,31 +227,33 @@ const props = defineProps<{
   };
 }>();
 
+// 组件事件定义
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void;
   (e: 'success'): void;
 }>();
 
+// Store 实例
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const tagStore = useTagStore();
-const loading = ref(false);
 
-// 计算属性处理editMode
+// 响应式状态
+const loading = ref(false);
 const isEditMode = computed(() => props.editMode || false);
 
-// 添加 checkbox 引用数组
+// 标签选择相关
 const checkboxRefs = ref<any[]>([]);
-
-// 添加 toggle 方法
-const toggle = (index: number) => {
-  checkboxRefs.value[index]?.toggle();
-};
 
 // 在组件更新前清空 checkboxRefs 数组
 onBeforeUpdate(() => {
   checkboxRefs.value = [];
 });
+
+// 标签切换方法
+const toggle = (index: number) => {
+  checkboxRefs.value[index]?.toggle();
+};
 
 // 重置表单数据
 const resetForm = () => {
@@ -260,7 +265,10 @@ const resetForm = () => {
   showNumberKeyboard.value = false;
 };
 
-// 表单数据
+/**
+ * 表单数据
+ * 使用响应式对象管理表单状态
+ */
 const form = reactive({
   date: dayjs().format('YYYY-MM-DD'),
   category: '',

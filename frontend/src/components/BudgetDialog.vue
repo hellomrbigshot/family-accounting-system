@@ -84,10 +84,9 @@
 
 <script setup lang="ts">
 import { useBudgetStore } from '@/stores/budget';
-import { showToast } from 'vant';
 import dayjs from 'dayjs';
 
-const props = defineProps<{
+defineProps<{
   show: boolean;
 }>();
 

@@ -65,9 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
 import { useCategoryStore } from '@/stores/category';
-import { showToast } from 'vant';
 import type { CategoryData } from '@/api/category';
 
 const props = defineProps<{
@@ -86,7 +84,8 @@ const categoryStore = useCategoryStore();
 const form = reactive<Omit<CategoryData, 'id' | 'createdAt'>>({
   name: '',
   icon: '',
-  type: 'expense'
+  type: 'expense',
+  isSystem: false
 });
 
 // 重置表单数据
@@ -94,6 +93,7 @@ const resetForm = () => {
   form.name = '';
   form.icon = '';
   form.type = 'expense';
+  form.isSystem = false;
 };
 
 const handleShowUpdate = (value: boolean) => {
