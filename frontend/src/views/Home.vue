@@ -121,9 +121,10 @@ const showBudgetDialog = ref(false);
 // 添加支出对话框
 const showAddExpenseDialog = ref(false);
 
-// 本月支出 - 使用本月支出数据计算
+// 本月支出 - 使用本月支出数据计算（排除额外支出）
 const monthlyExpense = computed(() => {
   return expenseStore.monthlyExpenses
+    .filter((expense: ExpenseData) => !expense.isExtra)
     .reduce((sum: number, expense: ExpenseData) => sum + (expense.amount || 0), 0);
 });
 

@@ -47,6 +47,16 @@
         </div>
       </div>
 
+      <!-- 额外支出统计卡片 -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-sm p-4 mb-4">
+        <div class="text-center">
+          <h3 class="text-white text-sm font-medium mb-2">额外支出</h3>
+          <div class="text-white text-2xl font-bold">
+            ¥{{ extraAmount.toFixed(2) }}
+          </div>
+        </div>
+      </div>
+
       <!-- 报表内容区域 -->
       <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
         <div class="flex justify-between items-center mb-4">
@@ -169,6 +179,11 @@ const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
 // 计算总金额
 const totalAmount = computed(() => {
   return reportStore.data.expenses.total;
+});
+
+// 计算额外支出金额
+const extraAmount = computed(() => {
+  return reportStore.data.expenses.extraTotal || 0;
 });
 
 // 初始加载

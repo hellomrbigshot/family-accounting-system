@@ -102,6 +102,24 @@
             </template>
           </van-field>
 
+          <!-- 额外支出开关 -->
+          <van-field
+            name="isExtra"
+            input-align="right"
+            label="额外支出"
+          >
+            <template #input>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-400 mr-3">不计入当月预算</span>
+                <van-switch
+                  v-model="form.isExtra"
+                  size="20"
+                  active-color="#ef4444"
+                />
+              </div>
+            </template>
+          </van-field>
+
           <!-- 提交按钮 -->
           <div class="mt-6 px-4">
             <van-button
@@ -224,6 +242,7 @@ const props = defineProps<{
     amount: number;
     description: string;
     tags: string[];
+    isExtra: boolean;
   };
 }>();
 
@@ -262,6 +281,7 @@ const resetForm = () => {
   form.amount = '';
   form.description = '';
   form.tags = [];
+  form.isExtra = false;
   showNumberKeyboard.value = false;
 };
 
@@ -274,7 +294,8 @@ const form = reactive({
   category: '',
   amount: '',
   description: '',
-  tags: [] as string[]
+  tags: [] as string[],
+  isExtra: false
 });
 
 const categoryName = computed(() => {
@@ -367,13 +388,15 @@ const handleSubmit = async () => {
     if (isEditMode.value && props.editData) {
       await expenseStore.updateExpense(props.editData.id, {
         ...form,
-        amount: parseFloat(form.amount)
+        amount: parseFloat(form.amount),
+        isExtra: form.isExtra
       });
       showToast('更新成功');
     } else {
       await expenseStore.createExpense({
         ...form,
-        amount: parseFloat(form.amount)
+        amount: parseFloat(form.amount),
+        isExtra: form.isExtra
       });
       showToast('保存成功');
     }
@@ -439,6 +462,7 @@ watch(() => props.show, async (newValue) => {
       form.amount = props.editData.amount.toString();
       form.description = props.editData.description;
       form.tags = props.editData.tags;
+      form.isExtra = props.editData.isExtra || false;
     }
   }
 });

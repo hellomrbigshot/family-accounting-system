@@ -8,6 +8,7 @@ export interface ExpenseData {
   description: string
   createdAt: string
   tags: string[]
+  isExtra: boolean
 }
 
 export interface ExpenseQuery {

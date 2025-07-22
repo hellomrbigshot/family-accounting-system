@@ -28,6 +28,34 @@
       </div>
     </div>
 
+    <!-- 额外支出分类分析 -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">额外支出分类</h3>
+        <div>
+          <div ref="extraCategoryChartRef" class="h-64"></div>
+          <!-- 图例 -->
+          <div class="mt-4 space-y-2">
+            <div 
+              v-for="item in extraCategoryChartData" 
+              :key="item.name"
+              class="flex items-center justify-between text-sm"
+            >
+              <div class="flex items-center space-x-2">
+                <div 
+                  class="w-3 h-3 rounded-full"
+                  :style="{ backgroundColor: item.color }"
+                ></div>
+                <span class="text-lg mr-2">{{ item.icon }}</span>
+                <span class="text-gray-600">{{ item.name }}</span>
+              </div>
+              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 支出标签饼图 -->
     <div class="bg-white overflow-hidden shadow rounded-lg">
       <div class="p-5">
@@ -79,8 +107,10 @@ const tagStore = useTagStore();
 
 const categoryChartRef = ref<HTMLElement>();
 const tagChartRef = ref<HTMLElement>();
+const extraCategoryChartRef = ref<HTMLElement>();
 let categoryChart: echarts.ECharts | null = null;
 let tagChart: echarts.ECharts | null = null;
+let extraCategoryChart: echarts.ECharts | null = null;
 
 // 预定义的颜色数组 - 重新设计确保对比度
 const colors = [
@@ -164,6 +194,11 @@ const tagChartData = computed(() => {
   return transformTagData(props.data.expenses.byTag);
 });
 
+// 计算属性：额外支出分类数据
+const extraCategoryChartData = computed(() => {
+  return transformCategoryData(props.data.expenses.byExtraCategory);
+});
+
 // 初始化图表
 const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: number; color: string }>) => {
   // 检查 DOM 元素上是否已有图表实例
@@ -234,7 +269,7 @@ const updateChart = (chart: echarts.ECharts | null, data: Array<{ name: string; 
 };
 
 // 监听数据变化
-watch([categoryChartData, tagChartData], () => {
+watch([categoryChartData, tagChartData, extraCategoryChartData], () => {
   nextTick(() => {
     // 分类图表处理
     if (categoryChartData.value.length === 0 && categoryChart) {
@@ -245,6 +280,17 @@ watch([categoryChartData, tagChartData], () => {
         categoryChart = initChart(categoryChartRef.value, categoryChartData.value);
       } else if (categoryChart) {
         updateChart(categoryChart, categoryChartData.value);
+      }
+    }
+    // 额外支出分类图表处理
+    if (extraCategoryChartData.value.length === 0 && extraCategoryChart) {
+      extraCategoryChart.dispose();
+      extraCategoryChart = null;
+    } else if (extraCategoryChartData.value.length > 0) {
+      if (!extraCategoryChart && extraCategoryChartRef.value) {
+        extraCategoryChart = initChart(extraCategoryChartRef.value, extraCategoryChartData.value);
+      } else if (extraCategoryChart) {
+        updateChart(extraCategoryChart, extraCategoryChartData.value);
       }
     }
     // 标签图表处理
@@ -271,6 +317,13 @@ watch(() => props.loading, (loading) => {
       } else if (categoryChart && categoryChartData.value.length === 0) {
         categoryChart.dispose();
         categoryChart = null;
+      }
+      
+      if (extraCategoryChart && extraCategoryChartData.value.length > 0) {
+        updateChart(extraCategoryChart, extraCategoryChartData.value);
+      } else if (extraCategoryChart && extraCategoryChartData.value.length === 0) {
+        extraCategoryChart.dispose();
+        extraCategoryChart = null;
       }
       
       if (tagChart && tagChartData.value.length > 0) {
@@ -303,6 +356,10 @@ onMounted(async () => {
       categoryChart = initChart(categoryChartRef.value, categoryChartData.value);
     }
     
+    if (extraCategoryChartRef.value && extraCategoryChartData.value.length > 0) {
+      extraCategoryChart = initChart(extraCategoryChartRef.value, extraCategoryChartData.value);
+    }
+    
     if (tagChartRef.value && tagChartData.value.length > 0) {
       tagChart = initChart(tagChartRef.value, tagChartData.value);
     }
@@ -314,6 +371,10 @@ onUnmounted(() => {
   if (categoryChart) {
     categoryChart.dispose();
     categoryChart = null;
+  }
+  if (extraCategoryChart) {
+    extraCategoryChart.dispose();
+    extraCategoryChart = null;
   }
   if (tagChart) {
     tagChart.dispose();

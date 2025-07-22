@@ -11,7 +11,7 @@ interface AuthenticatedRequest extends Request {
 
 export const createExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { date, category, amount, description, tags } = req.body;
+    const { date, category, amount, description, tags, isExtra } = req.body;
 
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
@@ -23,7 +23,8 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
       category,
       amount,
       description,
-      tags: tags || []
+      tags: tags || [],
+      isExtra: isExtra || false
     });
 
     await expense.save();
@@ -36,6 +37,7 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
       amount: expense.amount,
       description: expense.description,
       tags: expense.tags,
+      isExtra: expense.isExtra,
       createdAt: expense.createdAt
     };
 
@@ -89,6 +91,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
       amount: expense.amount,
       description: expense.description,
       tags: expense.tags,
+      isExtra: expense.isExtra,
       createdAt: expense.createdAt
     }));
 
@@ -202,7 +205,7 @@ export const deleteExpense = async (req: AuthenticatedRequest, res: Response) =>
 export const updateExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { date, category, amount, description, tags } = req.body;
+    const { date, category, amount, description, tags, isExtra } = req.body;
 
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
@@ -218,7 +221,8 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
         category,
         amount,
         description,
-        tags: tags || []
+        tags: tags || [],
+        isExtra: isExtra || false
       },
       { new: true }
     );
@@ -235,6 +239,7 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
       amount: expense.amount,
       description: expense.description,
       tags: expense.tags,
+      isExtra: expense.isExtra,
       createdAt: expense.createdAt
     };
 
