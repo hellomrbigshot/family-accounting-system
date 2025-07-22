@@ -27,17 +27,20 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
       }
     }
 
-    // 获取支出统计数据
+    // 获取支出统计数据（包含额外支出）
     const expenseStats = await Expense.aggregate([
       { $match: query },
       {
         $group: {
           _id: null,
           total: { $sum: '$amount' },
+          extraTotal: { $sum: { $cond: ['$isExtra', '$amount', 0] } },
+          normalTotal: { $sum: { $cond: ['$isExtra', 0, '$amount'] } },
           byCategory: {
             $push: {
               category: '$category',
-              amount: '$amount'
+              amount: '$amount',
+              isExtra: '$isExtra'
             }
           },
           byDate: {
@@ -48,7 +51,8 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
                   date: '$date'
                 }
               },
-              amount: '$amount'
+              amount: '$amount',
+              isExtra: '$isExtra'
             }
           }
         }
@@ -91,7 +95,10 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
     // 处理支出数据
     const expenses = {
       total: 0,
+      extraTotal: 0,
+      normalTotal: 0,
       byCategory: {} as Record<string, number>,
+      byExtraCategory: {} as Record<string, number>,
       byTag: {} as Record<string, number>,
       byDate: {} as Record<string, number>
     }
@@ -99,10 +106,16 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
     if (expenseStats.length > 0) {
       const stats = expenseStats[0]
       expenses.total = stats.total
+      expenses.extraTotal = stats.extraTotal || 0
+      expenses.normalTotal = stats.normalTotal || 0
 
-      // 按类别聚合
+      // 按类别聚合（包含额外支出）
       stats.byCategory.forEach((item: any) => {
         expenses.byCategory[item.category] = (expenses.byCategory[item.category] || 0) + item.amount
+        // 额外支出分类统计
+        if (item.isExtra) {
+          expenses.byExtraCategory[item.category] = (expenses.byExtraCategory[item.category] || 0) + item.amount
+        }
       })
 
       // 按日期聚合
@@ -124,7 +137,9 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
 
     // 生成趋势数据（使用传入的日期范围或默认最近30天）
     const trends = {
-      expenses: {} as Record<string, number>
+      expenses: {} as Record<string, number>,
+      extraExpenses: {} as Record<string, number>,
+      normalExpenses: {} as Record<string, number>
     }
 
     // 构建趋势查询条件
@@ -154,7 +169,9 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
               date: '$date'
             }
           },
-          total: { $sum: '$amount' }
+          total: { $sum: '$amount' },
+          extraTotal: { $sum: { $cond: ['$isExtra', '$amount', 0] } },
+          normalTotal: { $sum: { $cond: ['$isExtra', 0, '$amount'] } }
         }
       },
       { $sort: { _id: 1 } }
@@ -162,6 +179,8 @@ export const getReport = async (req: AuthenticatedRequest, res: Response) => {
 
     trendStats.forEach((item: any) => {
       trends.expenses[item._id] = item.total
+      trends.extraExpenses[item._id] = item.extraTotal || 0
+      trends.normalExpenses[item._id] = item.normalTotal || 0
     })
 
     // 构建响应数据

@@ -7,6 +7,7 @@ export interface IExpense {
   amount: number;
   description?: string;
   tags: Schema.Types.ObjectId[];
+  isExtra: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,7 +39,11 @@ const expenseSchema = new Schema<IExpense>({
   tags: [{
     type: Schema.Types.ObjectId,
     ref: 'Tag'
-  }]
+  }],
+  isExtra: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });
