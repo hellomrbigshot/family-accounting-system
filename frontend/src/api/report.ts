@@ -4,13 +4,18 @@ import type { ExpenseQuery } from './expense';
 export interface ReportData {
   expenses: {
     total: number;
+    extraTotal: number;
+    normalTotal: number;
     byCategory: Record<string, number>;
+    byExtraCategory: Record<string, number>;
     byTag: Record<string, number>;
     byDate: Record<string, number>;
   };
   balance: number;
   trends: {
     expenses: Record<string, number>;
+    extraExpenses: Record<string, number>;
+    normalExpenses: Record<string, number>;
   };
 }
 
