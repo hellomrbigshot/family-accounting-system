@@ -16,6 +16,7 @@ export interface ExpenseQuery {
   endDate?: string
   category?: string
   tags?: string[]
+  isExtra?: boolean
 }
 
 export interface ExpenseStats {

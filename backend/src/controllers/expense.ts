@@ -60,7 +60,7 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
 
 export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { startDate, endDate, category } = req.query;
+    const { startDate, endDate, category, isExtra } = req.query;
     
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
@@ -77,6 +77,10 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
 
     if (category) {
       query.category = category;
+    }
+
+    if (isExtra !== undefined) {
+      query.isExtra = isExtra === 'true';
     }
 
     const expenses = await Expense.find(query)

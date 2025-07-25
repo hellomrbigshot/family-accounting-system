@@ -10,11 +10,28 @@
       <!-- 搜索框 -->
       <van-search
         v-model="searchQuery"
-        placeholder="搜索支出记录"
+        placeholder="搜索支出记录（支持搜索'额外支出'）"
         shape="round"
         background="transparent"
         class="custom-search !px-0"
       />
+
+
+
+      <!-- 搜索帮助提示 -->
+      <div v-if="searchQuery && !filteredExpenses.length" class="mb-4 p-3 bg-blue-50 rounded-lg">
+        <div class="flex items-start">
+          <van-icon name="info-o" class="text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+          <div class="text-sm text-blue-700">
+            <p class="font-medium mb-1">搜索提示：</p>
+            <ul class="text-xs space-y-1">
+              <li>• 输入"额外支出"、"额外"或"extra"可搜索额外支出记录</li>
+              <li>• 输入分类名称、描述内容或金额进行搜索</li>
+              <li>• 支持标签名称搜索</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       <!-- 搜索区域 -->
       <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
@@ -217,6 +234,17 @@ const filteredExpenses = computed(() => {
       return tag?.name.toLowerCase().includes(query);
     }) || false;
     
+    // 检查额外支出关键词匹配
+    const extraKeywords = ['额外支出', '额外', 'extra'];
+    const isExtraMatch = extraKeywords.some(keyword => 
+      query.includes(keyword.toLowerCase())
+    );
+    
+    // 如果搜索额外支出关键词，只返回额外支出记录
+    if (isExtraMatch) {
+      return expense.isExtra;
+    }
+    
     return (
       expense.description.toLowerCase().includes(query) ||
       (category?.name || '').toLowerCase().includes(query) ||
@@ -285,6 +313,8 @@ const handleRefresh = async () => {
 const totalAmount = computed(() => {
   return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0);
 });
+
+
 </script>
 
 <style scoped>
