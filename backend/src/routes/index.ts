@@ -9,6 +9,7 @@ import accountRoutes from './account';
 import healthRoutes from './health';
 import budgetRoutes from './budget';
 import reportRoutes from './report';
+import filterRoutes from './filter';
 
 const router: Router = Router();
 
@@ -22,5 +23,6 @@ router.use('/accounts', accountRoutes);
 router.use('/health', healthRoutes);
 router.use('/budgets', budgetRoutes);
 router.use('/reports', reportRoutes);
+router.use('/filters', filterRoutes);
 
 export default router; 
