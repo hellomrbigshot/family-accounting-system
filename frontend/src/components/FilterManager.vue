@@ -5,7 +5,6 @@
     position="bottom"
     round
     :style="{ height: '80%' }"
-    :z-index="3000"
     teleport="body"
   >
     <div class="h-full flex flex-col">
@@ -56,39 +55,39 @@
             :key="filter.id"
             class="bg-white rounded-lg border border-gray-200 p-4"
           >
-            <div class="flex items-center justify-between">
-              <div class="flex-1">
-                <h3 class="font-medium text-gray-900">{{ filter.name }}</h3>
-                <p class="text-sm text-gray-500 mt-1">
-                  {{ formatFilterConditions(filter.conditions) }}
-                </p>
-                <p class="text-xs text-gray-400 mt-1">
-                  {{ formatDate(filter.createdAt) }}
-                </p>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="font-medium text-gray-900 truncate flex-1 mr-2">{{ filter.name }}</h3>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                  <van-icon
+                    name="play-circle-o"
+                    size="18"
+                    class="text-blue-500 cursor-pointer"
+                    @click="applyFilter(filter)"
+                    title="应用筛选器"
+                  />
+                  <van-icon
+                    name="edit"
+                    size="18"
+                    class="text-gray-500 cursor-pointer"
+                    @click="editFilter(filter)"
+                    title="编辑筛选器"
+                  />
+                  <van-icon
+                    name="delete-o"
+                    size="18"
+                    class="text-red-500 cursor-pointer"
+                    @click="deleteFilter(filter)"
+                    title="删除筛选器"
+                  />
+                </div>
               </div>
-              <div class="flex items-center space-x-2">
-                <van-button
-                  size="small"
-                  type="primary"
-                  @click="applyFilter(filter)"
-                >
-                  应用
-                </van-button>
-                <van-button
-                  size="small"
-                  type="default"
-                  @click="editFilter(filter)"
-                >
-                  编辑
-                </van-button>
-                <van-button
-                  size="small"
-                  type="danger"
-                  @click="deleteFilter(filter)"
-                >
-                  删除
-                </van-button>
-              </div>
+              <p class="text-sm text-gray-500 break-words leading-relaxed">
+                {{ formatFilterConditions(filter.conditions) }}
+              </p>
+              <p class="text-xs text-gray-400">
+                {{ formatDate(filter.createdAt) }}
+              </p>
             </div>
           </div>
         </div>
@@ -98,7 +97,7 @@
           <van-button
             type="primary"
             block
-            @click="showCreateForm = true"
+            @click="createNewFilter"
           >
             新建筛选器
           </van-button>
@@ -117,6 +116,8 @@
 
 <script setup lang="ts">
 import { useFilterStore } from '@/stores/filter'
+import { useCategoryStore } from '@/stores/category'
+import { useTagStore } from '@/stores/tag'
 import type { FilterData } from '@/api/filter'
 import FilterForm from './FilterForm.vue'
 import dayjs from '@/utils/dayjs'
@@ -133,6 +134,8 @@ const emit = defineEmits<{
 }>()
 
 const filterStore = useFilterStore()
+const categoryStore = useCategoryStore()
+const tagStore = useTagStore()
 const showCreateForm = ref(false)
 const editingFilter = ref<FilterData | null>(null)
 
@@ -160,6 +163,12 @@ const applyFilter = (filter: FilterData) => {
 const clearCurrentFilter = () => {
   filterStore.clearCurrentFilter()
   emit('filter-cleared')
+}
+
+// 新建筛选器
+const createNewFilter = () => {
+  editingFilter.value = null
+  showCreateForm.value = true
 }
 
 // 编辑筛选器
@@ -198,7 +207,8 @@ const handleFormSuccess = () => {
 const formatFilterConditions = (conditions: any) => {
   const parts = []
   
-  if (conditions.timeRange) {
+  // 时间范围
+  if (conditions?.timeRange) {
     if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
       const presetMap: Record<string, string> = {
         week: '本周',
@@ -212,10 +222,19 @@ const formatFilterConditions = (conditions: any) => {
       parts.push(presetMap[conditions.timeRange.preset] || '自定义时间')
     } else if (conditions.timeRange.custom) {
       parts.push('自定义时间')
+    } else {
+      parts.push('不限')
     }
+  } else {
+    parts.push('不限')
   }
   
-  if (conditions.amountRange) {
+  // 金额范围
+  if (conditions?.amountRange && 
+      conditions.amountRange.operator && 
+      conditions.amountRange.value !== undefined && 
+      conditions.amountRange.value !== null && 
+      conditions.amountRange.value !== '') {
     const operatorMap: Record<string, string> = {
       gt: '大于',
       lt: '小于',
@@ -223,18 +242,49 @@ const formatFilterConditions = (conditions: any) => {
       gte: '大于等于',
       lte: '小于等于'
     }
-    parts.push(`${operatorMap[conditions.amountRange.operator]} ¥${conditions.amountRange.value}`)
+    const operator = conditions.amountRange.operator
+    parts.push(`${operatorMap[operator]} ¥${conditions.amountRange.value}`)
+  } else {
+    parts.push('不限')
   }
   
-  if (conditions.isExtra !== undefined) {
+  // 分类筛选
+  if (conditions?.categories && conditions.categories.length > 0) {
+    const categoryNames = conditions.categories.map((id: string) => {
+      const category = categoryStore.allCategoriesForMapping.find(c => c.id === id)
+      return category?.name || id
+    })
+    parts.push(categoryNames.join('、'))
+  } else {
+    parts.push('不限')
+  }
+  
+  // 标签筛选
+  if (conditions?.tags && conditions.tags.length > 0) {
+    const tagNames = conditions.tags.map((id: string) => {
+      const tag = tagStore.tags.find(t => t.id === id)
+      return tag?.name || id
+    })
+    parts.push(tagNames.join('、'))
+  } else {
+    parts.push('不限')
+  }
+  
+  // 支出类型
+  if (conditions?.isExtra !== undefined) {
     parts.push(conditions.isExtra ? '额外支出' : '普通支出')
+  } else {
+    parts.push('不限')
   }
   
-  if (conditions.description) {
-    parts.push(`描述包含"${conditions.description}"`)
+  // 描述关键词
+  if (conditions?.description && conditions.description.trim() !== '') {
+    parts.push(`包含"${conditions.description}"`)
+  } else {
+    parts.push('不限')
   }
   
-  return parts.length > 0 ? parts.join('，') : '无筛选条件'
+  return `时间：${parts[0]}，金额：${parts[1]}，分类：${parts[2]}，标签：${parts[3]}，类型：${parts[4]}，描述：${parts[5]}`
 }
 
 // 格式化日期

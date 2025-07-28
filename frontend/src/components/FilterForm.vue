@@ -1,12 +1,11 @@
 <template>
   <van-popup
     :show="show"
-    @update:show="handleShowUpdate"
     position="bottom"
     round
     :style="{ height: '90%' }"
-    :z-index="3000"
     teleport="body"
+    @update:show="handleShowUpdate"
   >
     <div class="h-full flex flex-col">
       <!-- 头部 -->
@@ -54,45 +53,26 @@
           </van-field>
 
           <!-- 分类选择 -->
-          <van-field
-            name="categories"
+          <MultiSelect
+            v-model="selectedCategories"
+            :options="categoryStore.allCategoriesForMapping"
             label="分类筛选"
-            readonly
-            is-link
-            @click="showCategoryPicker = true"
-          >
-            <template #input>
-              <span class="text-gray-900">{{ categoriesText }}</span>
-            </template>
-          </van-field>
+            title="选择分类"
+            placeholder="不限"
+            @confirm="handleCategoriesConfirm"
+            @clear="handleCategoriesClear"
+          />
 
           <!-- 标签选择 -->
-          <van-field
-            name="tags"
+          <MultiSelect
+            v-model="form.tags"
+            :options="tagStore.tags"
             label="标签筛选"
-            readonly
-            is-link
-            @click="showTagPicker = true"
-          >
-            <template #input>
-              <div class="flex flex-wrap gap-2 min-h-[24px]">
-                <div
-                  v-for="tag in selectedTags"
-                  :key="tag.id"
-                  class="inline-flex items-center px-2 py-1 bg-gray-100 rounded-full text-xs"
-                >
-                  <div 
-                    class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
-                    :style="{ backgroundColor: tag.color }"
-                  ></div>
-                  <span class="text-gray-700">{{ tag.name }}</span>
-                </div>
-                <span v-if="selectedTags.length === 0" class="text-gray-400 text-sm">
-                  请选择标签（可选）
-                </span>
-              </div>
-            </template>
-          </van-field>
+            title="选择标签"
+            placeholder="不限"
+            @confirm="handleTagsConfirm"
+            @clear="handleTagsClear"
+          />
 
           <!-- 额外支出状态 -->
           <van-field
@@ -145,7 +125,13 @@
     </van-popup>
 
     <!-- 金额范围选择器 -->
-    <van-popup v-model:show="showAmountRangePicker" position="bottom" round>
+    <van-popup
+      v-model:show="showAmountRangePicker"
+      position="bottom"
+      round
+      teleport="body"
+      :style="{ paddingBottom: '250px' }"
+    >
       <div class="p-4">
         <div class="space-y-4">
           <van-field
@@ -161,13 +147,20 @@
           <van-field
             v-model="amountRange.value"
             label="金额"
-            type="number"
+            readonly
+            clickable
             placeholder="请输入金额"
-          />
+            @click="showNumberKeyboard = true"
+          >
+            <template #button>
+              <span class="text-gray-500">¥</span>
+            </template>
+          </van-field>
           <div class="flex space-x-2">
             <van-button
               type="primary"
               size="small"
+              :disabled="!isAmountRangeValid"
               @click="confirmAmountRange"
             >
               确定
@@ -185,7 +178,12 @@
     </van-popup>
 
     <!-- 比较方式选择器 -->
-    <van-popup v-model:show="showOperatorPicker" position="bottom" round>
+    <van-popup
+      v-model:show="showOperatorPicker"
+      position="bottom"
+      round
+      teleport="body"
+    >
       <van-picker
         :columns="operatorColumns"
         @confirm="onOperatorConfirm"
@@ -193,87 +191,7 @@
       />
     </van-popup>
 
-    <!-- 标签选择器 -->
-    <van-popup v-model:show="showTagPicker" position="bottom" round>
-      <div class="p-4">
-        <h3 class="text-lg font-medium mb-4">选择标签</h3>
-        <div class="space-y-2 max-h-60 overflow-y-auto">
-          <van-checkbox-group v-model="form.tags">
-            <div
-              v-for="tag in tagStore.tags"
-              :key="tag.id"
-              class="flex items-center p-3 bg-gray-50 rounded-lg"
-            >
-              <van-checkbox :name="tag.id" />
-              <div class="ml-3 flex items-center">
-                <div 
-                  class="w-3 h-3 rounded-full mr-2"
-                  :style="{ backgroundColor: tag.color }"
-                ></div>
-                <span class="text-gray-900">{{ tag.name }}</span>
-              </div>
-            </div>
-          </van-checkbox-group>
-        </div>
-        <div class="mt-4 flex space-x-2">
-          <van-button
-            type="primary"
-            size="small"
-            @click="confirmTags"
-          >
-            确定
-          </van-button>
-          <van-button
-            type="default"
-            size="small"
-            @click="clearTags"
-          >
-            清除
-          </van-button>
-        </div>
-      </div>
-    </van-popup>
 
-    <!-- 分类选择器 -->
-    <van-popup v-model:show="showCategoryPicker" position="bottom" round>
-      <div class="p-4">
-        <h3 class="text-lg font-medium mb-4">选择分类</h3>
-        <div class="space-y-2 max-h-60 overflow-y-auto">
-          <van-checkbox-group v-model="selectedCategories">
-            <div
-              v-for="category in categoryStore.allCategoriesForMapping"
-              :key="category.id"
-              class="flex items-center p-3 bg-gray-50 rounded-lg"
-            >
-              <van-checkbox :name="category.id" />
-              <div class="ml-3 flex items-center">
-                <div 
-                  class="w-3 h-3 rounded-full mr-2"
-                  :style="{ backgroundColor: category.color }"
-                ></div>
-                <span class="text-gray-900">{{ category.name }}</span>
-              </div>
-            </div>
-          </van-checkbox-group>
-        </div>
-        <div class="mt-4 flex space-x-2">
-          <van-button
-            type="primary"
-            size="small"
-            @click="confirmCategories"
-          >
-            确定
-          </van-button>
-          <van-button
-            type="default"
-            size="small"
-            @click="clearCategories"
-          >
-            清除
-          </van-button>
-        </div>
-      </div>
-    </van-popup>
 
     <!-- 额外支出选择器 -->
     <van-popup v-model:show="showExtraPicker" position="bottom" round>
@@ -283,6 +201,22 @@
         @cancel="showExtraPicker = false"
       />
     </van-popup>
+
+    <!-- 数字键盘 -->
+    <van-number-keyboard
+      v-model:show="showNumberKeyboard"
+      v-model="amountRange.value"
+      :maxlength="10"
+      theme="custom"
+      close-button-text="完成"
+      :extra-key="['00', '.']"
+      teleport="body"
+      :z-index="3000"
+      @input="onAmountInput"
+      @delete="onAmountDelete"
+      @blur="handleAmountFieldBlur"
+      @close="showNumberKeyboard = false"
+    />
   </van-popup>
 </template>
 
@@ -290,8 +224,8 @@
 import { useFilterStore } from '@/stores/filter'
 import { useTagStore } from '@/stores/tag'
 import { useCategoryStore } from '@/stores/category'
+import MultiSelect from './MultiSelect.vue'
 import type { FilterData, FilterConditions } from '@/api/filter'
-import type { TagData } from '@/api/tag'
 
 const props = defineProps<{
   show: boolean
@@ -337,9 +271,8 @@ const selectedCategories = ref<string[]>([])
 const showTimeRangePicker = ref(false)
 const showAmountRangePicker = ref(false)
 const showOperatorPicker = ref(false)
-const showTagPicker = ref(false)
-const showCategoryPicker = ref(false)
 const showExtraPicker = ref(false)
+const showNumberKeyboard = ref(false)
 
 // 时间范围选项
 const timeRangeColumns = [
@@ -371,7 +304,7 @@ const extraColumns = [
 
 // 显示文本
 const timeRangeText = computed(() => {
-  if (!conditions.timeRange) return '请选择时间范围'
+  if (!conditions.timeRange) return '不限'
   if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
     const presetMap: Record<string, string> = {
       week: '本周',
@@ -388,7 +321,13 @@ const timeRangeText = computed(() => {
 })
 
 const amountRangeText = computed(() => {
-  if (!conditions.amountRange) return '请选择金额范围'
+  // 检查 amountRange 是否存在且有效
+  if (!conditions.amountRange || 
+      !conditions.amountRange.operator || 
+      conditions.amountRange.value === undefined || 
+      conditions.amountRange.value === null) {
+    return '不限'
+  }
   const operatorMap: Record<string, string> = {
     gt: '大于',
     lt: '小于',
@@ -397,11 +336,6 @@ const amountRangeText = computed(() => {
     lte: '小于等于'
   }
   return `${operatorMap[conditions.amountRange.operator]} ¥${conditions.amountRange.value}`
-})
-
-const categoriesText = computed(() => {
-  if (!selectedCategories.value.length) return '请选择分类'
-  return `已选择 ${selectedCategories.value.length} 个分类`
 })
 
 const operatorText = computed(() => {
@@ -415,40 +349,56 @@ const operatorText = computed(() => {
   return operatorMap[amountRange.operator] || '请选择比较方式'
 })
 
+// 判断金额范围是否有效
+const isAmountRangeValid = computed(() => {
+  return amountRange.operator && 
+         amountRange.value && 
+         amountRange.value.trim() !== '' && 
+         !isNaN(parseFloat(amountRange.value))
+})
+
 const extraText = computed(() => {
   if (conditions.isExtra === undefined) return '不限'
   return conditions.isExtra ? '额外支出' : '普通支出'
 })
 
-const selectedTags = computed(() => {
-  return tagStore.tags.filter(tag => form.tags.includes(tag.id))
-})
-
 // 初始化表单数据
 const initForm = () => {
   if (props.editData) {
-    form.name = props.editData.name
-    form.description = props.editData.conditions.description || ''
-    form.tags = props.editData.conditions.tags || []
-    selectedCategories.value = props.editData.conditions.categories || []
-    Object.assign(conditions, props.editData.conditions)
+    form.name = props.editData.name || ''
+    form.description = props.editData.conditions?.description || ''
+    form.tags = props.editData.conditions?.tags || []
+    selectedCategories.value = props.editData.conditions?.categories || []
+    // 使用响应式方式设置条件对象
+    Object.assign(conditions, props.editData.conditions || {})
+    
+    // 确保表单数据和条件数据同步
+    conditions.tags = [...form.tags]
+    conditions.categories = [...selectedCategories.value]
+    conditions.description = form.description
     
     // 初始化金额范围临时数据
-    if (props.editData.conditions.amountRange) {
-      amountRange.operator = props.editData.conditions.amountRange.operator
-      amountRange.value = props.editData.conditions.amountRange.value.toString()
+    if (props.editData.conditions?.amountRange) {
+      amountRange.operator = props.editData.conditions.amountRange.operator || 'gt'
+      const value = props.editData.conditions.amountRange.value
+      amountRange.value = value !== undefined && value !== null ? value.toString() : ''
     }
   } else {
+    // 新建模式：重置所有数据
     form.name = ''
     form.description = ''
     form.tags = []
     selectedCategories.value = []
-    Object.assign(conditions, {
-      timeRange: {
-        type: 'preset',
-        preset: 'week'
-      }
-    })
+    
+    // 重置条件对象 - 不设置默认时间范围
+    delete conditions.timeRange
+    
+    // 清除其他条件
+    delete conditions.amountRange
+    delete conditions.tags
+    delete conditions.categories
+    delete conditions.isExtra
+    delete conditions.description
     
     // 重置金额范围临时数据
     amountRange.operator = 'gt'
@@ -499,8 +449,9 @@ const confirmAmountRange = () => {
 // 同步金额范围数据到临时变量
 const syncAmountRangeToTemp = () => {
   if (conditions.amountRange) {
-    amountRange.operator = conditions.amountRange.operator
-    amountRange.value = conditions.amountRange.value.toString()
+    amountRange.operator = conditions.amountRange.operator || 'gt'
+    const value = conditions.amountRange.value
+    amountRange.value = value !== undefined && value !== null ? value.toString() : ''
   } else {
     amountRange.operator = 'gt'
     amountRange.value = ''
@@ -514,6 +465,21 @@ const clearAmountRange = () => {
   showAmountRangePicker.value = false
 }
 
+// 金额输入
+const onAmountInput = (value: string) => {
+  amountRange.value = value
+}
+
+// 金额删除
+const onAmountDelete = () => {
+  amountRange.value = amountRange.value.slice(0, -1)
+}
+
+// 金额字段失焦处理
+const handleAmountFieldBlur = () => {
+  showNumberKeyboard.value = false
+}
+
 // 监听金额范围选择器弹窗显示状态
 watch(showAmountRangePicker, (newVal) => {
   if (newVal) {
@@ -521,28 +487,28 @@ watch(showAmountRangePicker, (newVal) => {
   }
 })
 
-// 确认标签
-const confirmTags = () => {
-  showTagPicker.value = false
+// 标签确认处理
+const handleTagsConfirm = (values: string[]) => {
+  form.tags = values
+  conditions.tags = [...values]
 }
 
-// 清除标签
-const clearTags = () => {
+// 标签清除处理
+const handleTagsClear = () => {
   form.tags = []
-  showTagPicker.value = false
+  conditions.tags = []
 }
 
-// 确认分类
-const confirmCategories = () => {
-  conditions.categories = selectedCategories.value
-  showCategoryPicker.value = false
+// 分类确认处理
+const handleCategoriesConfirm = (values: string[]) => {
+  selectedCategories.value = values
+  conditions.categories = [...values]
 }
 
-// 清除分类
-const clearCategories = () => {
+// 分类清除处理
+const handleCategoriesClear = () => {
   selectedCategories.value = []
-  delete conditions.categories
-  showCategoryPicker.value = false
+  conditions.categories = []
 }
 
 // 额外支出确认
@@ -563,19 +529,25 @@ const handleSubmit = async () => {
   try {
     loading.value = true
     
+    // 同步表单数据到条件对象
+    conditions.tags = [...form.tags]
+    conditions.categories = [...selectedCategories.value]
+    conditions.description = form.description.trim() || undefined
+    
     const filterData = {
       name: form.name.trim(),
       conditions: { ...conditions }
     }
-    
+    let success = false
     if (isEditMode.value && props.editData) {
-      await filterStore.updateFilter(props.editData.id, filterData)
+      success = await filterStore.updateFilter(props.editData.id, filterData)
     } else {
-      await filterStore.createFilter(filterData)
+      success = await filterStore.createFilter(filterData)
     }
-    
-    emit('success')
-    handleClose()
+    if (success) {
+      emit('success')
+      handleClose()
+    }
   } catch (error) {
     console.error('保存筛选器失败:', error)
   } finally {
@@ -598,10 +570,5 @@ watch(() => props.show, (newValue) => {
   if (newValue) {
     initForm()
   }
-})
-
-// 组件挂载时获取标签数据
-onMounted(() => {
-  tagStore.fetchTags()
 })
 </script> 

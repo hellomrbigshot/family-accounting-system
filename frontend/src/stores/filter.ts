@@ -19,7 +19,7 @@ export const useFilterStore = defineStore('filter', () => {
       return true
     } catch (error) {
       console.error('获取筛选器列表失败:', error)
-      showToast('获取筛选器列表失败')
+      showFailToast('获取筛选器列表失败')
       return false
     } finally {
       loading.value = false
@@ -31,14 +31,14 @@ export const useFilterStore = defineStore('filter', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await filterApi.create(filter)
+      await filterApi.create(filter)
       await fetchFilters() // 重新获取列表
-      showToast('筛选器创建成功')
-      return response.filter
+      showSuccessToast('筛选器创建成功')
+      return true
     } catch (error) {
       console.error('创建筛选器失败:', error)
-      showToast('创建筛选器失败')
-      return null
+      showFailToast('创建筛选器失败')
+      return false
     } finally {
       loading.value = false
     }
@@ -49,14 +49,14 @@ export const useFilterStore = defineStore('filter', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await filterApi.update(id, filter)
+      await filterApi.update(id, filter)
       await fetchFilters() // 重新获取列表
-      showToast('筛选器更新成功')
-      return response.filter
+      showSuccessToast('筛选器更新成功')
+      return true
     } catch (error) {
       console.error('更新筛选器失败:', error)
-      showToast('更新筛选器失败')
-      return null
+      showFailToast('更新筛选器失败')
+      return false
     } finally {
       loading.value = false
     }
@@ -69,11 +69,11 @@ export const useFilterStore = defineStore('filter', () => {
     try {
       await filterApi.delete(id)
       await fetchFilters() // 重新获取列表
-      showToast('筛选器删除成功')
+      showSuccessToast('筛选器删除成功')
       return true
     } catch (error) {
       console.error('删除筛选器失败:', error)
-      showToast('删除筛选器失败')
+      showFailToast('删除筛选器失败')
       return false
     } finally {
       loading.value = false

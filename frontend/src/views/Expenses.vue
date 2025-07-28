@@ -8,7 +8,7 @@
       </div>
 
       <!-- 搜索框和筛选器 -->
-      <div class="flex items-center space-x-2 mb-4">
+      <div class="flex items-center space-x-2 mb-2">
         <van-search
           v-model="searchQuery"
           placeholder="搜索支出记录"
@@ -43,29 +43,43 @@
       </div>
 
       <!-- 搜索区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
+      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 pt-2 mb-6" :class="{ 'opacity-50': currentFilter }">
+        <div v-if="currentFilter" class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div class="flex items-center space-x-2">
+            <van-icon name="info-o" class="text-yellow-600" size="16" />
+            <span class="text-sm text-yellow-800">当前使用筛选器，日期选择将被忽略</span>
+          </div>
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <van-field
             v-model="query.startDate"
             readonly
-            is-link
+            :is-link="!currentFilter"
             placeholder="开始日期"
             class="custom-field"
-            @click="showStartDatePicker = true"
+            :class="{ 'opacity-60': currentFilter }"
+            @click="!currentFilter && (showStartDatePicker = true)"
           />
           <van-field
             v-model="query.endDate"
             readonly
-            is-link
+            :is-link="!currentFilter"
             placeholder="结束日期"
             class="custom-field"
-            @click="showEndDatePicker = true"
+            :class="{ 'opacity-60': currentFilter }"
+            @click="!currentFilter && (showEndDatePicker = true)"
           />
         </div>
 
         <div class="mt-4">
-          <van-button size="small" type="primary" class="w-full" @click="handleSearch">
-            搜索
+          <van-button 
+            size="small" 
+            type="primary" 
+            class="w-full" 
+            :disabled="!!currentFilter"
+            @click="handleSearch"
+          >
+            {{ currentFilter ? '搜索（已禁用）' : '搜索' }}
           </van-button>
         </div>
       </div>
@@ -323,6 +337,11 @@ const fetchExpenses = async () => {
       // 应用额外支出筛选
       if (conditions.isExtra !== undefined) {
         expenseQuery.isExtra = conditions.isExtra;
+      }
+      
+      // 应用分类筛选
+      if (conditions.categories && conditions.categories.length > 0) {
+        expenseQuery.categories = conditions.categories;
       }
       
       // 应用标签筛选

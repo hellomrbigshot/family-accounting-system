@@ -62,6 +62,10 @@ const filterSchema = new Schema<IFilter>({
         min: 0
       }
     },
+    categories: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Category'
+    }],
     tags: [{
       type: Schema.Types.ObjectId,
       ref: 'Tag'
