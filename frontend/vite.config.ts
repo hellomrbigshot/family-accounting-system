@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      dts: 'src/auto-imports.d.ts',
+      dts: true,
       imports: [
         'vue',
         'vue-router',
@@ -50,8 +50,7 @@ export default defineConfig({
       resolvers: [VantResolver()],
     }),
     Components({
-      resolvers: [VantResolver()],
-      dts: 'src/components.d.ts',
+      resolvers: [VantResolver()]
     }),
     VitePWA({
       registerType: 'autoUpdate',

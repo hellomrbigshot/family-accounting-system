@@ -25,7 +25,7 @@
             placeholder="选择月份"
             @click="showMonthPicker = true"
           />
-          <van-popup v-model:show="showMonthPicker" position="bottom" round :z-index="3001" teleport="body">
+          <van-popup v-model:show="showMonthPicker" position="bottom" round teleport="body">
             <van-date-picker
               v-model="selectedMonth"
               type="year-month"
@@ -71,8 +71,8 @@
       theme="custom"
       close-button-text="完成"
       :extra-key="['00', '.']"
-      :z-index="3002"
       teleport="body"
+      :z-index="3000"
       @update:model-value="budgetAmount = $event"
       @input="onAmountInput"
       @delete="onAmountDelete"

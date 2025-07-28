@@ -7,39 +7,96 @@
         <p class="text-sm text-gray-500 font-medium">今天是 {{ currentDate }}</p>
       </div>
 
-      <!-- 搜索框 -->
-      <van-search
-        v-model="searchQuery"
-        placeholder="搜索支出记录"
-        shape="round"
-        background="transparent"
-        class="custom-search !px-0"
-      />
+      <!-- 搜索框和筛选器 -->
+      <div class="flex items-center space-x-2 mb-2">
+        <van-search
+          v-model="searchQuery"
+          placeholder="搜索支出记录（支持搜索'额外支出'）"
+          shape="round"
+          background="transparent"
+          class="custom-search !px-0 flex-1"
+        />
+        <van-button
+          size="small"
+          type="primary"
+          @click="showFilterManager = true"
+        >
+          筛选器
+        </van-button>
+      </div>
+
+      <!-- 当前筛选器显示 -->
+      <div v-if="currentFilter" class="mb-3 p-2 bg-blue-50 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <van-icon name="filter-o" class="text-blue-500" size="16" />
+            <span class="text-sm font-medium text-blue-900">{{ currentFilter.name }}</span>
+          </div>
+          <van-button
+            size="mini"
+            type="default"
+            @click="clearCurrentFilter"
+          >
+            清除
+          </van-button>
+        </div>
+      </div>
+
+
+
+      <!-- 搜索帮助提示 -->
+      <div v-if="searchQuery && !filteredExpenses.length" class="mb-4 p-3 bg-blue-50 rounded-lg">
+        <div class="flex items-start">
+          <van-icon name="info-o" class="text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+          <div class="text-sm text-blue-700">
+            <p class="font-medium mb-1">搜索提示：</p>
+            <ul class="text-xs space-y-1">
+              <li>• 输入"额外支出"、"额外"或"extra"可搜索额外支出记录</li>
+              <li>• 输入分类名称、描述内容或金额进行搜索</li>
+              <li>• 支持标签名称搜索</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       <!-- 搜索区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
+      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 pt-2 mb-6" :class="{ 'opacity-50': currentFilter }">
+        <div v-if="currentFilter" class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div class="flex items-center space-x-2">
+            <van-icon name="info-o" class="text-yellow-600" size="16" />
+            <span class="text-sm text-yellow-800">当前使用筛选器，日期选择将被忽略</span>
+          </div>
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <van-field
             v-model="query.startDate"
             readonly
-            is-link
+            :is-link="!currentFilter"
             placeholder="开始日期"
             class="custom-field"
-            @click="showStartDatePicker = true"
+            :class="{ 'opacity-60': currentFilter }"
+            @click="!currentFilter && (showStartDatePicker = true)"
           />
           <van-field
             v-model="query.endDate"
             readonly
-            is-link
+            :is-link="!currentFilter"
             placeholder="结束日期"
             class="custom-field"
-            @click="showEndDatePicker = true"
+            :class="{ 'opacity-60': currentFilter }"
+            @click="!currentFilter && (showEndDatePicker = true)"
           />
         </div>
 
         <div class="mt-4">
-          <van-button size="small" type="primary" class="w-full" @click="handleSearch">
-            搜索
+          <van-button 
+            size="small" 
+            type="primary" 
+            class="w-full" 
+            :disabled="!!currentFilter"
+            @click="handleSearch"
+          >
+            {{ currentFilter ? '搜索（已禁用）' : '搜索' }}
           </van-button>
         </div>
       </div>
@@ -78,6 +135,14 @@
         @success="handleEditSuccess"
       />
 
+      <!-- 筛选器管理弹窗 -->
+      <FilterManager
+        v-model:show="showFilterManager"
+        :current-filter="currentFilter"
+        @filter-applied="handleFilterApplied"
+        @filter-cleared="handleFilterCleared"
+      />
+
       <!-- 日期选择器 -->
       <van-popup v-model:show="showStartDatePicker" position="bottom" round>
         <van-date-picker
@@ -108,21 +173,26 @@
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
+import { useFilterStore } from '@/stores/filter';
 import ExpenseList from '@/components/ExpenseList.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
+import FilterManager from '@/components/FilterManager.vue';
 import type { ExpenseQuery } from '@/api/expense';
+import type { FilterData } from '@/api/filter';
 import dayjs from '@/utils/dayjs';
 
 const route = useRoute();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
 const tagStore = useTagStore();
+const filterStore = useFilterStore();
 const showForm = ref(false);
 const showEditForm = ref(false);
 const editData = ref<any>(null);
 const showStartDatePicker = ref(false);
 const showEndDatePicker = ref(false);
 const searchQuery = ref('');
+const showFilterManager = ref(false);
 
 // 当前日期
 const currentDate = computed(() => {
@@ -205,6 +275,7 @@ const handleEdit = (expense: any) => {
 const expenses = computed(() => expenseStore.expenses);
 
 const filteredExpenses = computed(() => {
+  // 如果有搜索查询，应用本地搜索（用于快速搜索提示）
   if (!searchQuery.value) return expenses.value;
   
   const query = searchQuery.value.toLowerCase();
@@ -217,6 +288,17 @@ const filteredExpenses = computed(() => {
       return tag?.name.toLowerCase().includes(query);
     }) || false;
     
+    // 检查额外支出关键词匹配
+    const extraKeywords = ['额外支出', '额外', 'extra'];
+    const isExtraMatch = extraKeywords.some(keyword => 
+      query.includes(keyword.toLowerCase())
+    );
+    
+    // 如果搜索额外支出关键词，只返回额外支出记录
+    if (isExtraMatch) {
+      return expense.isExtra;
+    }
+    
     return (
       expense.description.toLowerCase().includes(query) ||
       (category?.name || '').toLowerCase().includes(query) ||
@@ -228,10 +310,86 @@ const filteredExpenses = computed(() => {
 
 const fetchExpenses = async () => {
   try {
-    await expenseStore.fetchExpenses({
+    let expenseQuery: ExpenseQuery = {
       startDate: query.startDate,
       endDate: query.endDate
-    });
+    };
+
+    // 如果有当前筛选器，应用筛选器条件
+    if (currentFilter.value) {
+      const conditions = currentFilter.value.conditions;
+      
+      // 应用时间范围
+      if (conditions.timeRange) {
+        if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
+          // 根据预设时间范围设置查询参数
+          const now = dayjs();
+          switch (conditions.timeRange.preset) {
+            case 'week':
+              expenseQuery.startDate = now.startOf('week').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.endOf('week').format('YYYY-MM-DD');
+              break;
+            case 'month':
+              expenseQuery.startDate = now.startOf('month').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.endOf('month').format('YYYY-MM-DD');
+              break;
+            case 'quarter':
+              // dayjs 不支持 quarter，使用月份计算
+              const quarterStart = now.month(Math.floor(now.month() / 3) * 3);
+              expenseQuery.startDate = quarterStart.startOf('month').format('YYYY-MM-DD');
+              expenseQuery.endDate = quarterStart.add(2, 'month').endOf('month').format('YYYY-MM-DD');
+              break;
+            case 'year':
+              expenseQuery.startDate = now.startOf('year').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.endOf('year').format('YYYY-MM-DD');
+              break;
+            case 'lastWeek':
+              expenseQuery.startDate = now.subtract(1, 'week').startOf('week').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.subtract(1, 'week').endOf('week').format('YYYY-MM-DD');
+              break;
+            case 'lastMonth':
+              expenseQuery.startDate = now.subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');
+              break;
+            case 'lastYear':
+              expenseQuery.startDate = now.subtract(1, 'year').startOf('year').format('YYYY-MM-DD');
+              expenseQuery.endDate = now.subtract(1, 'year').endOf('year').format('YYYY-MM-DD');
+              break;
+          }
+        } else if (conditions.timeRange.custom) {
+          expenseQuery.startDate = conditions.timeRange.custom.startDate;
+          expenseQuery.endDate = conditions.timeRange.custom.endDate;
+        }
+      }
+      
+      // 应用额外支出筛选
+      if (conditions.isExtra !== undefined) {
+        expenseQuery.isExtra = conditions.isExtra;
+      }
+      
+      // 应用分类筛选
+      if (conditions.categories && conditions.categories.length > 0) {
+        expenseQuery.categories = conditions.categories;
+      }
+      
+      // 应用标签筛选
+      if (conditions.tags && conditions.tags.length > 0) {
+        expenseQuery.tags = conditions.tags;
+      }
+      
+      // 应用金额范围筛选
+      if (conditions.amountRange) {
+        expenseQuery.amountOperator = conditions.amountRange.operator;
+        expenseQuery.amountValue = conditions.amountRange.value;
+      }
+      
+      // 应用描述关键词筛选
+      if (conditions.description) {
+        expenseQuery.description = conditions.description;
+      }
+    }
+
+    await expenseStore.fetchExpenses(expenseQuery);
   } catch (error) {
     console.error('Failed to fetch expenses:', error);
   }
@@ -285,6 +443,28 @@ const handleRefresh = async () => {
 const totalAmount = computed(() => {
   return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0);
 });
+
+// 当前筛选器
+const currentFilter = computed(() => filterStore.currentFilter);
+
+// 清除当前筛选器
+const clearCurrentFilter = () => {
+  filterStore.clearCurrentFilter();
+  // 重新获取支出数据
+  fetchExpenses();
+};
+
+// 处理筛选器应用
+const handleFilterApplied = (filter: FilterData) => {
+  // 根据筛选器条件重新获取支出数据
+  fetchExpenses();
+};
+
+// 处理筛选器清除
+const handleFilterCleared = () => {
+  // 重新获取支出数据
+  fetchExpenses();
+};
 </script>
 
 <style scoped>
