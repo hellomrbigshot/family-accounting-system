@@ -15,8 +15,14 @@ export interface ExpenseQuery {
   startDate?: string
   endDate?: string
   category?: string
+  categories?: string[]
   tags?: string[]
   isExtra?: boolean
+  minAmount?: number
+  maxAmount?: number
+  amountOperator?: 'gt' | 'lt' | 'eq' | 'gte' | 'lte'
+  amountValue?: number
+  description?: string
 }
 
 export interface ExpenseStats {

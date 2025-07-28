@@ -60,7 +60,19 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
 
 export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { startDate, endDate, category, isExtra } = req.query;
+    const { 
+      startDate, 
+      endDate, 
+      category, 
+      categories,
+      isExtra, 
+      tags,
+      minAmount,
+      maxAmount,
+      amountOperator,
+      amountValue,
+      description
+    } = req.query;
     
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
@@ -68,6 +80,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
 
     const query: any = { userId: new Types.ObjectId(req.user._id) };
 
+    // 时间范围筛选
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate as string),
@@ -75,8 +88,61 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
       };
     }
 
+    // 分类筛选（支持单个或多个分类）
     if (category) {
       query.category = category;
+    } else if (categories) {
+      const categoryArray = Array.isArray(categories) ? categories : [categories];
+      query.category = { $in: categoryArray };
+    }
+
+    // 额外支出筛选
+    if (isExtra !== undefined) {
+      query.isExtra = isExtra === 'true';
+    }
+
+    // 标签筛选
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : [tags];
+      query.tags = { $in: tagArray.map(tag => new Types.ObjectId(tag as string)) };
+    }
+
+    // 金额范围筛选
+    if (minAmount !== undefined || maxAmount !== undefined) {
+      query.amount = {};
+      if (minAmount !== undefined) {
+        query.amount.$gte = parseFloat(minAmount as string);
+      }
+      if (maxAmount !== undefined) {
+        query.amount.$lte = parseFloat(maxAmount as string);
+      }
+    }
+
+    // 金额比较筛选
+    if (amountOperator && amountValue !== undefined) {
+      const value = parseFloat(amountValue as string);
+      switch (amountOperator) {
+        case 'gt':
+          query.amount = { $gt: value };
+          break;
+        case 'lt':
+          query.amount = { $lt: value };
+          break;
+        case 'eq':
+          query.amount = value;
+          break;
+        case 'gte':
+          query.amount = { $gte: value };
+          break;
+        case 'lte':
+          query.amount = { $lte: value };
+          break;
+      }
+    }
+
+    // 描述关键词搜索
+    if (description) {
+      query.description = { $regex: description as string, $options: 'i' };
     }
 
     if (isExtra !== undefined) {

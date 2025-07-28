@@ -1,12 +1,11 @@
 <template>
   <van-popup
     :show="show"
-    @update:show="handleShowUpdate"
     position="bottom"
     round
     :style="{ height: '90%' }"
-    :z-index="3000"
     teleport="body"
+    @update:show="handleShowUpdate"
   >
     <div class="h-full flex flex-col">
       <!-- 头部 -->
@@ -139,7 +138,7 @@
   </van-popup>
 
   <!-- 日期选择器 -->
-  <van-popup v-model:show="showDatePicker" position="bottom" round :z-index="3001" teleport="body">
+  <van-popup v-model:show="showDatePicker" position="bottom" round teleport="body">
     <van-date-picker
       v-model="currentDate"
       title="选择日期"
@@ -151,7 +150,7 @@
   </van-popup>
 
   <!-- 分类选择器 -->
-  <van-popup v-model:show="showCategoryPicker" position="bottom" round :z-index="3001" teleport="body">
+  <van-popup v-model:show="showCategoryPicker" position="bottom" round teleport="body">
     <van-picker
       :columns="categoryColumns"
       show-toolbar
@@ -169,8 +168,8 @@
     theme="custom"
     close-button-text="完成"
     :extra-key="['00', '.']"
-    :z-index="3002"
     teleport="body"
+    :z-index="3000"
     @input="onAmountInput"
     @delete="onAmountDelete"
     @blur="handleAmountFieldBlur"
@@ -178,7 +177,7 @@
   />
 
   <!-- 标签选择器 -->
-  <van-popup v-model:show="showTagPicker" position="bottom" round :z-index="3001" teleport="body">
+  <van-popup v-model:show="showTagPicker" position="bottom" round teleport="body">
     <div class="p-4">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-medium">选择标签</h3>

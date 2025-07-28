@@ -52,6 +52,8 @@ const expenseSchema = new Schema<IExpense>({
 expenseSchema.index({ userId: 1, date: -1 });
 expenseSchema.index({ category: 1 });
 expenseSchema.index({ tags: 1 });
+expenseSchema.index({ userId: 1, amount: 1 });
+expenseSchema.index({ userId: 1, description: 'text' });
 expenseSchema.index({ userId: 1, isExtra: 1 });
 expenseSchema.index({ userId: 1, isExtra: 1, date: -1 });
 
