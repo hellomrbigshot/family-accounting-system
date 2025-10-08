@@ -344,6 +344,7 @@ const extraColumns = [
 // 显示文本
 const timeRangeText = computed(() => {
   if (!conditions.timeRange) return '不限'
+  if (conditions.timeRange.type === 'unlimited') return '不限'
   if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
     const presetMap: Record<string, string> = {
       week: '本周',
