@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { auth } from '../middlewares/auth';
 import {
   getUserCategoryPermissions,
   updateUserCategoryPermission,
@@ -9,7 +9,7 @@ import {
 const router: Router = Router();
 
 // 所有路由都需要认证
-router.use(authMiddleware);
+router.use(auth);
 
 // 获取用户分类权限列表
 router.get('/permissions', getUserCategoryPermissions);
@@ -20,4 +20,4 @@ router.put('/permissions/:categoryId', updateUserCategoryPermission);
 // 批量更新用户分类权限
 router.put('/permissions', batchUpdateUserCategoryPermissions);
 
-export default router; 
+export default router;

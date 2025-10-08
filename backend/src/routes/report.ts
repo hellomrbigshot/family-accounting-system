@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { getReport, exportReport } from '../controllers/report'
-import { authMiddleware } from '../middleware/auth'
+import { auth } from '../middlewares/auth'
 
 const router: Router = Router()
 
-router.use(authMiddleware)
+router.use(auth)
 
 router.get('/', getReport)
 router.get('/export', exportReport)
 
-export default router 
+export default router

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { auth } from '../middlewares/auth';
 import {
   getCategories,
   createCategory,
@@ -10,7 +10,7 @@ import {
 const router: Router = Router();
 
 // 所有路由都需要认证
-router.use(authMiddleware);
+router.use(auth);
 
 // 获取所有分类
 router.get('/', getCategories);
@@ -24,4 +24,4 @@ router.put('/:id', updateCategory);
 // 删除分类
 router.delete('/:id', deleteCategory);
 
-export default router; 
+export default router;

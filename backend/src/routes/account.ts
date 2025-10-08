@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { auth } from '../middlewares/auth';
 import {
   getAllAccounts,
   getAccountById,
@@ -12,7 +12,7 @@ import {
 
 const router: Router = Router();
 
-router.use(authMiddleware);
+router.use(auth);
 
 // 账户管理路由
 router.get('/', getAllAccounts);
@@ -25,4 +25,4 @@ router.delete('/:id', deleteAccount);
 router.post('/transfer', transfer);
 router.post('/:id/adjust', adjustBalance);
 
-export default router; 
+export default router;

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { authMiddleware } from '../middleware/auth'
+import { auth } from '../middlewares/auth'
 import {
   createFilter,
   getFilters,
@@ -11,7 +11,7 @@ import {
 const router: Router = Router()
 
 // 所有路由都需要认证
-router.use(authMiddleware)
+router.use(auth)
 
 // 获取筛选器列表
 router.get('/', getFilters)
@@ -28,4 +28,4 @@ router.put('/:id', updateFilter)
 // 删除筛选器
 router.delete('/:id', deleteFilter)
 
-export default router 
+export default router

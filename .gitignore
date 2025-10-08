@@ -77,6 +77,8 @@ frontend/dist
 frontend/node_modules
 frontend/.env.local
 frontend/.env.*.local
+frontend/auto-imports.d.ts
+frontend/components.d.ts
 
 # Backend specific
 backend/node_modules
@@ -86,4 +88,4 @@ backend/logs
 backend/coverage
 
 # Documentation and README files
-Vant-README/ 
+Vant-README/
