@@ -185,9 +185,9 @@ const deleteFilter = async (filter: FilterData) => {
       message: `确定要删除筛选器"${filter.name}"吗？`,
       showCancelButton: true
     })
-    
+
     await filterStore.deleteFilter(filter.id)
-    
+
     // 如果删除的是当前筛选器，清除当前筛选器
     if (currentFilter.value?.id === filter.id) {
       clearCurrentFilter()
@@ -206,7 +206,7 @@ const handleFormSuccess = () => {
 // 格式化筛选条件
 const formatFilterConditions = (conditions: any) => {
   const parts = []
-  
+
   // 时间范围
   if (conditions?.timeRange) {
     if (conditions.timeRange.type === 'unlimited') {
@@ -233,12 +233,12 @@ const formatFilterConditions = (conditions: any) => {
   } else {
     parts.push('不限时间')
   }
-  
+
   // 金额范围
-  if (conditions?.amountRange && 
-      conditions.amountRange.operator && 
-      conditions.amountRange.value !== undefined && 
-      conditions.amountRange.value !== null && 
+  if (conditions?.amountRange &&
+      conditions.amountRange.operator &&
+      conditions.amountRange.value !== undefined &&
+      conditions.amountRange.value !== null &&
       conditions.amountRange.value !== '') {
     const operatorMap: Record<string, string> = {
       gt: '大于',
@@ -252,7 +252,7 @@ const formatFilterConditions = (conditions: any) => {
   } else {
     parts.push('不限')
   }
-  
+
   // 分类筛选
   if (conditions?.categories && conditions.categories.length > 0) {
     const categoryNames = conditions.categories.map((id: string) => {
@@ -263,7 +263,7 @@ const formatFilterConditions = (conditions: any) => {
   } else {
     parts.push('不限')
   }
-  
+
   // 标签筛选
   if (conditions?.tags && conditions.tags.length > 0) {
     const tagNames = conditions.tags.map((id: string) => {
@@ -274,21 +274,21 @@ const formatFilterConditions = (conditions: any) => {
   } else {
     parts.push('不限')
   }
-  
+
   // 支出类型
   if (conditions?.isExtra !== undefined) {
     parts.push(conditions.isExtra ? '额外支出' : '普通支出')
   } else {
     parts.push('不限')
   }
-  
+
   // 描述关键词
   if (conditions?.description && conditions.description.trim() !== '') {
     parts.push(`包含"${conditions.description}"`)
   } else {
     parts.push('不限')
   }
-  
+
   return `时间：${parts[0]}，金额：${parts[1]}，分类：${parts[2]}，标签：${parts[3]}，类型：${parts[4]}，描述：${parts[5]}`
 }
 
@@ -301,4 +301,4 @@ const formatDate = (date: string) => {
 onMounted(() => {
   filterStore.fetchFilters()
 })
-</script> 
+</script>
