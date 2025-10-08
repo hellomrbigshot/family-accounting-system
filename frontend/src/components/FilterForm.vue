@@ -217,6 +217,30 @@
       @blur="handleAmountFieldBlur"
       @close="showNumberKeyboard = false"
     />
+
+    <!-- 自定义开始日期选择器 -->
+    <van-popup v-model:show="showCustomStartDatePicker" position="bottom" round teleport="body">
+      <van-date-picker
+        v-model="customStartDate"
+        title="选择开始日期"
+        :min-date="new Date(2020, 0, 1)"
+        :max-date="new Date()"
+        @confirm="onCustomStartDateConfirm"
+        @cancel="showCustomStartDatePicker = false"
+      />
+    </van-popup>
+
+    <!-- 自定义结束日期选择器 -->
+    <van-popup v-model:show="showCustomEndDatePicker" position="bottom" round teleport="body">
+      <van-date-picker
+        v-model="customEndDate"
+        title="选择结束日期"
+        :min-date="new Date(2020, 0, 1)"
+        :max-date="new Date()"
+        @confirm="onCustomEndDateConfirm"
+        @cancel="showCustomEndDatePicker = false"
+      />
+    </van-popup>
   </van-popup>
 </template>
 
@@ -273,9 +297,24 @@ const showAmountRangePicker = ref(false)
 const showOperatorPicker = ref(false)
 const showExtraPicker = ref(false)
 const showNumberKeyboard = ref(false)
+const showCustomStartDatePicker = ref(false)
+const showCustomEndDatePicker = ref(false)
+
+// 自定义日期选择器的当前值
+const customStartDate = ref<string[]>([
+  dayjs().year().toString(),
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
+])
+const customEndDate = ref<string[]>([
+  dayjs().year().toString(),
+  (dayjs().month() + 1).toString().padStart(2, '0'),
+  dayjs().date().toString().padStart(2, '0')
+])
 
 // 时间范围选项
 const timeRangeColumns = [
+  { text: '不限', value: 'unlimited' },
   { text: '本周', value: 'week' },
   { text: '本月', value: 'month' },
   { text: '本季度', value: 'quarter' },
@@ -317,14 +356,20 @@ const timeRangeText = computed(() => {
     }
     return presetMap[conditions.timeRange.preset]
   }
+  // 显示自定义日期范围
+  if (conditions.timeRange.type === 'custom' && conditions.timeRange.custom) {
+    const start = dayjs(conditions.timeRange.custom.startDate).format('YYYY/MM/DD')
+    const end = dayjs(conditions.timeRange.custom.endDate).format('YYYY/MM/DD')
+    return `${start} - ${end}`
+  }
   return '自定义时间'
 })
 
 const amountRangeText = computed(() => {
   // 检查 amountRange 是否存在且有效
-  if (!conditions.amountRange || 
-      !conditions.amountRange.operator || 
-      conditions.amountRange.value === undefined || 
+  if (!conditions.amountRange ||
+      !conditions.amountRange.operator ||
+      conditions.amountRange.value === undefined ||
       conditions.amountRange.value === null) {
     return '不限'
   }
@@ -351,9 +396,9 @@ const operatorText = computed(() => {
 
 // 判断金额范围是否有效
 const isAmountRangeValid = computed(() => {
-  return amountRange.operator && 
-         amountRange.value && 
-         amountRange.value.trim() !== '' && 
+  return amountRange.operator &&
+         amountRange.value &&
+         amountRange.value.trim() !== '' &&
          !isNaN(parseFloat(amountRange.value))
 })
 
@@ -371,17 +416,49 @@ const initForm = () => {
     selectedCategories.value = props.editData.conditions?.categories || []
     // 使用响应式方式设置条件对象
     Object.assign(conditions, props.editData.conditions || {})
-    
+
     // 确保表单数据和条件数据同步
     conditions.tags = [...form.tags]
     conditions.categories = [...selectedCategories.value]
     conditions.description = form.description
-    
+
     // 初始化金额范围临时数据
     if (props.editData.conditions?.amountRange) {
       amountRange.operator = props.editData.conditions.amountRange.operator || 'gt'
       const value = props.editData.conditions.amountRange.value
       amountRange.value = value !== undefined && value !== null ? value.toString() : ''
+    }
+
+    // 初始化自定义日期选择器的值
+    if (props.editData.conditions?.timeRange?.type === 'custom' &&
+        props.editData.conditions.timeRange.custom) {
+      const startDate = dayjs(props.editData.conditions.timeRange.custom.startDate)
+      const endDate = dayjs(props.editData.conditions.timeRange.custom.endDate)
+
+      customStartDate.value = [
+        startDate.year().toString(),
+        (startDate.month() + 1).toString().padStart(2, '0'),
+        startDate.date().toString().padStart(2, '0')
+      ]
+
+      customEndDate.value = [
+        endDate.year().toString(),
+        (endDate.month() + 1).toString().padStart(2, '0'),
+        endDate.date().toString().padStart(2, '0')
+      ]
+    } else {
+      // 如果不是自定义时间，重置日期选择器的值
+      const now = dayjs()
+      customStartDate.value = [
+        now.year().toString(),
+        (now.month() + 1).toString().padStart(2, '0'),
+        now.date().toString().padStart(2, '0')
+      ]
+      customEndDate.value = [
+        now.year().toString(),
+        (now.month() + 1).toString().padStart(2, '0'),
+        now.date().toString().padStart(2, '0')
+      ]
     }
   } else {
     // 新建模式：重置所有数据
@@ -389,42 +466,91 @@ const initForm = () => {
     form.description = ''
     form.tags = []
     selectedCategories.value = []
-    
+
     // 重置条件对象 - 不设置默认时间范围
     delete conditions.timeRange
-    
+
     // 清除其他条件
     delete conditions.amountRange
     delete conditions.tags
     delete conditions.categories
     delete conditions.isExtra
     delete conditions.description
-    
+
     // 重置金额范围临时数据
     amountRange.operator = 'gt'
     amountRange.value = ''
+
+    // 重置自定义日期选择器的值
+    const now = dayjs()
+    customStartDate.value = [
+      now.year().toString(),
+      (now.month() + 1).toString().padStart(2, '0'),
+      now.date().toString().padStart(2, '0')
+    ]
+    customEndDate.value = [
+      now.year().toString(),
+      (now.month() + 1).toString().padStart(2, '0'),
+      now.date().toString().padStart(2, '0')
+    ]
   }
 }
 
 // 时间范围确认
 const onTimeRangeConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   const value = selectedValues[0]
-  if (value === 'custom') {
-    // TODO: 实现自定义时间选择
+  if (value === 'unlimited') {
+    // 不限：设置特殊标记，而不是删除
     conditions.timeRange = {
-      type: 'custom',
-      custom: {
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString()
-      }
+      type: 'unlimited'
     }
+    showTimeRangePicker.value = false
+  } else if (value === 'custom') {
+    // 自定义：显示日期选择器
+    showTimeRangePicker.value = false
+    // 延迟显示，避免弹窗冲突
+    setTimeout(() => {
+      showCustomStartDatePicker.value = true
+    }, 300)
   } else {
     conditions.timeRange = {
       type: 'preset',
       preset: value as any
     }
+    showTimeRangePicker.value = false
   }
-  showTimeRangePicker.value = false
+}
+
+// 确认自定义开始日期
+const onCustomStartDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  customStartDate.value = selectedValues
+  showCustomStartDatePicker.value = false
+  // 显示结束日期选择器
+  showCustomEndDatePicker.value = true
+}
+
+// 确认自定义结束日期
+const onCustomEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
+  customEndDate.value = selectedValues
+
+  // 设置自定义时间范围
+  const startDate = dayjs(`${customStartDate.value.join('-')}`)
+    .startOf('day')  // 00:00:00
+    .toISOString()
+
+  const endDate = dayjs(`${selectedValues.join('-')}`)
+    .endOf('day')    // 23:59:59.999
+    .toISOString()
+
+  conditions.timeRange = {
+    type: 'custom',
+    custom: {
+      startDate,
+      endDate
+    }
+  }
+
+  showCustomEndDatePicker.value = false
 }
 
 // 比较方式确认
@@ -528,12 +654,12 @@ const onExtraConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
 const handleSubmit = async () => {
   try {
     loading.value = true
-    
+
     // 同步表单数据到条件对象
     conditions.tags = [...form.tags]
     conditions.categories = [...selectedCategories.value]
     conditions.description = form.description.trim() || undefined
-    
+
     const filterData = {
       name: form.name.trim(),
       conditions: { ...conditions }
@@ -571,4 +697,4 @@ watch(() => props.show, (newValue) => {
     initForm()
   }
 })
-</script> 
+</script>

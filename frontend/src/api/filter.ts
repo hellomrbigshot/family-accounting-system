@@ -2,7 +2,7 @@ import axios from '@/utils/axios'
 
 export interface FilterConditions {
   timeRange?: {
-    type: 'preset' | 'custom'
+    type: 'preset' | 'custom' | 'unlimited'
     preset?: 'week' | 'month' | 'quarter' | 'year' | 'lastWeek' | 'lastMonth' | 'lastYear'
     custom?: {
       startDate: string
@@ -64,4 +64,4 @@ class FilterApi {
   }
 }
 
-export const filterApi = new FilterApi() 
+export const filterApi = new FilterApi()
