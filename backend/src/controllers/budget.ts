@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middlewares/auth';
 import { Budget } from '../models/budget';
 import dayjs from 'dayjs';
 
-export const getCurrentBudget = async (req: Request, res: Response) => {
+export const getCurrentBudget = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
     if (!userId) {
@@ -11,7 +12,7 @@ export const getCurrentBudget = async (req: Request, res: Response) => {
 
     const { year, month } = req.query;
     const now = dayjs();
-    
+
     // 如果没有指定年月，使用当前年月
     const targetYear = year ? parseInt(year as string) : now.year();
     const targetMonth = month ? parseInt(month as string) : now.month() + 1;
@@ -29,7 +30,7 @@ export const getCurrentBudget = async (req: Request, res: Response) => {
   }
 };
 
-export const updateBudget = async (req: Request, res: Response) => {
+export const updateBudget = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
     if (!userId) {
@@ -70,4 +71,4 @@ export const updateBudget = async (req: Request, res: Response) => {
     console.error('更新预算失败:', error);
     res.status(500).json({ message: '更新预算失败' });
   }
-}; 
+};
