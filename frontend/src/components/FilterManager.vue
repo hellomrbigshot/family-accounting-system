@@ -209,7 +209,9 @@ const formatFilterConditions = (conditions: any) => {
   
   // 时间范围
   if (conditions?.timeRange) {
-    if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
+    if (conditions.timeRange.type === 'unlimited') {
+      parts.push('不限时间')
+    } else if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
       const presetMap: Record<string, string> = {
         week: '本周',
         month: '本月',
@@ -220,13 +222,16 @@ const formatFilterConditions = (conditions: any) => {
         lastYear: '去年'
       }
       parts.push(presetMap[conditions.timeRange.preset] || '自定义时间')
-    } else if (conditions.timeRange.custom) {
-      parts.push('自定义时间')
+    } else if (conditions.timeRange.type === 'custom' && conditions.timeRange.custom) {
+      // 显示具体的自定义时间范围
+      const start = dayjs(conditions.timeRange.custom.startDate).format('YYYY/MM/DD')
+      const end = dayjs(conditions.timeRange.custom.endDate).format('YYYY/MM/DD')
+      parts.push(`${start} - ${end}`)
     } else {
-      parts.push('不限')
+      parts.push('不限时间')
     }
   } else {
-    parts.push('不限')
+    parts.push('不限时间')
   }
   
   // 金额范围

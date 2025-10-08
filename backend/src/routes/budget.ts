@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { getCurrentBudget, updateBudget } from '../controllers/budget';
-import { authMiddleware } from '../middleware/auth';
+import { auth } from '../middlewares/auth';
 
 const router: Router = Router();
 
-router.use(authMiddleware);
+router.use(auth);
 
 router.get('/current', getCurrentBudget);
 router.put('/current', updateBudget);
 
-export default router; 
+export default router;

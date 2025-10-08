@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/auth';
+import { auth } from '../middlewares/auth';
 import {
   getTags,
   createTag,
@@ -10,7 +10,7 @@ import {
 const router: Router = Router();
 
 // 所有路由都需要认证
-router.use(authMiddleware);
+router.use(auth);
 
 // 获取标签列表
 router.get('/', getTags);
@@ -24,4 +24,4 @@ router.put('/:id', updateTag);
 // 删除标签
 router.delete('/:id', deleteTag);
 
-export default router; 
+export default router;
