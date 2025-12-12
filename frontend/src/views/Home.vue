@@ -1,59 +1,69 @@
 <template>
-  <div class="container mx-auto px-4">
+  <div class="container mx-auto px-4 animate-fade-in">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
       <!-- 预算卡片 -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-900">本月总览</h2>
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 mb-4 card-hover animate-fade-in-up" style="animation-delay: 0.1s">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-display font-bold text-gray-900">本月总览</h2>
           <van-button
             type="primary"
             size="small"
             @click="showBudgetDialog = true"
+            class="rounded-lg"
           >
             设置预算
           </van-button>
         </div>
-        <div class="space-y-2">
+        <div class="space-y-4">
           <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-              <span class="text-gray-600">预算</span>
-              <span class="text-lg font-medium text-gray-900">
+            <div class="flex flex-col space-y-1">
+              <span class="text-sm text-gray-600 font-medium">预算</span>
+              <span class="text-xl font-display font-bold text-gray-900">
                 {{ formatAmount(budgetStore.currentBudget?.amount) }}
               </span>
             </div>
-            <div class="flex items-center space-x-2">
-              <span class="text-gray-600">支出</span>
+            <div class="flex flex-col items-end space-y-1">
+              <span class="text-sm text-gray-600 font-medium">支出</span>
               <span :class="[
-                'text-2xl font-bold',
-                isOverBudget ? 'text-red-600' : 'text-gray-900'
+                'text-3xl font-display font-bold transition-colors duration-300',
+                isOverBudget ? 'text-red-600' : 'text-warm-600'
               ]">
                 {{ formatAmount(monthlyExpense) }}
               </span>
             </div>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div class="w-full bg-warm-100 rounded-full h-3 overflow-hidden shadow-inner">
             <div
-              class="h-2 rounded-full transition-all duration-300"
-              :class="isOverBudget ? 'bg-red-600' : 'bg-indigo-600'"
-              :style="{ width: `${actualProgress}%` }"
-            />
+              class="h-3 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+              :class="isOverBudget ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-warm-400 to-warm-600'"
+              :style="{ width: `${Math.min(actualProgress, 100)}%` }"
+            >
+              <div class="absolute inset-0 bg-white/20 animate-shimmer"></div>
+            </div>
           </div>
-          <div class="text-sm text-gray-500 text-right">
-            已使用 {{ actualProgress.toFixed(1) }}%
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-gray-500">已使用</span>
+            <span :class="[
+              'font-bold',
+              isOverBudget ? 'text-red-600' : 'text-warm-600'
+            ]">
+              {{ actualProgress.toFixed(1) }}%
+            </span>
           </div>
         </div>
       </div>
 
       <!-- 最近支出 -->
-      <div class="bg-white rounded-lg shadow-sm p-4">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-900">最近支出</h2>
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 card-hover animate-fade-in-up" style="animation-delay: 0.2s">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-display font-bold text-gray-900">最近支出</h2>
           <div class="flex space-x-2">
             <van-button
               type="default"
               size="small"
               @click="router.push('/expenses')"
+              class="rounded-lg"
             >
               查看全部
             </van-button>
@@ -61,6 +71,7 @@
               type="primary"
               size="small"
               @click="router.push('/categories')"
+              class="rounded-lg"
             >
               分类管理
             </van-button>
@@ -83,8 +94,9 @@
       magnetic="x"
       :gap="{ x: 24, y: 60 }"
       @click="showAddExpenseDialog = true"
+      class="floating-button"
     >
-      <van-icon name="plus" size="20" />
+      <van-icon name="plus" size="24" />
     </van-floating-bubble>
 
     <!-- 预算设置对话框 -->
@@ -215,20 +227,40 @@ watch(() => dayjs().month(), async (newMonth) => {
 });
 </script>
 
-<style>
-.van-button--primary {
-  @apply bg-indigo-600 border-indigo-600;
+<style scoped>
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
 }
 
-.van-button--primary:active {
-  @apply bg-indigo-700 border-indigo-700;
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
 }
 
-.van-floating-bubble {
-  @apply shadow-lg bg-indigo-600 border-indigo-600;
+:deep(.van-button--default) {
+  border-color: var(--color-warm-300);
+  color: var(--color-warm-700);
 }
 
-.van-floating-bubble:active {
-  @apply shadow-xl bg-indigo-700 border-indigo-700;
+:deep(.van-button--default:active) {
+  background: var(--color-warm-50);
+  border-color: var(--color-warm-400);
+}
+
+.floating-button :deep(.van-floating-bubble) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-button :deep(.van-floating-bubble:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.4);
+  transform: scale(0.95);
+}
+
+.floating-button :deep(.van-icon) {
+  color: white;
 }
 </style> 

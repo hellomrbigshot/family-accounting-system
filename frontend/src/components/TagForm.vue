@@ -4,61 +4,65 @@
     @update:show="handleShowUpdate"
     position="bottom"
     round
-    class="h-[50vh] flex flex-col"
+    :style="{ height: '50vh' }"
+    teleport="body"
   >
     <div class="flex flex-col h-full">
-      <div class="flex items-center justify-between p-4 border-b">
-        <span class="text-lg font-medium">{{ props.tag ? '编辑标签' : '新建标签' }}</span>
-        <van-icon name="cross" @click="handleCancel" />
+      <div class="flex items-center justify-between p-6 border-b border-warm-200 bg-gradient-warm-subtle">
+        <span class="text-xl font-display font-bold text-gray-900">{{ props.tag ? '编辑标签' : '新建标签' }}</span>
+        <van-icon name="cross" size="22" class="text-gray-600 hover:text-warm-600 cursor-pointer transition-colors" @click="handleCancel" />
       </div>
 
-      <div class="flex-1 overflow-y-auto">
-        <van-form @submit="handleSubmit" class="flex flex-col h-full p-4">
-          <van-cell-group inset>
+      <div class="flex-1 overflow-y-auto bg-white">
+        <van-form @submit="handleSubmit" class="flex flex-col h-full p-6">
+          <van-cell-group inset class="mb-4">
             <van-field
               v-model="form.name"
               name="name"
               label="名称"
               placeholder="请输入标签名称"
               :rules="[{ required: true, message: '请输入标签名称' }]"
-              class="[&_.van-field__label]:text-gray-700 [&_.van-field__label]:font-medium [&_.van-field__control]:text-gray-900"
+              class="tag-field"
             />
           </van-cell-group>
 
           <van-cell-group inset class="mt-4 flex-1 flex flex-col">
-            <van-cell title="颜色" />
-            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent hover:scrollbar-thumb-gray-300">
-              <div class="grid grid-cols-6 gap-2 p-3 bg-gray-50">
+            <van-cell title="颜色" class="font-semibold" />
+            <div class="flex-1 min-h-0 overflow-y-auto">
+              <div class="grid grid-cols-6 gap-3 p-4 bg-warm-50 rounded-xl">
                 <button
                   v-for="color in colorOptions"
                   :key="color"
                   type="button"
                   @click="form.color = color"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center hover:ring-2 hover:ring-offset-2 hover:ring-primary-500 transition-all duration-200"
-                  :class="{ 'ring-2 ring-primary-500 ring-offset-2': form.color === color }"
+                  class="w-12 h-12 rounded-xl flex items-center justify-center hover:ring-2 hover:ring-offset-2 hover:ring-warm-500 transition-all duration-200 shadow-sm border-2 border-white"
+                  :class="{ 
+                    'ring-2 ring-warm-500 ring-offset-2 scale-110 shadow-md': form.color === color,
+                    'hover:scale-105': form.color !== color
+                  }"
                   :style="{ backgroundColor: color }"
                 >
-                  <van-icon v-if="form.color === color" name="success" class="text-white" />
+                  <van-icon v-if="form.color === color" name="success" class="text-white text-lg" />
                 </button>
               </div>
-              <div v-if="!form.color" class="px-3 py-1 text-red-500 text-sm">
+              <div v-if="!form.color" class="px-4 py-2 text-red-500 text-sm font-medium mt-2">
                 请选择颜色
               </div>
             </div>
           </van-cell-group>
 
-          <div class="flex justify-end space-x-3 pt-4 mr-4">
+          <div class="flex justify-end space-x-3 pt-6">
             <van-button
               type="default"
               @click="handleCancel"
-              class="!px-4 min-w-[80px]"
+              class="!px-6 min-w-[100px] rounded-lg"
             >
               取消
             </van-button>
             <van-button
               type="primary"
               native-type="submit"
-              class="!px-4 min-w-[80px]"
+              class="!px-6 min-w-[100px] rounded-lg"
             >
               保存
             </van-button>
@@ -91,41 +95,54 @@ const form = reactive<{
   color: string;
 }>({
   name: '',
-  color: '#6366F1'
+  color: '#F97316' // 默认使用温暖橙色
 });
 
 // 重置表单数据
 const resetForm = () => {
   form.name = '';
-  form.color = '#6366F1';
+  form.color = '#F97316'; // 默认使用温暖橙色
 };
 
-// 常用颜色列表
+// 常用颜色列表 - 与温暖主题搭配
 const colorOptions = [
-  '#6366F1', // 靛蓝色
-  '#EC4899', // 粉色
-  '#F59E0B', // 橙色
-  '#EF4444', // 红色
-  '#10B981', // 绿色
-  '#3B82F6', // 蓝色
-  '#8B5CF6', // 紫色
-  '#F43F5E', // 玫瑰红
-  '#14B8A6', // 青色
-  '#F97316', // 橙红色
-  '#84CC16', // 黄绿色
-  '#A855F7', // 紫罗兰
-  '#06B6D4', // 天蓝色
+  // 温暖色系
+  '#F97316', // 温暖橙
+  '#EA580C', // 深橙
+  '#FB923C', // 浅橙
+  '#FDBA74', // 柔和橙
+  '#F59E0B', // 金色
   '#EAB308', // 黄色
-  '#22C55E', // 翠绿色
   '#FACC15', // 金黄色
-  '#4F46E5', // 靛青色
-  '#7C3AED', // 紫色
-  '#DB2777', // 粉红色
-  '#EA580C', // 橙红色
-  '#16A34A', // 深绿色
-  '#2563EB', // 深蓝色
-  '#9333EA', // 深紫色
-  '#DC2626', // 深红色
+  
+  // 辅助色系（与温暖色搭配）
+  '#10B981', // 翠绿
+  '#059669', // 深绿
+  '#22C55E', // 浅绿
+  '#84CC16', // 黄绿
+  
+  // 蓝色系（与橙色互补）
+  '#3B82F6', // 蓝色
+  '#2563EB', // 深蓝
+  '#0EA5E9', // 天蓝
+  '#0284C7', // 钢蓝
+  
+  // 紫色系（与橙色形成对比）
+  '#8B5CF6', // 紫色
+  '#7C3AED', // 深紫
+  '#A855F7', // 紫罗兰
+  '#9333EA', // 深紫罗兰
+  
+  // 红色系（与温暖色相近）
+  '#EF4444', // 红色
+  '#DC2626', // 深红
+  '#F43F5E', // 玫瑰红
+  '#EC4899', // 粉色
+  
+  // 青色系
+  '#14B8A6', // 青色
+  '#06B6D4', // 天青
+  '#0891B2', // 深青
 ];
 
 const handleShowUpdate = (value: boolean) => {
@@ -176,11 +193,53 @@ watch(() => props.tag, (newTag) => {
 </script>
 
 <style scoped>
-:deep(.van-field__label) {
+.tag-field :deep(.van-field__label) {
   width: 60px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  font-family: var(--font-body);
+}
+
+.tag-field :deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+}
+
+.tag-field :deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.tag-field :deep(.van-field__control) {
+  color: var(--color-gray-900);
+  font-family: var(--font-body);
 }
 
 :deep(.van-popup__content) {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+  font-weight: 600;
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+}
+
+:deep(.van-button--default) {
+  border-color: var(--color-warm-300);
+  color: var(--color-warm-700);
+}
+
+:deep(.van-button--default:active) {
+  background: var(--color-warm-50);
+  border-color: var(--color-warm-400);
 }
 </style> 

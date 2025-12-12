@@ -46,15 +46,15 @@
       </template>
     </van-cell>
     <template #right>
-      <div class="flex h-full">
+      <div class="flex h-full ml-[2px]">
         <div
-          class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
+          class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-all duration-200 bg-gradient-to-r from-warm-500 to-warm-600 hover:from-warm-600 hover:to-warm-700 font-medium"
           @click="handleEdit"
         >
           编辑
         </div>
         <div
-          class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+          class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-all duration-200 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 font-medium"
           @click="handleDelete"
         >
           删除
@@ -153,23 +153,32 @@ const handleDelete = () => {
 
 <style scoped>
 :deep(.van-cell) {
-  @apply bg-white px-2;
+  @apply bg-white px-4 py-3;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
 }
+
+:deep(.van-cell:hover) {
+  background: var(--color-warm-50);
+  transform: translateX(4px);
+}
+
 :deep(.van-cell::after) {
-  left: 8px;
-  right: 8px;
+  display: none;
 }
 
 :deep(.van-cell__title) {
   @apply text-base text-gray-900;
   flex: 70%;
   min-width: 0;
+  font-family: var(--font-body);
 }
 
 :deep(.van-cell__value) {
-  @apply text-base font-medium text-red-600 ml-2;
+  @apply text-lg font-display font-bold text-warm-600 ml-2;
   flex-shrink: 0;
   flex: 35%;
+  transition: color 0.2s ease;
 }
 
 .line-clamp-2 {
@@ -180,11 +189,25 @@ const handleDelete = () => {
 }
 
 :deep(.van-swipe-cell) {
-  @apply rounded-lg overflow-hidden mb-2;
+  @apply rounded-xl overflow-hidden mb-3;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+:deep(.van-swipe-cell:hover) {
+  box-shadow: var(--shadow-md);
 }
 
 :deep(.van-swipe-cell__right) {
   @apply h-full;
   width: 130px;
+}
+
+:deep(.van-swipe-cell__right > div) {
+  transition: all 0.2s ease;
+}
+
+:deep(.van-swipe-cell__right > div:hover) {
+  filter: brightness(0.9);
 }
 </style> 

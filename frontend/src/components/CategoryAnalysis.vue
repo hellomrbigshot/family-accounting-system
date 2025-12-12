@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <!-- 支出分类饼图 -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">支出分类</h3>
+    <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-warm rounded-2xl card-hover">
+      <div class="p-6">
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-6">支出分类</h3>
         <div>
           <div ref="categoryChartRef" class="h-64"></div>
           <!-- 图例 -->
@@ -19,9 +19,9 @@
                   :style="{ backgroundColor: item.color }"
                 ></div>
                 <span class="text-lg mr-2">{{ item.icon }}</span>
-                <span class="text-gray-600">{{ item.name }}</span>
+                <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -29,9 +29,9 @@
     </div>
 
     <!-- 额外支出分类分析 -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">额外支出分类</h3>
+    <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-warm rounded-2xl card-hover">
+      <div class="p-6">
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-6">额外支出分类</h3>
         <div>
           <div ref="extraCategoryChartRef" class="h-64"></div>
           <!-- 图例 -->
@@ -47,9 +47,9 @@
                   :style="{ backgroundColor: item.color }"
                 ></div>
                 <span class="text-lg mr-2">{{ item.icon }}</span>
-                <span class="text-gray-600">{{ item.name }}</span>
+                <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -57,9 +57,9 @@
     </div>
 
     <!-- 支出标签饼图 -->
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">支出标签</h3>
+    <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-warm rounded-2xl card-hover">
+      <div class="p-6">
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-6">支出标签</h3>
         <div>
           <div ref="tagChartRef" class="h-64"></div>
           <!-- 图例 -->
@@ -74,9 +74,9 @@
                   class="w-3 h-3 rounded-full"
                   :style="{ backgroundColor: item.color }"
                 ></div>
-                <span class="text-gray-600">{{ item.name }}</span>
+                <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-medium">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
             </div>
           </div>
         </div>
