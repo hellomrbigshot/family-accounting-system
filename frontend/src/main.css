@@ -193,4 +193,23 @@
   .gradient-info {
     background: linear-gradient(135deg, var(--color-accent-blue-light) 0%, var(--color-accent-blue) 100%);
   }
+}
+
+/* 全局悬浮按钮样式 - 应用于 teleported 组件 */
+.van-floating-bubble {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%) !important;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35), 0 4px 12px rgba(249, 115, 22, 0.2) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.van-floating-bubble:active {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%) !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3), 0 2px 6px rgba(249, 115, 22, 0.15) !important;
+  transform: scale(0.95) !important;
+}
+
+.van-floating-bubble .van-icon {
+  color: white !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 } 

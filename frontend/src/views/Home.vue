@@ -93,11 +93,9 @@
       axis="xy"
       magnetic="x"
       :gap="{ x: 24, y: 60 }"
+      icon="plus"
       @click="showAddExpenseDialog = true"
-      class="floating-button"
-    >
-      <van-icon name="plus" size="24" />
-    </van-floating-bubble>
+    />
 
     <!-- 预算设置对话框 -->
     <BudgetDialog v-model:show="showBudgetDialog" />
@@ -246,21 +244,5 @@ watch(() => dayjs().month(), async (newMonth) => {
 :deep(.van-button--default:active) {
   background: var(--color-warm-50);
   border-color: var(--color-warm-400);
-}
-
-.floating-button :deep(.van-floating-bubble) {
-  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.floating-button :deep(.van-floating-bubble:active) {
-  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
-  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.4);
-  transform: scale(0.95);
-}
-
-.floating-button :deep(.van-icon) {
-  color: white;
 }
 </style> 

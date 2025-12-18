@@ -57,29 +57,21 @@
         </div>
       </div>
 
-      <!-- 报表内容区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 mb-6 animate-fade-in-up card-hover" style="animation-delay: 0.4s">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-display font-bold text-gray-900">趋势分析</h2>
-        </div>
-        
-        <trend-analysis
-          :data="reportData.trend"
-          :loading="loading"
-        />
-      </div>
+      <!-- 趋势分析 -->
+      <trend-analysis
+        :data="reportData.trend"
+        :loading="loading"
+        class="mb-6 animate-fade-in-up"
+        style="animation-delay: 0.4s"
+      />
 
-      <!-- 分类分析区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 animate-fade-in-up card-hover" style="animation-delay: 0.5s">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-display font-bold text-gray-900">分类分析</h2>
-        </div>
-        
-        <category-analysis
-          :data="reportStore.data"
-          :loading="loading"
-        />
-      </div>
+      <!-- 分类分析 -->
+      <category-analysis
+        :data="reportStore.data"
+        :loading="loading"
+        class="animate-fade-in-up"
+        style="animation-delay: 0.5s"
+      />
 
       <!-- 日期选择器 -->
       <van-popup v-model:show="showStartDatePicker" position="bottom" round>
