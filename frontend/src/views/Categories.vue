@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen animate-fade-in">
+  <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
-      <div class="mb-6 animate-fade-in-up">
+      <div class="mb-6">
         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">分类管理</h1>
         <p class="text-sm text-gray-600 font-medium">管理您的支出分类和标签，方便记录日常开销</p>
       </div>
 
       <!-- Tab 切换 -->
-      <div class="border-b border-warm-200 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+      <div class="border-b border-warm-200 mb-6">
         <nav class="-mb-px flex space-x-8">
           <button
             v-for="tab in tabs"

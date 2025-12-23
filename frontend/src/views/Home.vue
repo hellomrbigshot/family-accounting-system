@@ -1,9 +1,9 @@
 <template>
-  <div class="container mx-auto px-4 animate-fade-in">
+  <div class="container mx-auto px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
       <!-- 预算卡片 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 mb-4 card-hover animate-fade-in-up" style="animation-delay: 0.1s">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 mb-4 card-hover">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-xl font-display font-bold text-gray-900">本月总览</h2>
           <van-button
@@ -55,7 +55,7 @@
       </div>
 
       <!-- 最近支出 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 card-hover animate-fade-in-up" style="animation-delay: 0.2s">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-6 card-hover">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-xl font-display font-bold text-gray-900">最近支出</h2>
           <div class="flex space-x-2">

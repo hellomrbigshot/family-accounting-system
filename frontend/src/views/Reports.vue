@@ -2,13 +2,13 @@
   <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
-      <div class="mb-4 animate-fade-in-up">
+      <div class="mb-4">
         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">报表分析</h1>
         <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
       </div>
 
       <!-- 搜索区域 -->
-       <div class="py-2.5 animate-fade-in-up" style="animation-delay: 0.1s">
+       <div class="py-2.5">
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 mb-6">
           <div class="grid grid-cols-2 gap-4">
             <van-field
@@ -38,7 +38,7 @@
        </div>
 
       <!-- 总金额统计卡片 -->
-      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 mb-4 animate-scale-in card-hover" style="animation-delay: 0.2s">
+      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
         <div class="text-center">
           <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">时间段总支出</h3>
           <div class="text-white text-4xl font-display font-bold">
@@ -48,7 +48,7 @@
       </div>
 
       <!-- 额外支出统计卡片 -->
-      <div class="bg-gradient-to-r from-warm-500 to-warm-600 rounded-2xl shadow-lg p-6 mb-4 animate-scale-in card-hover" style="animation-delay: 0.3s">
+      <div class="bg-gradient-to-r from-warm-500 to-warm-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
         <div class="text-center">
           <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">额外支出</h3>
           <div class="text-white text-4xl font-display font-bold">
@@ -61,16 +61,13 @@
       <trend-analysis
         :data="reportData.trend"
         :loading="loading"
-        class="mb-6 animate-fade-in-up"
-        style="animation-delay: 0.4s"
+        class="mb-6"
       />
 
       <!-- 分类分析 -->
       <category-analysis
         :data="reportStore.data"
         :loading="loading"
-        class="animate-fade-in-up"
-        style="animation-delay: 0.5s"
       />
 
       <!-- 日期选择器 -->
