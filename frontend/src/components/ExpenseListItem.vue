@@ -181,6 +181,10 @@ const handleDelete = () => {
   transition: color 0.2s ease;
 }
 
+:deep(.van-cell__value span) {
+  color: var(--color-accent-green-light);
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
