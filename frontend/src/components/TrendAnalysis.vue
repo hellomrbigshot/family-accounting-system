@@ -1,16 +1,16 @@
 <template>
-  <div class="bg-white overflow-hidden shadow rounded-lg">
-    <div class="p-5">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-medium text-gray-900">趋势分析</h3>
+  <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-warm rounded-2xl card-hover">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-display font-bold text-gray-900">趋势分析</h3>
         <div class="flex space-x-2">
           <button
             @click="currentTrend = 'daily'"
             :class="[
-              'px-3 py-1 text-sm font-medium rounded-md',
+              'px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
               currentTrend === 'daily'
-                ? 'bg-primary-100 text-primary-700'
-                : 'text-gray-500 hover:text-gray-700',
+                ? 'bg-warm-500 text-white shadow-warm'
+                : 'text-gray-600 hover:text-warm-600 hover:bg-warm-50',
             ]"
           >
             日
@@ -18,10 +18,10 @@
           <button
             @click="currentTrend = 'weekly'"
             :class="[
-              'px-3 py-1 text-sm font-medium rounded-md',
+              'px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
               currentTrend === 'weekly'
-                ? 'bg-primary-100 text-primary-700'
-                : 'text-gray-500 hover:text-gray-700',
+                ? 'bg-warm-500 text-white shadow-warm'
+                : 'text-gray-600 hover:text-warm-600 hover:bg-warm-50',
             ]"
           >
             周
@@ -29,10 +29,10 @@
           <button
             @click="currentTrend = 'monthly'"
             :class="[
-              'px-3 py-1 text-sm font-medium rounded-md',
+              'px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
               currentTrend === 'monthly'
-                ? 'bg-primary-100 text-primary-700'
-                : 'text-gray-500 hover:text-gray-700',
+                ? 'bg-warm-500 text-white shadow-warm'
+                : 'text-gray-600 hover:text-warm-600 hover:bg-warm-50',
             ]"
           >
             月

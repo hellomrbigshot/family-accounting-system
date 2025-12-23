@@ -2,14 +2,14 @@
   <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
-      <div class="mb-2">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">报表分析</h1>
-        <p class="text-sm text-gray-500 font-medium">今天是 {{ currentDate }}</p>
+      <div class="mb-4 animate-fade-in-up">
+        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">报表分析</h1>
+        <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
       </div>
 
       <!-- 搜索区域 -->
-       <div class="py-2.5">
-        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
+       <div class="py-2.5 animate-fade-in-up" style="animation-delay: 0.1s">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 mb-6">
           <div class="grid grid-cols-2 gap-4">
             <van-field
               v-model="query.startDate"
@@ -30,7 +30,7 @@
           </div>
 
           <div class="mt-4">
-            <van-button size="small" type="primary" class="w-full" @click="handleSearch">
+            <van-button size="small" type="primary" class="w-full rounded-lg" @click="handleSearch">
               查询
             </van-button>
           </div>
@@ -38,48 +38,40 @@
        </div>
 
       <!-- 总金额统计卡片 -->
-      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-sm p-4 mb-4">
+      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 mb-4 animate-scale-in card-hover" style="animation-delay: 0.2s">
         <div class="text-center">
-          <h3 class="text-white text-sm font-medium mb-2">时间段总支出</h3>
-          <div class="text-white text-2xl font-bold">
+          <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">时间段总支出</h3>
+          <div class="text-white text-4xl font-display font-bold">
             ¥{{ totalAmount.toFixed(2) }}
           </div>
         </div>
       </div>
 
       <!-- 额外支出统计卡片 -->
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-sm p-4 mb-4">
+      <div class="bg-gradient-to-r from-warm-500 to-warm-600 rounded-2xl shadow-lg p-6 mb-4 animate-scale-in card-hover" style="animation-delay: 0.3s">
         <div class="text-center">
-          <h3 class="text-white text-sm font-medium mb-2">额外支出</h3>
-          <div class="text-white text-2xl font-bold">
+          <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">额外支出</h3>
+          <div class="text-white text-4xl font-display font-bold">
             ¥{{ extraAmount.toFixed(2) }}
           </div>
         </div>
       </div>
 
-      <!-- 报表内容区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 mb-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-800">趋势分析</h2>
-        </div>
-        
-        <trend-analysis
-          :data="reportData.trend"
-          :loading="loading"
-        />
-      </div>
+      <!-- 趋势分析 -->
+      <trend-analysis
+        :data="reportData.trend"
+        :loading="loading"
+        class="mb-6 animate-fade-in-up"
+        style="animation-delay: 0.4s"
+      />
 
-      <!-- 分类分析区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-medium text-gray-800">分类分析</h2>
-        </div>
-        
-        <category-analysis
-          :data="reportStore.data"
-          :loading="loading"
-        />
-      </div>
+      <!-- 分类分析 -->
+      <category-analysis
+        :data="reportStore.data"
+        :loading="loading"
+        class="animate-fade-in-up"
+        style="animation-delay: 0.5s"
+      />
 
       <!-- 日期选择器 -->
       <van-popup v-model:show="showStartDatePicker" position="bottom" round>
@@ -193,12 +185,36 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.custom-field :deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+}
+
+.custom-field :deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
 .custom-field :deep(.van-field__control) {
   font-size: 14px !important;
   color: #1e293b !important;
+  font-family: var(--font-body);
 }
 
 .custom-field :deep(.van-field__placeholder) {
   color: #94a3b8 !important;
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
 }
 </style> 

@@ -4,37 +4,41 @@
     @update:show="handleShowUpdate"
     position="bottom"
     round
-    class="h-[70vh] flex flex-col"
+    :style="{ height: '70vh' }"
+    teleport="body"
   >
     <div class="flex flex-col h-full">
-      <div class="flex items-center justify-between p-4 border-b">
-        <span class="text-lg font-medium">{{ props.category ? '编辑分类' : '新建分类' }}</span>
-        <van-icon name="cross" @click="handleCancel" />
+      <div class="flex items-center justify-between p-6 border-b border-warm-200 bg-gradient-warm-subtle">
+        <span class="text-xl font-display font-bold text-gray-900">{{ props.category ? '编辑分类' : '新建分类' }}</span>
+        <van-icon name="cross" size="22" class="text-gray-600 hover:text-warm-600 cursor-pointer transition-colors" @click="handleCancel" />
       </div>
 
-      <div class="flex-1 overflow-y-auto">
-        <van-form @submit="handleSubmit" class="flex flex-col h-full p-4">
-          <van-cell-group inset>
+      <div class="flex-1 overflow-y-auto bg-white">
+        <van-form @submit="handleSubmit" class="flex flex-col h-full p-6">
+          <van-cell-group inset class="mb-4">
             <van-field
               v-model="form.name"
               name="name"
               label="名称"
               placeholder="输入分类名称"
               :rules="[{ required: true, message: '请输入分类名称' }]"
+              class="category-field"
             />
           </van-cell-group>
 
           <van-cell-group inset class="flex-1 flex flex-col">
-            <van-cell title="图标" />
-            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent hover:scrollbar-thumb-gray-300">
-              <div class="grid grid-cols-6 gap-2 p-3 bg-gray-50">
+            <van-cell title="图标" class="font-semibold" />
+            <div class="flex-1 min-h-0 overflow-y-auto">
+              <div class="grid grid-cols-6 gap-3 p-4 bg-warm-50 rounded-xl">
                 <button
                   v-for="icon in icons"
                   :key="icon"
                   type="button"
                   @click="form.icon = icon"
-                  class="w-9 h-9 rounded-lg flex items-center justify-center text-base hover:bg-white hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
-                  :class="{ 'bg-white shadow-sm ring-2 ring-primary-500 ring-offset-2': form.icon === icon }"
+                  class="w-12 h-12 rounded-xl flex items-center justify-center text-xl hover:bg-white hover:shadow-md focus:outline-none transition-all duration-200 border-2"
+                  :class="form.icon === icon 
+                    ? 'bg-white shadow-md border-warm-500 scale-110' 
+                    : 'bg-warm-100 border-warm-200 hover:border-warm-300 hover:scale-105'"
                 >
                   {{ icon }}
                 </button>
@@ -42,18 +46,18 @@
             </div>
           </van-cell-group>
 
-          <div class="flex justify-end space-x-3 pt-4 mr-4">
+          <div class="flex justify-end space-x-3 pt-6">
             <van-button
               type="default"
               @click="handleCancel"
-              class="!px-4 min-w-[80px]"
+              class="!px-6 min-w-[100px] rounded-lg"
             >
               取消
             </van-button>
             <van-button
               type="primary"
               native-type="submit"
-              class="!px-4 min-w-[80px]"
+              class="!px-6 min-w-[100px] rounded-lg"
             >
               保存
             </van-button>
@@ -191,12 +195,53 @@ const icons = [
 </script>
 
 <style scoped>
-/* 仅保留必要的自定义样式 */
-:deep(.van-field__label) {
+.category-field :deep(.van-field__label) {
   width: 60px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  font-family: var(--font-body);
+}
+
+.category-field :deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+}
+
+.category-field :deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.category-field :deep(.van-field__control) {
+  color: var(--color-gray-900);
+  font-family: var(--font-body);
 }
 
 :deep(.van-popup__content) {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+  font-weight: 600;
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+}
+
+:deep(.van-button--default) {
+  border-color: var(--color-warm-300);
+  color: var(--color-warm-700);
+}
+
+:deep(.van-button--default:active) {
+  background: var(--color-warm-50);
+  border-color: var(--color-warm-400);
 }
 </style> 

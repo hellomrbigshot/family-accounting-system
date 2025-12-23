@@ -1,41 +1,50 @@
 <template>
-  <div class="bg-white rounded-b-xl shadow-sm">
-    <div class="p-5 border-b border-gray-200">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <h2 class="text-lg font-medium text-gray-900">支出分类</h2>
-          <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-50 text-primary-700">
+  <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <h2 class="text-xl font-display font-bold text-gray-900">支出标签</h2>
+          <div class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-warm-100 text-warm-700 shadow-sm">
             {{ tagCount }} 个标签
           </div>
         </div>
-        <van-button size="small" type="primary" icon="plus" @click="showTagForm = true" />
+        <van-button 
+          size="small" 
+          type="primary" 
+          icon="plus" 
+          @click="showTagForm = true"
+          class="rounded-lg"
+        />
       </div>
     </div>
-    <div class="space-y-4 p-4">
+    <div class="space-y-3 px-6 pb-6">
       <van-swipe-cell
         v-for="tag in tags"
         :key="tag.id"
-        class="mb-2"
+        class="mb-2 tag-item"
       >
         <div
-          class="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+          class="flex items-center justify-between p-4 bg-warm-50 rounded-xl cursor-pointer hover:bg-warm-100 transition-all duration-200 card-hover border border-warm-200"
           @click="handleTagClick(tag)"
         >
           <div class="flex items-center space-x-3">
-            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: tag.color }" />
-            <span class="text-gray-900">{{ tag.name }}</span>
+            <div 
+              class="w-4 h-4 rounded-full shadow-sm ring-2 ring-white" 
+              :style="{ backgroundColor: tag.color }" 
+            />
+            <span class="font-semibold text-gray-900 font-display">{{ tag.name }}</span>
           </div>
         </div>
         <template #right>
-          <div class="flex h-full">
+          <div class="flex h-full ml-[2px]">
             <div
-              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-indigo-600 hover:bg-indigo-700"
+              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-all duration-200 bg-gradient-to-r from-warm-500 to-warm-600 hover:from-warm-600 hover:to-warm-700 font-medium shadow-md"
               @click="handleEdit(tag)"
             >
               编辑
             </div>
             <div
-              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-colors duration-200 bg-red-600 hover:bg-red-700"
+              class="h-full flex-1 cursor-pointer text-white whitespace-nowrap flex items-center justify-center transition-all duration-200 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 font-medium shadow-md"
               @click="handleDelete(tag)"
             >
               删除
@@ -43,6 +52,15 @@
           </div>
         </template>
       </van-swipe-cell>
+      
+      <!-- 空状态 -->
+      <div v-if="tags.length === 0" class="p-12 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-warm-100 flex items-center justify-center">
+          <span class="text-3xl">🏷️</span>
+        </div>
+        <p class="text-gray-500 font-medium">暂无标签</p>
+        <p class="text-sm text-gray-400 mt-2">点击右上角按钮创建标签</p>
+      </div>
     </div>
 
     <!-- 标签表单弹窗 -->
@@ -153,12 +171,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:deep(.van-swipe-cell) {
-  @apply rounded-lg overflow-hidden mb-2;
+.tag-item :deep(.van-swipe-cell) {
+  @apply rounded-xl overflow-hidden mb-3;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
 }
 
-:deep(.van-swipe-cell__right) {
+.tag-item :deep(.van-swipe-cell:hover) {
+  box-shadow: var(--shadow-md);
+}
+
+.tag-item :deep(.van-swipe-cell__right) {
   @apply h-full;
   width: 130px;
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
 }
 </style>

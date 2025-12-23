@@ -9,14 +9,14 @@
   >
     <div class="h-full flex flex-col">
       <!-- 头部 -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900">{{ isEditMode ? '编辑支出' : '新增支出' }}</h2>
-        <van-icon name="cross" size="20" @click="handleClose" />
+      <div class="flex justify-between items-center p-6 border-b border-warm-200 bg-gradient-warm-subtle">
+        <h2 class="text-xl font-display font-bold text-gray-900">{{ isEditMode ? '编辑支出' : '新增支出' }}</h2>
+        <van-icon name="cross" size="22" class="text-gray-600 hover:text-warm-600 cursor-pointer transition-colors" @click="handleClose" />
       </div>
 
       <!-- 表单内容 -->
-      <div class="flex-1 overflow-y-auto p-4">
-        <van-form class="space-y-4" @submit="handleSubmit">
+      <div class="flex-1 overflow-y-auto p-6 bg-white">
+        <van-form class="space-y-5" @submit="handleSubmit">
           <!-- 日期选择 -->
           <van-field
             v-model="form.date"
@@ -500,6 +500,28 @@ const handleAmountFieldBlur = () => {
 <style scoped>
 :deep(.van-field__label) {
   width: 60px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  font-family: var(--font-body);
+}
+
+:deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+}
+
+:deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+:deep(.van-field__control) {
+  color: var(--color-gray-900);
+  font-family: var(--font-body);
 }
 
 :deep(.van-popup__content) {
@@ -512,5 +534,20 @@ const handleAmountFieldBlur = () => {
 
 .tag-cell :deep(.van-checkbox) {
   margin-left: auto;
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+  font-weight: 600;
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+}
+
+:deep(.van-switch--on) {
+  background-color: var(--color-error);
 }
 </style> 

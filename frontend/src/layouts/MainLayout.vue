@@ -1,16 +1,21 @@
 <template>
-  <div class="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+  <div class="h-screen bg-gradient-warm-subtle flex flex-col">
     <!-- 顶部导航栏 -->
-    <nav class="z-10 bg-white shadow-sm border-b border-gray-100">
+    <nav class="z-10 bg-white/80 backdrop-blur-md shadow-md border-b border-warm-100 sticky top-0">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-8">
-            <router-link to="/" class="text-xl font-bold text-gray-900">家庭账本</router-link>
+            <router-link 
+              to="/" 
+              class="text-xl font-display font-bold bg-gradient-to-r from-warm-600 to-warm-500 bg-clip-text text-transparent hover:from-warm-700 hover:to-warm-600 transition-all duration-300"
+            >
+              家庭账本
+            </router-link>
           </div>
           <div class="flex items-center space-x-4">
             <button 
               @click="handleLogout" 
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-warm-600 hover:bg-warm-50 rounded-lg transition-all duration-200 hover:shadow-sm"
             >
               退出登录
             </button>
@@ -20,14 +25,16 @@
     </nav>
 
     <!-- 中间内容区域 -->
-    <main class="flex-1 overflow-y-auto bg-gradient-to-b from-blue-50 to-white">
+    <main class="flex-1 overflow-y-auto">
       <div class="container mx-auto pt-4 pb-14">
-        <router-view></router-view>
+        <transition name="page" mode="out-in">
+          <router-view class="animate-fade-in"></router-view>
+        </transition>
       </div>
     </main>
 
     <!-- 移动端底部导航 -->
-    <van-tabbar v-model="active" class="md:hidden" @change="handleTabChange">
+    <van-tabbar v-model="active" class="md:hidden border-t border-warm-200 bg-white/90 backdrop-blur-md" @change="handleTabChange">
       <van-tabbar-item
         v-for="item in navItems"
         :key="item.path"
@@ -71,16 +78,41 @@ const handleLogout = async () => {
 };
 </script>
 
-<style>
-.van-tabbar {
-  @apply border-t border-gray-200;
+<style scoped>
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease-out;
 }
 
-.van-tabbar-item {
-  @apply text-gray-600;
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
-.van-tabbar-item--active {
-  @apply text-indigo-600;
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Tabbar 样式优化 */
+:deep(.van-tabbar) {
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+:deep(.van-tabbar-item) {
+  @apply text-gray-500 transition-colors duration-200;
+}
+
+:deep(.van-tabbar-item--active) {
+  @apply text-warm-600;
+}
+
+:deep(.van-tabbar-item__icon) {
+  transition: transform 0.2s ease;
+}
+
+:deep(.van-tabbar-item--active .van-tabbar-item__icon) {
+  transform: scale(1.1);
 }
 </style>

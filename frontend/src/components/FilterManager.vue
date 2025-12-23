@@ -7,24 +7,35 @@
     :style="{ height: '80%' }"
     teleport="body"
   >
-    <div class="h-full flex flex-col">
+    <div class="h-full flex flex-col bg-warm-50/30">
       <!-- 头部 -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900">筛选器管理</h2>
-        <van-icon name="cross" size="20" @click="handleClose" />
+      <div class="flex justify-between items-center p-6 border-b border-warm-200 bg-gradient-warm-subtle">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-blue-light to-accent-blue flex items-center justify-center shadow-lg">
+            <span class="text-2xl">📊</span>
+          </div>
+          <h2 class="text-xl font-display font-bold text-gray-900">筛选器管理</h2>
+        </div>
+        <van-icon name="cross" size="22" class="text-gray-600 hover:text-warm-600 cursor-pointer transition-colors" @click="handleClose" />
       </div>
 
       <!-- 当前筛选器 -->
-      <div v-if="currentFilter" class="p-4 bg-blue-50 border-b border-blue-200">
+      <div v-if="currentFilter" class="p-4 bg-gradient-to-r from-accent-blue-light/20 via-accent-blue-light/10 to-warm-100/30 border-b border-accent-blue-light/30 animate-fade-in">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-blue-700 font-medium">当前筛选器</p>
-            <p class="text-lg font-semibold text-blue-900">{{ currentFilter.name }}</p>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-blue-light to-accent-blue flex items-center justify-center shadow-md">
+              <span class="text-lg">✨</span>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-accent-blue-dark/70 mb-0.5">当前筛选器</p>
+              <p class="text-base font-display font-bold text-accent-blue-dark">{{ currentFilter.name }}</p>
+            </div>
           </div>
           <van-button
             size="small"
             type="default"
             @click="clearCurrentFilter"
+            class="rounded-lg border-accent-blue-light/30 text-accent-blue-dark hover:bg-accent-blue-light/10"
           >
             清除
           </van-button>
@@ -32,72 +43,86 @@
       </div>
 
       <!-- 筛选器列表 -->
-      <div class="flex-1 overflow-y-auto p-4">
-        <div v-if="filterStore.loading" class="flex justify-center py-8">
-          <van-loading size="24px">加载中...</van-loading>
+      <div class="flex-1 overflow-y-auto p-6 bg-white">
+        <div v-if="filterStore.loading" class="flex justify-center py-12">
+          <van-loading size="32px" color="#f97316">加载中...</van-loading>
         </div>
 
-        <div v-else-if="filterStore.filters.length === 0" class="text-center py-8">
-          <van-empty description="暂无筛选器" />
+        <div v-else-if="filterStore.filters.length === 0" class="text-center py-12 animate-fade-in">
+          <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-warm-100 to-warm-200 flex items-center justify-center shadow-warm">
+            <span class="text-5xl animate-pulse-warm">📁</span>
+          </div>
+          <p class="text-gray-600 font-display font-bold text-lg mb-2">暂无筛选器</p>
+          <p class="text-sm text-gray-400 mb-6">创建筛选器以快速查找支出记录</p>
           <van-button
             type="primary"
             size="small"
-            class="mt-4"
+            icon="plus"
             @click="showCreateForm = true"
+            class="rounded-xl shadow-warm"
           >
             创建第一个筛选器
           </van-button>
         </div>
 
-        <div v-else class="space-y-3">
+        <div v-else class="space-y-3 animate-fade-in">
           <div
-            v-for="filter in filterStore.filters"
+            v-for="(filter, index) in filterStore.filters"
             :key="filter.id"
-            class="bg-white rounded-lg border border-gray-200 p-4"
+            class="bg-white rounded-2xl border border-warm-200 p-5 hover:shadow-md transition-all duration-300 card-hover group animate-fade-in-up"
+            :style="{ animationDelay: `${index * 0.05}s` }"
           >
-            <div class="space-y-2">
+            <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <h3 class="font-medium text-gray-900 truncate flex-1 mr-2">{{ filter.name }}</h3>
+                <div class="flex items-center space-x-3 flex-1 mr-2">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-warm-300 to-warm-500 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                    <span class="text-lg">🔍</span>
+                  </div>
+                  <h3 class="font-display font-bold text-gray-900 truncate text-base">{{ filter.name }}</h3>
+                </div>
                 <div class="flex items-center space-x-2 flex-shrink-0">
-                  <van-icon
-                    name="play-circle-o"
-                    size="18"
-                    class="text-blue-500 cursor-pointer"
+                  <button
                     @click="applyFilter(filter)"
+                    class="p-2 rounded-lg bg-gradient-to-r from-accent-blue-light to-accent-blue text-white hover:from-accent-blue hover:to-accent-blue-dark transition-all duration-200 shadow-md hover:shadow-lg"
                     title="应用筛选器"
-                  />
-                  <van-icon
-                    name="edit"
-                    size="18"
-                    class="text-gray-500 cursor-pointer"
+                  >
+                    <van-icon name="play-circle-o" size="18" />
+                  </button>
+                  <button
                     @click="editFilter(filter)"
+                    class="p-2 rounded-lg bg-warm-100 text-warm-600 hover:bg-warm-200 transition-all duration-200"
                     title="编辑筛选器"
-                  />
-                  <van-icon
-                    name="delete-o"
-                    size="18"
-                    class="text-red-500 cursor-pointer"
+                  >
+                    <van-icon name="edit" size="18" />
+                  </button>
+                  <button
                     @click="deleteFilter(filter)"
+                    class="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-all duration-200"
                     title="删除筛选器"
-                  />
+                  >
+                    <van-icon name="delete-o" size="18" />
+                  </button>
                 </div>
               </div>
-              <p class="text-sm text-gray-500 break-words leading-relaxed">
+              <p class="text-sm text-gray-600 break-words leading-relaxed pl-13">
                 {{ formatFilterConditions(filter.conditions) }}
               </p>
-              <p class="text-xs text-gray-400">
-                {{ formatDate(filter.createdAt) }}
+              <p class="text-xs text-gray-400 pl-13 flex items-center space-x-1">
+                <van-icon name="clock-o" size="12" />
+                <span>{{ formatDate(filter.createdAt) }}</span>
               </p>
             </div>
           </div>
         </div>
 
         <!-- 新建筛选器按钮 -->
-        <div class="mt-6">
+        <div class="mt-6 px-2">
           <van-button
             type="primary"
             block
+            icon="plus"
             @click="createNewFilter"
+            class="rounded-xl shadow-warm font-semibold"
           >
             新建筛选器
           </van-button>
@@ -302,3 +327,26 @@ onMounted(() => {
   filterStore.fetchFilters()
 })
 </script>
+
+<style scoped>
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+}
+
+:deep(.van-button--default) {
+  background: white;
+}
+
+:deep(.van-button--default:active) {
+  background: var(--color-warm-50);
+}
+
+:deep(.van-loading__spinner) {
+  color: var(--color-warm-500);
+}
+</style>

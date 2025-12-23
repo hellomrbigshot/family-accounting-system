@@ -7,15 +7,20 @@
     teleport="body"
     @update:show="handleShowUpdate"
   >
-    <div class="flex flex-col">
+    <div class="flex flex-col overflow-hidden">
       <!-- 头部 -->
-      <div class="flex justify-between items-center p-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900">设置预算</h2>
-        <van-icon name="cross" size="20" @click="handleClose" />
+      <div class="flex justify-between items-center p-6 border-b border-warm-200 bg-gradient-warm-subtle">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-warm-400 to-warm-600 flex items-center justify-center shadow-warm">
+            <span class="text-2xl">💰</span>
+          </div>
+          <h2 class="text-xl font-display font-bold text-gray-900">设置预算</h2>
+        </div>
+        <van-icon name="cross" size="22" class="text-gray-600 hover:text-warm-600 cursor-pointer transition-colors" @click="handleClose" />
       </div>
 
       <!-- 内容 -->
-      <div class="p-4">
+      <div class="p-6 bg-white">
         <div class="mb-4">
           <van-field
             :model-value="formattedMonth"
@@ -57,9 +62,22 @@
       </div>
 
       <!-- 按钮 -->
-      <div class="flex justify-end space-x-3 p-4 border-t border-gray-200">
-        <van-button type="default" @click="handleClose">取消</van-button>
-        <van-button type="primary" :loading="loading" @click="handleConfirm">确定</van-button>
+      <div class="flex justify-end space-x-3 p-6 border-t border-warm-200 bg-warm-50/30">
+        <van-button 
+          type="default" 
+          @click="handleClose"
+          class="!px-6 min-w-[100px] rounded-lg border-warm-300 text-warm-700 hover:bg-warm-50"
+        >
+          取消
+        </van-button>
+        <van-button 
+          type="primary" 
+          :loading="loading" 
+          @click="handleConfirm"
+          class="!px-6 min-w-[100px] rounded-lg shadow-warm"
+        >
+          确定
+        </van-button>
       </div>
     </div>
 
@@ -264,7 +282,50 @@ const handleAmountFieldBlur = () => {
   max-height: 60vh;
   overflow-y: auto;
 }
+
 :deep(.van-cell) {
   @apply px-2;
+}
+
+:deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+}
+
+:deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+:deep(.van-field__label) {
+  color: var(--color-gray-700);
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+:deep(.van-field__control) {
+  color: var(--color-gray-900);
+  font-family: var(--font-body);
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
+}
+
+:deep(.van-button--default) {
+  background: white;
+}
+
+:deep(.van-button--default:active) {
+  background: var(--color-warm-50);
 }
 </style> 

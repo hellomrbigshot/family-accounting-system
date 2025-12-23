@@ -2,13 +2,13 @@
   <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
-      <div class="mb-2">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">支出记录</h1>
-        <p class="text-sm text-gray-500 font-medium">今天是 {{ currentDate }}</p>
+      <div class="mb-4 animate-fade-in-up">
+        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">支出记录</h1>
+        <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
       </div>
 
       <!-- 搜索框和筛选器 -->
-      <div class="flex items-center space-x-2 mb-2">
+      <div class="flex items-center space-x-2 mb-4 animate-fade-in-up" style="animation-delay: 0.1s">
         <van-search
           v-model="searchQuery"
           placeholder="搜索支出记录（支持搜索'额外支出'）"
@@ -20,22 +20,24 @@
           size="small"
           type="primary"
           @click="showFilterManager = true"
+          class="rounded-lg"
         >
           筛选器
         </van-button>
       </div>
 
       <!-- 当前筛选器显示 -->
-      <div v-if="currentFilter" class="mb-3 p-2 bg-blue-50 rounded-lg">
+      <div v-if="currentFilter" class="mb-4 p-3 bg-warm-50 border border-warm-200 rounded-xl animate-scale-in">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
-            <van-icon name="filter-o" class="text-blue-500" size="16" />
-            <span class="text-sm font-medium text-blue-900">{{ currentFilter.name }}</span>
+            <van-icon name="filter-o" class="text-warm-600" size="18" />
+            <span class="text-sm font-semibold text-warm-900">{{ currentFilter.name }}</span>
           </div>
           <van-button
             size="mini"
             type="default"
             @click="clearCurrentFilter"
+            class="rounded-lg"
           >
             清除
           </van-button>
@@ -60,11 +62,11 @@
       </div>
 
       <!-- 搜索区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4 pt-2 mb-6" :class="{ 'opacity-50': currentFilter }">
-        <div v-if="currentFilter" class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 pt-2 mb-6 animate-fade-in-up" :class="{ 'opacity-50': currentFilter }" style="animation-delay: 0.2s">
+        <div v-if="currentFilter" class="mb-3 p-3 bg-warm-100 rounded-xl border border-warm-300">
           <div class="flex items-center space-x-2">
-            <van-icon name="info-o" class="text-yellow-600" size="16" />
-            <span class="text-sm text-yellow-800">当前使用筛选器，日期选择将被忽略</span>
+            <van-icon name="info-o" class="text-warm-600" size="18" />
+            <span class="text-sm text-warm-800 font-medium">当前使用筛选器，日期选择将被忽略</span>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -92,7 +94,7 @@
           <van-button 
             size="small" 
             type="primary" 
-            class="w-full" 
+            class="w-full rounded-lg" 
             :disabled="!!currentFilter"
             @click="handleSearch"
           >
@@ -102,11 +104,11 @@
       </div>
 
       <!-- 支出列表 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-4">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 animate-fade-in-up" style="animation-delay: 0.3s">
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center space-x-3">
-            <h2 class="text-lg font-medium text-gray-800">支出记录</h2>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-700">
+            <h2 class="text-xl font-display font-bold text-gray-900">支出记录</h2>
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md">
               总计: ¥{{ totalAmount.toFixed(2) }}
             </span>
           </div>
@@ -471,29 +473,61 @@ const handleFilterCleared = () => {
 .custom-search :deep(.van-search__content) {
   background-color: #ffffff !important;
   border-radius: 12px !important;
-  padding: 6px 12px !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  min-height: 36px !important;
+  padding: 8px 14px !important;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-warm-200);
+  min-height: 40px !important;
+  transition: all 0.2s ease;
+}
+
+.custom-search :deep(.van-search__content:focus-within) {
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .custom-search :deep(.van-field__control) {
   font-size: 14px !important;
   min-height: 24px !important;
   line-height: 24px !important;
+  font-family: var(--font-body);
 }
 
 .custom-search :deep(.van-search) {
   padding: 0 !important;
   background: transparent !important;
-  height: 36px !important;
+  height: 40px !important;
+}
+
+.custom-field :deep(.van-field) {
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warm-200);
+  transition: all 0.2s ease;
+}
+
+.custom-field :deep(.van-field:focus-within) {
+  background: white;
+  border-color: var(--color-warm-400);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
 .custom-field :deep(.van-field__control) {
   font-size: 14px !important;
   color: #1e293b !important;
+  font-family: var(--font-body);
 }
 
 .custom-field :deep(.van-field__placeholder) {
   color: #94a3b8 !important;
+}
+
+:deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%);
+  border: none;
+  box-shadow: var(--shadow-warm);
+}
+
+:deep(.van-button--primary:active) {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%);
 }
 </style> 
