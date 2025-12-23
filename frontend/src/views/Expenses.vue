@@ -2,13 +2,13 @@
   <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
-      <div class="mb-4 animate-fade-in-up">
+      <div class="mb-4">
         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">支出记录</h1>
         <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
       </div>
 
       <!-- 搜索框和筛选器 -->
-      <div class="flex items-center space-x-2 mb-4 animate-fade-in-up" style="animation-delay: 0.1s">
+      <div class="flex items-center space-x-2 mb-4">
         <van-search
           v-model="searchQuery"
           placeholder="搜索支出记录（支持搜索'额外支出'）"
@@ -27,7 +27,7 @@
       </div>
 
       <!-- 当前筛选器显示 -->
-      <div v-if="currentFilter" class="mb-4 p-3 bg-warm-50 border border-warm-200 rounded-xl animate-scale-in">
+      <div v-if="currentFilter" class="mb-4 p-3 bg-warm-50 border border-warm-200 rounded-xl">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <van-icon name="filter-o" class="text-warm-600" size="18" />
@@ -62,7 +62,7 @@
       </div>
 
       <!-- 搜索区域 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 pt-2 mb-6 animate-fade-in-up" :class="{ 'opacity-50': currentFilter }" style="animation-delay: 0.2s">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 pt-2 mb-6" :class="{ 'opacity-50': currentFilter }">
         <div v-if="currentFilter" class="mb-3 p-3 bg-warm-100 rounded-xl border border-warm-300">
           <div class="flex items-center space-x-2">
             <van-icon name="info-o" class="text-warm-600" size="18" />
@@ -104,7 +104,7 @@
       </div>
 
       <!-- 支出列表 -->
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4 animate-fade-in-up" style="animation-delay: 0.3s">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm p-4">
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center space-x-3">
             <h2 class="text-xl font-display font-bold text-gray-900">支出记录</h2>

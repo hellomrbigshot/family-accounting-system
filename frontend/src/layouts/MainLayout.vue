@@ -28,7 +28,7 @@
     <main class="flex-1 overflow-y-auto">
       <div class="container mx-auto pt-4 pb-14">
         <transition name="page" mode="out-in">
-          <router-view class="animate-fade-in"></router-view>
+          <router-view></router-view>
         </transition>
       </div>
     </main>
@@ -79,20 +79,15 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
-/* 页面过渡动画 */
+/* 页面过渡动画：纯淡入淡出，时间短，避免晃动 */
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.3s ease-out;
+  transition: opacity 0.15s ease-out;
 }
 
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
+.page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
 }
 
 /* Tabbar 样式优化 */
