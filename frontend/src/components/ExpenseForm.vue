@@ -276,6 +276,11 @@ const toggle = (index: number) => {
 // 重置表单数据
 const resetForm = () => {
   form.date = dayjs().format('YYYY-MM-DD');
+  currentDate.value = [
+    dayjs().year().toString(),
+    (dayjs().month() + 1).toString().padStart(2, '0'),
+    dayjs().date().toString().padStart(2, '0')
+  ];
   form.category = '';
   form.amount = '';
   form.description = '';
@@ -312,6 +317,9 @@ const currentDate = ref<string[]>([
   (dayjs().month() + 1).toString().padStart(2, '0'),
   dayjs().date().toString().padStart(2, '0')
 ]);
+
+// 保存上次提交的日期，用于提交后保留日期
+const lastSubmittedDate = ref<string | null>(null);
 
 // 分类选择器
 const showCategoryPicker = ref(false);
@@ -400,7 +408,11 @@ const handleSubmit = async () => {
       showToast('保存成功');
     }
     emit('success');
-    resetForm(); // 提交成功后重置表单
+    // 只在新增模式下保存日期，用于下次打开表单时保留
+    if (!isEditMode.value) {
+      lastSubmittedDate.value = form.date;
+    }
+    resetForm();
     handleClose();
   } catch (error) {
     console.error('Failed to create expense:', error);
@@ -420,6 +432,17 @@ watch(() => props.show, async (newValue) => {
   if (newValue) {
     // 重置表单
     resetForm();
+    
+    // 如果是新增模式且有保留的日期，恢复保留的日期
+    if (!isEditMode.value && lastSubmittedDate.value) {
+      form.date = lastSubmittedDate.value;
+      const dateObj = dayjs(lastSubmittedDate.value);
+      currentDate.value = [
+        dateObj.year().toString(),
+        (dateObj.month() + 1).toString().padStart(2, '0'),
+        dateObj.date().toString().padStart(2, '0')
+      ];
+    }
     
           // 确保分类列表已加载
       if (categoryStore.allCategoriesForMapping.length === 0) {

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { expenseApi } from '@/api/expense';
-;
 import type { ExpenseData, ExpenseQuery, ExpenseStats } from '@/api/expense';
 import dayjs from '@/utils/dayjs';
 

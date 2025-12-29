@@ -90,6 +90,7 @@
 
     <!-- 悬浮按钮 -->
     <van-floating-bubble
+      v-if="!showAddExpenseDialog"
       axis="xy"
       magnetic="x"
       :gap="{ x: 24, y: 60 }"

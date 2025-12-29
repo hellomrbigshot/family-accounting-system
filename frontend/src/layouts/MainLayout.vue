@@ -27,9 +27,11 @@
     <!-- 中间内容区域 -->
     <main class="flex-1 overflow-y-auto">
       <div class="container mx-auto pt-4 pb-14">
-        <transition name="page" mode="out-in">
-          <router-view></router-view>
-        </transition>
+        <router-view v-slot="{ Component }">
+          <transition name="page" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
     </main>
 
