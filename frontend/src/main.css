@@ -206,7 +206,6 @@
 .van-floating-bubble:active {
   background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%) !important;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3), 0 2px 6px rgba(249, 115, 22, 0.15) !important;
-  transform: scale(0.95) !important;
 }
 
 .van-floating-bubble .van-icon {
