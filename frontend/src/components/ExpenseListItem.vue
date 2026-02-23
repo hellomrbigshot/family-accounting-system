@@ -175,9 +175,10 @@ const handleDelete = () => {
 }
 
 :deep(.van-cell__value) {
-  @apply text-lg font-display font-bold text-warm-600 ml-2;
+  @apply text-lg font-display font-bold text-warm-600 ml-2 whitespace-nowrap;
   flex-shrink: 0;
   flex: 35%;
+  min-width: 8rem; /* 支持百万级金额不换行，约 ¥1234567.89 */
   transition: color 0.2s ease;
 }
 
