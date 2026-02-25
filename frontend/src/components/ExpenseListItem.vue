@@ -68,6 +68,7 @@
 import { useCategoryStore } from '@/stores/category'
 import { useTagStore } from '@/stores/tag'
 import dayjs from '@/utils/dayjs'
+import { formatAmount } from '@/utils/format'
 import type { CategoryData } from '@/api/category'
 import type { TagData } from '@/api/tag'
 
@@ -133,11 +134,6 @@ const getCategoryIcon = (category: string | CategoryData) => {
 // 格式化日期
 const formatDate = (date: string) => {
   return dayjs(date).format('YYYY-MM-DD')
-}
-
-// 格式化金额
-const formatAmount = (amount: number) => {
-  return `¥${amount.toFixed(2)}`
 }
 
 // 处理编辑

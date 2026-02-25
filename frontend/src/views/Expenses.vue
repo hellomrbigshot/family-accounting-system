@@ -109,7 +109,7 @@
           <div class="flex items-center space-x-3">
             <h2 class="text-xl font-display font-bold text-gray-900">支出记录</h2>
             <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md">
-              总计: ¥{{ totalAmount.toFixed(2) }}
+              总计: {{ formatAmount(totalAmount) }}
             </span>
           </div>
         </div>
@@ -182,6 +182,7 @@ import FilterManager from '@/components/FilterManager.vue';
 import type { ExpenseQuery } from '@/api/expense';
 import type { FilterData } from '@/api/filter';
 import dayjs from '@/utils/dayjs';
+import { formatAmount } from '@/utils/format';
 
 const route = useRoute();
 const expenseStore = useExpenseStore();

@@ -143,6 +143,7 @@
 import { useFilterStore } from '@/stores/filter'
 import { useCategoryStore } from '@/stores/category'
 import { useTagStore } from '@/stores/tag'
+import { formatAmount } from '@/utils/format'
 import type { FilterData } from '@/api/filter'
 import FilterForm from './FilterForm.vue'
 import dayjs from '@/utils/dayjs'
@@ -273,7 +274,7 @@ const formatFilterConditions = (conditions: any) => {
       lte: '小于等于'
     }
     const operator = conditions.amountRange.operator
-    parts.push(`${operatorMap[operator]} ¥${conditions.amountRange.value}`)
+    parts.push(`${operatorMap[operator]} ${formatAmount(conditions.amountRange.value)}`)
   } else {
     parts.push('不限')
   }
