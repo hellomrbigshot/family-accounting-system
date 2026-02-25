@@ -1,0 +1,49 @@
+---
+description: 当用户发送 GitHub Issue 链接时，按「实现 → Chrome DevTools MCP 功能测试 → Code Review → 提交 PR」流程执行
+globs:
+alwaysApply: false
+---
+
+# Issue 链接 → 实现 → 测试 → Code Review → PR 工作流
+
+## 触发条件
+
+当用户消息中包含 GitHub Issue 的链接（形如 `https://github.com/***/***/issues/数字` 或 `github.com/***/***/issues/数字`）且明确或隐含希望根据该 Issue 实现功能、修 Bug 并提 PR 时，按本规则执行。
+
+## 执行流程
+
+按顺序执行以下步骤，并在每步完成后简要说明结果；若某步需要用户确认再继续，则暂停并说明。
+
+1. **解析 Issue**
+   - 从用户消息中提取 Issue URL，用 `gh issue view <number> --repo 仓库` 或 `mcp_web_fetch` 获取标题、描述、标签。
+   - 确认是 bug 还是 feature，以及验收标准（若有）。
+
+2. **创建分支**
+   - 基于当前默认分支（一般为 `main`）创建新分支。
+   - 命名约定：`fix/issue-<number>`（Bug）、`feat/issue-<number>`（新功能），其他可用 `chore/issue-<number>`。
+   - 使用 `git checkout -b 分支名`，确保在干净工作区操作（必要时先 `git status` / `git stash`）。
+
+3. **实现**
+   - 仅修改与当前 Issue 直接相关的代码，遵循项目现有规范（Vue3、Pinia、Tailwind、Express、MongoDB 等）。
+   - 实现完成后自检：类型/语法、项目已有 lint 规则。
+
+4. **Chrome DevTools MCP 功能测试**
+   - 使用 **Chrome DevTools MCP**（Cursor 中配置的 `chrome-devtools` MCP 服务器）进行功能测试：通过 MCP 工具 `navigate_page` 打开本地运行的应用（如 `http://localhost:5173`）、`click`/`fill`/`hover` 等模拟操作、`take_snapshot` 或 `take_screenshot` 验证界面、`list_console_messages` 检查控制台报错，根据 Issue 验收标准执行并判断通过与否。
+   - **前提**：用户已在 Cursor 中配置 Chrome DevTools MCP 服务器；功能测试前需确保本地应用已启动（如 `pnpm dev` 或前后端分别启动）。若未配置该 MCP 或用户明确说「本次不跑功能测试」，则跳过本步并说明。
+   - 若测试失败（界面异常、控制台报错、与 Issue 描述不符）：分析原因，若是本次改动导致则修复并重新用 MCP 工具验证，直到通过或与用户确认是否暂不修复。
+
+5. **Code Review**
+   - 对本次改动做一次简短 Code Review：是否贴合 Issue、边界情况、可读性、是否引入明显风险或违反项目规则。
+   - 将结论与建议（若有）用中文总结给用户，不修改与 Issue 无关的代码。
+
+6. **提交并创建 PR**
+   - Commit：使用中文、符合用户约定的格式，例如 `fix: 简短描述` / `feat: 简短描述`，并在 commit body 或 PR 描述中引用 `Closes #<number>` 或 `Fixes #<number>`。
+   - 推送到远程：`git push -u origin <分支名>`。
+   - 创建 PR：`gh pr create --fill`（或等价命令），PR 标题与描述中引用对应 Issue；若 `--fill` 无法自动填描述，则手动写清「本 PR 对应 Issue #<number>」及主要改动。
+   - 若 `gh` 未登录或无权限，则说明需要用户配置 GitHub CLI 或 `GH_TOKEN`，并给出已完成的 commit/分支信息供用户自行在网页创建 PR。
+
+## 约束
+
+- 不主动重构与当前 Issue 无关的代码；不扩大修改范围。
+- 创建分支、提交、推送、创建 PR 前若发现工作区有未提交的无关修改，先提示用户再决定是 stash 还是先提交。
+- 所有对用户的说明与 Review 结论使用中文；commit message 按用户规则使用中文。
