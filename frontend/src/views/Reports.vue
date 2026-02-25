@@ -42,7 +42,7 @@
         <div class="text-center">
           <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">时间段总支出</h3>
           <div class="text-white text-4xl font-display font-bold">
-            ¥{{ totalAmount.toFixed(2) }}
+            {{ formatAmount(totalAmount) }}
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <div class="text-center">
           <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">额外支出</h3>
           <div class="text-white text-4xl font-display font-bold">
-            ¥{{ extraAmount.toFixed(2) }}
+            {{ formatAmount(extraAmount) }}
           </div>
         </div>
       </div>
@@ -100,6 +100,7 @@
 import TrendAnalysis from '@/components/TrendAnalysis.vue';
 import CategoryAnalysis from '@/components/CategoryAnalysis.vue';
 import { useReportStore } from '@/stores/report';
+import { formatAmount } from '@/utils/format';
 import type { ReportData } from '@/api/report';
 import dayjs from '@/utils/dayjs';
 

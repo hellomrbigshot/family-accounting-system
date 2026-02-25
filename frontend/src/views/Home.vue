@@ -115,6 +115,7 @@ import { useBudgetStore } from '@/stores/budget';
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
+import { formatAmount } from '@/utils/format'
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
@@ -150,12 +151,6 @@ const actualProgress = computed(() => {
   if (!budgetStore.currentBudget || !budgetStore.currentBudget.amount) return 0;
   return (monthlyExpense.value / budgetStore.currentBudget.amount) * 100;
 });
-
-// 格式化金额
-const formatAmount = (amount?: number) => {
-  if (!amount) return '¥0.00';
-  return `¥${amount.toFixed(2)}`;
-};
 
 // 处理刷新 - 同时刷新本月和最近数据
 const handleRefresh = async () => {

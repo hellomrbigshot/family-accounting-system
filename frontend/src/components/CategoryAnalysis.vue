@@ -21,7 +21,7 @@
                 <span class="text-lg mr-2">{{ item.icon }}</span>
                 <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">{{ formatAmount(item.value) }}</span>
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@
                 <span class="text-lg mr-2">{{ item.icon }}</span>
                 <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">{{ formatAmount(item.value) }}</span>
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@
                 ></div>
                 <span class="text-gray-700 font-medium">{{ item.name }}</span>
               </div>
-              <span class="text-gray-900 font-display font-bold text-lg">¥{{ item.value.toFixed(2) }}</span>
+              <span class="text-gray-900 font-display font-bold text-lg">{{ formatAmount(item.value) }}</span>
             </div>
           </div>
         </div>
@@ -89,6 +89,7 @@
 import { useReportStore } from '@/stores/report';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
+import { formatAmount } from '@/utils/format';
 import * as echarts from 'echarts';
 import type { ReportData } from '@/api/report';
 
@@ -212,7 +213,8 @@ const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: num
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b}: ¥{c} ({d}%)'
+      formatter: (params: any) =>
+        `${params.seriesName} <br/>${params.name}: ${formatAmount(params.value)} (${params.percent}%)`
     },
     series: [
       {

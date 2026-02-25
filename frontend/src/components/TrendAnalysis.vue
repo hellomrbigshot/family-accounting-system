@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { useReportStore } from '@/stores/report';
 import dayjs from '@/utils/dayjs';
+import { formatAmount } from '@/utils/format';
 import * as echarts from 'echarts';
 
 interface Props {
@@ -116,7 +117,7 @@ const initChart = (chartRef: HTMLElement) => {
       },
       formatter: function(params: any) {
         const data = params[0];
-        return `${data.name}<br/>支出: ¥${data.value.toFixed(2)}`;
+        return `${data.name}<br/>支出: ${formatAmount(data.value)}`;
       }
     },
     grid: {
@@ -137,7 +138,7 @@ const initChart = (chartRef: HTMLElement) => {
     yAxis: {
       type: 'value',
       axisLabel: {
-        formatter: '¥{value}'
+        formatter: (value: number) => formatAmount(value)
       }
     },
     series: [
@@ -189,7 +190,7 @@ const updateChart = () => {
       },
       formatter: function(params: any) {
         const data = params[0];
-        return `${data.name}<br/>支出: ¥${data.value.toFixed(2)}`;
+        return `${data.name}<br/>支出: ${formatAmount(data.value)}`;
       }
     },
     grid: {
@@ -210,7 +211,7 @@ const updateChart = () => {
     yAxis: {
       type: 'value',
       axisLabel: {
-        formatter: '¥{value}'
+        formatter: (value: number) => formatAmount(value)
       }
     },
     series: [

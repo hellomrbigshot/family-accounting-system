@@ -254,6 +254,7 @@
 import { useFilterStore } from '@/stores/filter'
 import { useTagStore } from '@/stores/tag'
 import { useCategoryStore } from '@/stores/category'
+import { formatAmount } from '@/utils/format'
 import MultiSelect from './MultiSelect.vue'
 import type { FilterData, FilterConditions } from '@/api/filter'
 
@@ -387,7 +388,7 @@ const amountRangeText = computed(() => {
     gte: '大于等于',
     lte: '小于等于'
   }
-  return `${operatorMap[conditions.amountRange.operator]} ¥${conditions.amountRange.value}`
+  return `${operatorMap[conditions.amountRange.operator]} ${formatAmount(conditions.amountRange.value)}`
 })
 
 const operatorText = computed(() => {
