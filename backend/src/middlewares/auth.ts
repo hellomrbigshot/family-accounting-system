@@ -15,7 +15,8 @@ export const auth = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const raw = req.header('Authorization') || req.header('authorization');
+    const token = raw?.replace(/^Bearer\s+/i, '').trim();
 
     if (!token) {
       throw new Error();
