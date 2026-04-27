@@ -25,6 +25,14 @@ const router = createRouter({
           }
         },
         {
+          path: 'calendar',
+          name: 'calendar',
+          component: () => import('@/views/Calendar.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
           path: 'categories',
           name: 'categories',
           component: () => import('@/views/Categories.vue'),
@@ -36,6 +44,14 @@ const router = createRouter({
           path: 'reports',
           name: 'reports',
           component: () => import('@/views/Reports.vue'),
+          meta: {
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'more',
+          name: 'more',
+          component: () => import('@/views/More.vue'),
           meta: {
             requiresAuth: true
           }

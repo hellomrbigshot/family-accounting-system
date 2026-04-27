@@ -1,10 +1,9 @@
 <template>
-  <div class="min-h-screen">
+  <div>
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
       <div class="mb-4">
-        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">支出记录</h1>
-        <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
+        <PageHeader title="支出记录" :description="`今天是 ${currentDate}`" />
       </div>
 
       <!-- 搜索框和筛选器 -->
@@ -98,7 +97,7 @@
             :disabled="!!currentFilter"
             @click="handleSearch"
           >
-            {{ currentFilter ? '搜索（已禁用）' : '搜索' }}
+            {{ currentFilter ? '查询（已禁用）' : '查询' }}
           </van-button>
         </div>
       </div>
@@ -179,6 +178,7 @@ import { useFilterStore } from '@/stores/filter';
 import ExpenseList from '@/components/ExpenseList.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import FilterManager from '@/components/FilterManager.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import type { ExpenseQuery } from '@/api/expense';
 import type { FilterData } from '@/api/filter';
 import dayjs from '@/utils/dayjs';

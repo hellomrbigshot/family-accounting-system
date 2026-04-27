@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4">
+  <div class="container mx-auto px-4 pt-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
       <!-- 预算卡片 -->
@@ -36,10 +36,10 @@
           <div class="w-full bg-warm-100 rounded-full h-3 overflow-hidden shadow-inner">
             <div
               class="h-3 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-              :class="isOverBudget ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-warm-400 to-warm-600'"
+              :class="isOverBudget ? 'bg-red-600' : 'bg-warm-500'"
               :style="{ width: `${Math.min(actualProgress, 100)}%` }"
             >
-              <div class="absolute inset-0 bg-white/20 animate-shimmer"></div>
+              <div class="absolute inset-0 bg-white/15"></div>
             </div>
           </div>
           <div class="flex justify-between items-center text-sm">
