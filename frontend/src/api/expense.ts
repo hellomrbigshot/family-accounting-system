@@ -32,6 +32,21 @@ export interface ExpenseStats {
   byTag: Record<string, number>
 }
 
+export type ExpenseCategoryStatRow = {
+  _id: string
+  total: number
+}
+
+export type ExpenseDateStatRow = {
+  _id: string
+  total: number
+}
+
+export type ExpenseStatsResponse = {
+  categoryStats: ExpenseCategoryStatRow[]
+  dateStats: ExpenseDateStatRow[]
+}
+
 class ExpenseApi {
   private baseUrl = '/expenses'
 
@@ -52,7 +67,7 @@ class ExpenseApi {
 
   async getStats(query?: ExpenseQuery) {
     const response = await axios.get(`${this.baseUrl}/stats`, { params: query })
-    return response.data
+    return response.data as ExpenseStatsResponse
   }
 
   async delete(id: string): Promise<void> {

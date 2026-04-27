@@ -1,42 +1,23 @@
 <template>
-  <div class="h-screen bg-gradient-warm-subtle flex flex-col">
-    <!-- 顶部导航栏 -->
-    <nav class="z-10 bg-white/80 backdrop-blur-md shadow-md border-b border-warm-100 sticky top-0">
-      <div class="container mx-auto px-4">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <router-link 
-              to="/" 
-              class="text-xl font-display font-bold bg-gradient-to-r from-warm-600 to-warm-500 bg-clip-text text-transparent hover:from-warm-700 hover:to-warm-600 transition-all duration-300"
-            >
-              家庭账本
-            </router-link>
-          </div>
-          <div class="flex items-center space-x-4">
-            <button 
-              @click="handleLogout" 
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-warm-600 hover:bg-warm-50 rounded-lg transition-all duration-200 hover:shadow-sm"
-            >
-              退出登录
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
+  <div class="h-screen overflow-hidden bg-gradient-warm-subtle flex flex-col">
     <!-- 中间内容区域 -->
-    <main class="flex-1 overflow-y-auto">
-      <div class="container mx-auto pt-4 pb-14">
+    <main class="flex-1 min-h-0 overflow-y-auto">
+      <div class="container mx-auto pt-2 pb-2">
         <router-view v-slot="{ Component }">
-          <transition name="page" mode="out-in">
-            <component :is="Component" />
-          </transition>
+          <component :is="Component" />
         </router-view>
       </div>
     </main>
 
     <!-- 移动端底部导航 -->
-    <van-tabbar v-model="active" class="md:hidden border-t border-warm-200 bg-white/90 backdrop-blur-md" @change="handleTabChange">
+    <van-tabbar
+      v-model="active"
+      :fixed="false"
+      safe-area-inset-bottom
+      :border="false"
+      class="md:hidden bg-transparent"
+      @change="handleTabChange"
+    >
       <van-tabbar-item
         v-for="item in navItems"
         :key="item.path"
@@ -49,60 +30,75 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth';
-
-const router = useRouter();
-const route = useRoute();
-const authStore = useAuthStore();
+const router = useRouter()
+const route = useRoute()
 
 const navItems = [
   { name: '首页', path: '/', icon: 'home-o' },
   { name: '支出', path: '/expenses', icon: 'balance-o' },
-  { name: '分类', path: '/categories', icon: 'apps-o' },
-  { name: '报表', path: '/reports', icon: 'chart-trending-o' }
-];
+  { name: '日历', path: '/calendar', icon: 'calendar-o' },
+  { name: '更多', path: '/more', icon: 'more-o' }
+]
 
 // 将 active 改为 ref，初始值根据当前路由计算
-const active = ref(0);
+const active = ref(0)
 
 // 监听路由变化，自动更新 active 值
 watch(() => route.path, (newPath) => {
-  const index = navItems.findIndex(item => item.path === newPath);
-  active.value = index !== -1 ? index : 0;
-}, { immediate: true });
+  const index = navItems.findIndex(item => item.path === newPath)
+
+  if (index !== -1) {
+    active.value = index
+    return
+  }
+
+  // 从“更多”进入的页面，保持底部高亮为“更多”
+  if (newPath === '/reports' || newPath === '/categories') {
+    const moreIndex = navItems.findIndex(item => item.path === '/more')
+    active.value = moreIndex === -1 ? 0 : moreIndex
+    return
+  }
+
+  active.value = 0
+}, { immediate: true })
 
 const handleTabChange = (index: number) => {
-  router.push(navItems[index].path);
-};
-
-const handleLogout = async () => {
-  await authStore.logout();
-};
+  router.push(navItems[index].path)
+}
 </script>
 
 <style scoped>
-/* 页面过渡动画：纯淡入淡出，时间短，避免晃动 */
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 0.15s ease-out;
-}
-
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
-}
-
 /* Tabbar 样式优化 */
 :deep(.van-tabbar) {
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  --van-tabbar-background: transparent;
+  box-shadow: none;
+  background: transparent;
+  border: 0;
+  backdrop-filter: none;
+}
+
+:deep(.van-tabbar::before),
+:deep(.van-tabbar::after) {
+  display: none;
+  content: none;
 }
 
 :deep(.van-tabbar-item) {
+  --van-tabbar-item-active-background: transparent;
+  background: transparent;
+  border: 0;
   @apply text-gray-500 transition-colors duration-200;
 }
 
 :deep(.van-tabbar-item--active) {
+  background: transparent;
   @apply text-warm-600;
+}
+
+:deep(.van-tabbar-item::before),
+:deep(.van-tabbar-item::after) {
+  display: none;
+  content: none;
 }
 
 :deep(.van-tabbar-item__icon) {

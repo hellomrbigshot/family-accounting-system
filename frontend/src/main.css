@@ -211,4 +211,55 @@
 .van-floating-bubble .van-icon {
   color: white !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+/* 全局“更纯粹”的视觉：去掉阴影/边框/动效（用 !important 覆盖 Tailwind 与 Vant 的默认装饰） */
+*,
+*::before,
+*::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+/* 边框：保留结构但去掉可见描边（比直接 border:0 更不容易把布局挤变形） */
+*,
+*::before,
+*::after {
+  border-color: transparent !important;
+}
+
+/* 动效：禁用 CSS 动画/过渡（包含页面切换、hover 过渡、Vant 默认过渡） */
+*,
+*::before,
+*::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* 项目里用到的动画工具类：直接失效（避免仍残留 animation-name） */
+[class*='animate-'] {
+  animation: none !important;
+}
+
+/* 卡片 hover 预设：去掉位移动画与阴影（即使 transition 已被禁用，也避免 hover 规则残留） */
+.card-hover:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 悬浮记账按钮：同步去掉阴影与描边，避免和全局规则“打架” */
+.van-floating-bubble {
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.van-floating-bubble:active {
+  box-shadow: none !important;
+}
+
+.van-floating-bubble .van-icon {
+  filter: none !important;
 } 

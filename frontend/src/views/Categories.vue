@@ -1,9 +1,11 @@
 <template>
-  <div class="min-h-screen">
+  <div>
     <div class="mx-auto px-4 pb-6 pt-2">
       <div class="mb-6">
-        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">分类管理</h1>
-        <p class="text-sm text-gray-600 font-medium">管理您的支出分类和标签，方便记录日常开销</p>
+        <PageHeader
+          title="分类管理"
+          description="管理您的支出分类和标签，方便记录日常开销"
+        />
       </div>
 
       <!-- Tab 切换 -->
@@ -45,6 +47,7 @@
 <script setup lang="ts">
 import CategoryList from '@/components/CategoryList.vue';
 import TagList from '@/components/TagList.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 // Tab 相关
 const tabs = [

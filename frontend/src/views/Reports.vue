@@ -1,10 +1,9 @@
 <template>
-  <div class="min-h-screen">
+  <div>
     <div class="mx-auto px-4 pb-6 pt-2">
       <!-- 欢迎区域 -->
       <div class="mb-4">
-        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">报表分析</h1>
-        <p class="text-sm text-gray-600 font-medium">今天是 {{ currentDate }}</p>
+        <PageHeader title="支出分析" :description="`今天是 ${currentDate}`" />
       </div>
 
       <!-- 搜索区域 -->
@@ -99,6 +98,7 @@
 <script setup lang="ts">
 import TrendAnalysis from '@/components/TrendAnalysis.vue';
 import CategoryAnalysis from '@/components/CategoryAnalysis.vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { useReportStore } from '@/stores/report';
 import { formatAmount } from '@/utils/format';
 import type { ReportData } from '@/api/report';
