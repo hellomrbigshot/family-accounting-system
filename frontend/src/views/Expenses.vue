@@ -400,7 +400,33 @@ const fetchExpenses = async () => {
 
 // 在组件挂载时设置默认日期范围并加载数据
 onMounted(async () => {
-  setDefaultDateRange();
+  const startParam = typeof route.query.startDate === 'string' ? route.query.startDate : ''
+  const endParam = typeof route.query.endDate === 'string' ? route.query.endDate : ''
+
+  const parsedStart = startParam ? dayjs(startParam) : null
+  const parsedEnd = endParam ? dayjs(endParam) : null
+
+  if (parsedStart && parsedStart.isValid() && parsedEnd && parsedEnd.isValid()) {
+    const start = parsedStart
+    const end = parsedEnd
+
+    query.startDate = start.format('YYYY-MM-DD')
+    query.endDate = end.format('YYYY-MM-DD')
+
+    currentStartDate.value = [
+      start.year().toString(),
+      (start.month() + 1).toString().padStart(2, '0'),
+      start.date().toString().padStart(2, '0')
+    ]
+
+    currentEndDate.value = [
+      end.year().toString(),
+      (end.month() + 1).toString().padStart(2, '0'),
+      end.date().toString().padStart(2, '0')
+    ]
+  } else {
+    setDefaultDateRange()
+  }
   
   // 处理路由查询参数，设置搜索框内容
   if (route.query.category) {

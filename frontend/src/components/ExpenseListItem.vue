@@ -156,7 +156,12 @@ const handleDelete = () => {
 
 :deep(.van-cell:hover) {
   background: var(--color-warm-50);
-  transform: translateX(4px);
+  transform: none;
+}
+
+:deep(.van-cell:active) {
+  background: var(--color-warm-100);
+  transform: none;
 }
 
 :deep(.van-cell::after) {

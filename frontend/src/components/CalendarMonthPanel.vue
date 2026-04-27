@@ -16,7 +16,7 @@
         :show-title="false"
         :show-confirm="false"
         :lazy-render="false"
-        :readonly="true"
+        :readonly="false"
         :show-mark="false"
         :show-subtitle="false"
         :row-height="64"
@@ -25,6 +25,7 @@
         :default-date="defaultDate"
         :formatter="formatDay"
         :safe-area-inset-bottom="false"
+        @select="handleSelect"
       />
     </div>
   </section>
@@ -38,6 +39,10 @@ import { formatAmount } from '@/utils/format'
 const props = defineProps<{
   monthStart: dayjs.Dayjs
   byDate: Record<string, number>
+}>()
+
+const emit = defineEmits<{
+  (e: 'select-expense-date', payload: { date: string }): void
 }>()
 
 const minDate = computed(() => props.monthStart.startOf('month').toDate())
@@ -93,6 +98,29 @@ const formatDay = (day: CalendarDayItem) => {
   }
 
   return day
+}
+
+const handleSelect = (value: Date | Date[]) => {
+  if (Array.isArray(value)) {
+    return
+  }
+
+  const d = dayjs(value)
+  if (!d.isValid()) {
+    return
+  }
+
+  if (!d.isSame(props.monthStart, 'month')) {
+    return
+  }
+
+  const key = d.format('YYYY-MM-DD')
+  const amount = props.byDate[key] || 0
+  if (amount <= 0) {
+    return
+  }
+
+  emit('select-expense-date', { date: key })
 }
 </script>
 
