@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen overflow-hidden bg-gradient-warm-subtle flex flex-col">
+  <div class="h-[100dvh] overflow-hidden bg-gradient-warm-subtle flex flex-col">
     <!-- 中间内容区域 -->
     <main class="flex-1 min-h-0 overflow-y-auto">
       <div class="container mx-auto pt-2 pb-2">
@@ -15,7 +15,7 @@
       :fixed="false"
       safe-area-inset-bottom
       :border="false"
-      class="md:hidden bg-transparent"
+      class="md:hidden bg-transparent flex-shrink-0"
       @change="handleTabChange"
     >
       <van-tabbar-item

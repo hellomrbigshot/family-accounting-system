@@ -21,6 +21,7 @@
           :key="month.format('YYYY-MM')"
           :month-start="month"
           :by-date="byDate"
+          @select-expense-date="handleSelectExpenseDate"
         />
       </div>
     </div>
@@ -36,6 +37,7 @@ import CalendarMonthPanel from '@/components/CalendarMonthPanel.vue'
 
 const loading = ref(true)
 const byDate = ref<Record<string, number>>({})
+const router = useRouter()
 
 const queryStartMonth = ref(dayjs().subtract(2, 'month').format('YYYY-MM'))
 const queryEndMonth = ref(dayjs().format('YYYY-MM'))
@@ -69,6 +71,13 @@ const handleSearch = async (payload: { startMonth: string; endMonth: string }) =
   queryStartMonth.value = payload.startMonth
   queryEndMonth.value = payload.endMonth
   await load()
+}
+
+const handleSelectExpenseDate = (payload: { date: string }) => {
+  router.push({
+    path: '/expenses',
+    query: { startDate: payload.date, endDate: payload.date }
+  })
 }
 
 const load = async () => {

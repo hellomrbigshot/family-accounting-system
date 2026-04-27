@@ -5,50 +5,48 @@
         <PageHeader title="更多" />
       </div>
 
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm overflow-hidden p-3">
-        <div class="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            class="group w-full rounded-2xl border border-warm-200 bg-[color:var(--color-warm-50)] px-3.5 py-3 active:bg-white"
-            @click="router.push('/categories')"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div
-                  class="w-10 h-10 rounded-2xl bg-white border border-warm-200 flex items-center justify-center text-warm-600"
-                >
-                  <van-icon name="apps-o" size="18" />
-                </div>
-                <div class="min-w-0 text-left">
-                  <div class="text-sm font-semibold text-slate-900 truncate">分类管理</div>
-                  <div class="text-xs text-slate-500 truncate">分类与标签</div>
-                </div>
+      <div class="space-y-3">
+        <button
+          type="button"
+          class="group w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm overflow-hidden"
+          @click="router.push('/categories')"
+        >
+          <div class="px-4 py-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3.5 min-w-0">
+              <div
+                class="w-11 h-11 rounded-2xl bg-[color:var(--color-warm-50)] border border-warm-200 flex items-center justify-center text-warm-600 flex-shrink-0"
+              >
+                <van-icon name="apps-o" size="18" />
               </div>
-              <van-icon name="arrow" class="text-slate-400 group-active:text-slate-500" />
+              <div class="min-w-0 text-left">
+                <div class="text-sm font-semibold text-slate-900 leading-snug">分类管理</div>
+                <div class="mt-1 text-xs text-slate-500 leading-snug break-words">分类与标签</div>
+              </div>
             </div>
-          </button>
+            <van-icon name="arrow" class="text-slate-400 group-active:text-slate-500 mt-1" />
+          </div>
+        </button>
 
-          <button
-            type="button"
-            class="group w-full rounded-2xl border border-warm-200 bg-[color:var(--color-warm-50)] px-3.5 py-3 active:bg-white"
-            @click="router.push('/reports')"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div
-                  class="w-10 h-10 rounded-2xl bg-white border border-warm-200 flex items-center justify-center text-warm-600"
-                >
-                  <van-icon name="chart-trending-o" size="18" />
-                </div>
-                <div class="min-w-0 text-left">
-                  <div class="text-sm font-semibold text-slate-900 truncate">支出分析</div>
-                  <div class="text-xs text-slate-500 truncate">趋势与分类</div>
-                </div>
+        <button
+          type="button"
+          class="group w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm overflow-hidden"
+          @click="router.push('/reports')"
+        >
+          <div class="px-4 py-4 flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3.5 min-w-0">
+              <div
+                class="w-11 h-11 rounded-2xl bg-[color:var(--color-warm-50)] border border-warm-200 flex items-center justify-center text-warm-600 flex-shrink-0"
+              >
+                <van-icon name="chart-trending-o" size="18" />
               </div>
-              <van-icon name="arrow" class="text-slate-400 group-active:text-slate-500" />
+              <div class="min-w-0 text-left">
+                <div class="text-sm font-semibold text-slate-900 leading-snug">支出分析</div>
+                <div class="mt-1 text-xs text-slate-500 leading-snug break-words">趋势与分类</div>
+              </div>
             </div>
-          </button>
-        </div>
+            <van-icon name="arrow" class="text-slate-400 group-active:text-slate-500 mt-1" />
+          </div>
+        </button>
       </div>
 
       <div class="mt-4">
@@ -66,7 +64,6 @@
               </div>
               <div class="min-w-0 text-left">
                 <div class="text-sm font-semibold text-red-600">退出登录</div>
-                <div class="text-xs text-slate-500">将返回登录页</div>
               </div>
             </div>
             <van-icon name="arrow" class="text-slate-400" />
