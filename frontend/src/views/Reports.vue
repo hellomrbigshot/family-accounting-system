@@ -36,38 +36,47 @@
         </div>
        </div>
 
-      <!-- 总金额统计卡片 -->
-      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
-        <div class="text-center">
-          <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">时间段总支出</h3>
-          <div class="text-white text-4xl font-display font-bold">
-            {{ formatAmount(totalAmount) }}
+      <!-- 报表数据：加载中骨架屏，完成后展示（保留图表与 Vant 弹层动效） -->
+      <div v-if="loading" class="mb-4 space-y-4" aria-busy="true">
+        <van-skeleton class="rounded-2xl !h-28" title :row="1" />
+        <van-skeleton class="rounded-2xl !h-28" title :row="1" />
+        <van-skeleton class="rounded-2xl" title :row="4" />
+        <van-skeleton class="rounded-2xl" title :row="6" />
+      </div>
+      <template v-else>
+        <!-- 总金额统计卡片 -->
+        <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
+          <div class="text-center">
+            <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">时间段总支出</h3>
+            <div class="text-white text-4xl font-display font-bold">
+              {{ formatAmount(totalAmount) }}
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 额外支出统计卡片 -->
-      <div class="bg-gradient-to-r from-warm-500 to-warm-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
-        <div class="text-center">
-          <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">额外支出</h3>
-          <div class="text-white text-4xl font-display font-bold">
-            {{ formatAmount(extraAmount) }}
+        <!-- 额外支出统计卡片 -->
+        <div class="bg-gradient-to-r from-warm-500 to-warm-600 rounded-2xl shadow-lg p-6 mb-4 card-hover">
+          <div class="text-center">
+            <h3 class="text-white text-sm font-semibold mb-3 uppercase tracking-wide">额外支出</h3>
+            <div class="text-white text-4xl font-display font-bold">
+              {{ formatAmount(extraAmount) }}
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 趋势分析 -->
-      <trend-analysis
-        :data="reportData.trend"
-        :loading="loading"
-        class="mb-6"
-      />
+        <!-- 趋势分析 -->
+        <trend-analysis
+          :data="reportData.trend"
+          :loading="loading"
+          class="mb-6"
+        />
 
-      <!-- 分类分析 -->
-      <category-analysis
-        :data="reportStore.data"
-        :loading="loading"
-      />
+        <!-- 分类分析 -->
+        <category-analysis
+          :data="reportStore.data"
+          :loading="loading"
+        />
+      </template>
 
       <!-- 日期选择器 -->
       <van-popup v-model:show="showStartDatePicker" position="bottom" round>

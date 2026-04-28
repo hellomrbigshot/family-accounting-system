@@ -1,10 +1,12 @@
 <template>
   <div class="h-[100dvh] overflow-hidden bg-gradient-warm-subtle flex flex-col">
     <!-- 中间内容区域 -->
-    <main class="flex-1 min-h-0 overflow-y-auto">
+    <main ref="mainScrollEl" class="flex-1 min-h-0 overflow-y-auto">
       <div class="container mx-auto pt-2 pb-2">
         <router-view v-slot="{ Component }">
-          <component :is="Component" />
+          <transition name="page" mode="out-in">
+            <component :is="Component" :key="route.fullPath" class="animate-fade-in" />
+          </transition>
         </router-view>
       </div>
     </main>
@@ -32,6 +34,21 @@
 <script setup lang="ts">
 const router = useRouter()
 const route = useRoute()
+const mainScrollEl = ref<HTMLElement | null>(null)
+
+/** 各页共用 main 滚动容器，path 或 query 变化时都回到顶部 */
+watch(
+  () => route.fullPath,
+  () => {
+    nextTick(() => {
+      const el = mainScrollEl.value
+      if (el) {
+        el.scrollTop = 0
+      }
+    })
+  },
+  { flush: 'post' }
+)
 
 const navItems = [
   { name: '首页', path: '/', icon: 'home-o' },
@@ -68,6 +85,22 @@ const handleTabChange = (index: number) => {
 </script>
 
 <style scoped>
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 /* Tabbar 样式优化 */
 :deep(.van-tabbar) {
   --van-tabbar-background: transparent;

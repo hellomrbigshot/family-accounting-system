@@ -10,12 +10,15 @@ export const useExpenseStore = defineStore('expense', () => {
   const recentExpenses = ref<ExpenseData[]>([]); // 最近支出数据
   const stats = ref<ExpenseStats | null>(null);
   const loading = ref<boolean>(false);
+  /** 支出页列表接口加载中（与本月/最近等其它请求解耦，便于骨架屏） */
+  const expensesListLoading = ref<boolean>(false);
+  const recentExpensesListLoading = ref<boolean>(false);
   const error = ref<string | null>(null);
 
   const totalExpense = () => expenses.value.reduce((sum, expense) => sum + expense.amount, 0);
 
   const fetchExpenses = async (query?: ExpenseQuery) => {
-    loading.value = true;
+    expensesListLoading.value = true;
     error.value = null;
     try {
       const response = await expenseApi.getList(query);
@@ -26,7 +29,7 @@ export const useExpenseStore = defineStore('expense', () => {
       showToast('获取支出列表失败');
       return false;
     } finally {
-      loading.value = false;
+      expensesListLoading.value = false;
     }
   };
 
@@ -56,7 +59,7 @@ export const useExpenseStore = defineStore('expense', () => {
 
   // 获取最近支出数据
   const fetchRecentExpenses = async () => {
-    loading.value = true;
+    recentExpensesListLoading.value = true;
     error.value = null;
     try {
       const now = dayjs();
@@ -73,7 +76,7 @@ export const useExpenseStore = defineStore('expense', () => {
       showToast('获取最近支出失败');
       return false;
     } finally {
-      loading.value = false;
+      recentExpensesListLoading.value = false;
     }
   };
 
@@ -156,6 +159,8 @@ export const useExpenseStore = defineStore('expense', () => {
     recentExpenses,
     stats,
     loading,
+    expensesListLoading,
+    recentExpensesListLoading,
     error,
     totalExpense,
     fetchExpenses,

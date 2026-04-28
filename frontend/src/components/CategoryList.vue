@@ -1,6 +1,16 @@
 <template>
-  <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm animate-fade-in-up">
-    <div class="p-6">
+  <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-warm">
+    <div v-if="listLoading" class="p-6 space-y-4" aria-busy="true">
+      <van-skeleton title avatar :row="2" />
+      <van-skeleton
+        v-for="n in 5"
+        :key="n"
+        title
+        :row="1"
+        class="rounded-xl overflow-hidden"
+      />
+    </div>
+    <div v-else class="p-6">
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center space-x-4">
           <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-warm-400 to-warm-600 flex items-center justify-center shadow-warm">
@@ -35,10 +45,9 @@
       </div>
       <div class="space-y-3">
         <van-swipe-cell
-          v-for="(category, index) in systemCategories"
+          v-for="category in systemCategories"
           :key="category.id"
           class="mb-2 category-item"
-          :style="{ animationDelay: `${index * 0.05}s` }"
         >
           <div
             class="flex items-center justify-between p-5 bg-gradient-to-r from-warm-50 via-warm-50/50 to-white rounded-2xl cursor-pointer hover:from-warm-100 hover:via-warm-100/50 hover:to-warm-50 transition-all duration-300 card-hover border border-warm-200/50 shadow-sm hover:shadow-md group"
@@ -91,10 +100,9 @@
       </div>
       <div class="space-y-3">
         <van-swipe-cell
-          v-for="(category, index) in customCategories"
+          v-for="category in customCategories"
           :key="category.id"
           class="mb-2 category-item"
-          :style="{ animationDelay: `${(systemCategories.length + index) * 0.05}s` }"
         >
           <div
             class="flex items-center justify-between p-5 bg-gradient-to-r from-warm-50/80 via-accent-blue-light/5 to-white rounded-2xl cursor-pointer hover:from-warm-100/80 hover:via-accent-blue-light/10 hover:to-warm-50 transition-all duration-300 card-hover border border-warm-200/50 shadow-sm hover:shadow-md group"
@@ -142,7 +150,7 @@
     </div>
 
     <!-- 空状态 -->
-    <div v-if="categories.length === 0" class="p-16 text-center animate-fade-in">
+    <div v-if="categories.length === 0" class="p-16 text-center">
       <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-warm-100 to-warm-200 flex items-center justify-center shadow-warm">
         <span class="text-5xl animate-pulse-warm">📦</span>
       </div>
@@ -218,7 +226,8 @@ const editingCategory = ref<CategoryData | null>(null);
 const showDeleteConfirm = ref(false);
 const showDisableConfirm = ref(false);
 
-const categories = ref<CategoryData[]>([]);
+const categories = ref<CategoryData[]>([])
+const listLoading = ref(true)
 
 // 分离系统分类和家庭分类
 const systemCategories = computed(() => 
@@ -245,13 +254,16 @@ const formatDate = (date: string) => {
 };
 
 const fetchCategories = async () => {
+  listLoading.value = true
   try {
-    const data = await categoryApi.getList({ type: 'expense' });
-    categories.value = data;
+    const data = await categoryApi.getList({ type: 'expense' })
+    categories.value = data
   } catch (error) {
-    console.error('获取分类列表失败:', error);
+    console.error('获取分类列表失败:', error)
+  } finally {
+    listLoading.value = false
   }
-};
+}
 
 const handleEdit = (category: CategoryData) => {
   editingCategory.value = category;
@@ -322,10 +334,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.category-item {
-  animation: fadeInUp 0.4s ease-out both;
-}
-
 .category-item :deep(.van-swipe-cell) {
   @apply rounded-2xl overflow-hidden mb-3;
   box-shadow: var(--shadow-sm);

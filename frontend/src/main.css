@@ -229,26 +229,6 @@
   border-color: transparent !important;
 }
 
-/* 动效：禁用 CSS 动画/过渡（包含页面切换、hover 过渡、Vant 默认过渡） */
-*,
-*::before,
-*::after {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
-}
-
-/* 项目里用到的动画工具类：直接失效（避免仍残留 animation-name） */
-[class*='animate-'] {
-  animation: none !important;
-}
-
-/* 卡片 hover 预设：去掉位移动画与阴影（即使 transition 已被禁用，也避免 hover 规则残留） */
-.card-hover:hover {
-  transform: none !important;
-  box-shadow: none !important;
-}
-
 /* 悬浮记账按钮：同步去掉阴影与描边，避免和全局规则“打架” */
 .van-floating-bubble {
   box-shadow: none !important;

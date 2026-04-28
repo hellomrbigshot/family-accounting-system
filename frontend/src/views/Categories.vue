@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="min-h-screen">
     <div class="mx-auto px-4 pb-6 pt-2">
       <div class="mb-6">
         <PageHeader

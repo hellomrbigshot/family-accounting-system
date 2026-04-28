@@ -1,7 +1,17 @@
 <template>
   <div class="bg-white">
     <van-pull-refresh v-if="showRefresh" v-model="refreshing" @refresh="onRefresh">
+      <div v-if="listLoading" class="px-2 py-3 space-y-3" aria-busy="true">
+        <van-skeleton
+          v-for="n in 6"
+          :key="n"
+          title
+          :row="1"
+          class="rounded-xl overflow-hidden"
+        />
+      </div>
       <van-list
+        v-else
         v-model:loading="loading"
         :finished="finished"
         :finished-text="finishedText"
@@ -20,7 +30,16 @@
     
     <!-- 无刷新功能的简单列表 -->
     <div v-else>
-      <div v-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8">
+      <div v-if="listLoading" class="px-2 py-3 space-y-3" aria-busy="true">
+        <van-skeleton
+          v-for="n in 6"
+          :key="n"
+          title
+          :row="1"
+          class="rounded-xl overflow-hidden"
+        />
+      </div>
+      <div v-else-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8">
         {{ emptyText }}
       </div>
       <div v-else>
@@ -70,6 +89,8 @@ const props = defineProps<{
   maxItems?: number
   emptyText?: string
   finishedText?: string
+  /** 为 true 时展示骨架屏，不渲染列表项（数据就绪后由父组件置为 false） */
+  listLoading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -84,6 +105,7 @@ const maxItems = computed(() => props.maxItems ?? 0)
 const emptyText = computed(() => props.emptyText ?? '暂无支出记录')
 const finishedText = computed(() => props.finishedText ?? '没有更多了')
 const showDelete = computed(() => props.showDelete ?? false)
+const listLoading = computed(() => props.listLoading ?? false)
 
 const expenseStore = useExpenseStore()
 const refreshing = ref(false)

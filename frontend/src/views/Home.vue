@@ -79,6 +79,7 @@
         </div>
         <ExpenseList
           :expenses="expenseStore.recentExpenses"
+          :list-loading="expenseStore.recentExpensesListLoading"
           :show-refresh="true"
           :max-items="20"
           empty-text="7天内暂无支出"
