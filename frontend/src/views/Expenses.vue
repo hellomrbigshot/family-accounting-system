@@ -115,6 +115,7 @@
 
         <ExpenseList
           :expenses="filteredExpenses"
+          :list-loading="expenseStore.expensesListLoading"
           show-delete
           :show-refresh="false"
           @refresh="handleRefresh"

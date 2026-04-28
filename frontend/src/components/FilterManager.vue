@@ -20,7 +20,7 @@
       </div>
 
       <!-- 当前筛选器 -->
-      <div v-if="currentFilter" class="p-4 bg-gradient-to-r from-accent-blue-light/20 via-accent-blue-light/10 to-warm-100/30 border-b border-accent-blue-light/30 animate-fade-in">
+      <div v-if="currentFilter" class="p-4 bg-gradient-to-r from-accent-blue-light/20 via-accent-blue-light/10 to-warm-100/30 border-b border-accent-blue-light/30">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-blue-light to-accent-blue flex items-center justify-center shadow-md">
@@ -44,11 +44,17 @@
 
       <!-- 筛选器列表 -->
       <div class="flex-1 overflow-y-auto p-6 bg-white">
-        <div v-if="filterStore.loading" class="flex justify-center py-12">
-          <van-loading size="32px" color="#f97316">加载中...</van-loading>
+        <div v-if="filterStore.loading" class="py-4 space-y-4" aria-busy="true">
+          <van-skeleton
+            v-for="n in 4"
+            :key="n"
+            class="rounded-2xl overflow-hidden"
+            title
+            :row="2"
+          />
         </div>
 
-        <div v-else-if="filterStore.filters.length === 0" class="text-center py-12 animate-fade-in">
+        <div v-else-if="filterStore.filters.length === 0" class="text-center py-12">
           <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-warm-100 to-warm-200 flex items-center justify-center shadow-warm">
             <span class="text-5xl animate-pulse-warm">📁</span>
           </div>
@@ -65,12 +71,11 @@
           </van-button>
         </div>
 
-        <div v-else class="space-y-3 animate-fade-in">
+        <div v-else class="space-y-3">
           <div
-            v-for="(filter, index) in filterStore.filters"
+            v-for="filter in filterStore.filters"
             :key="filter.id"
-            class="bg-white rounded-2xl border border-warm-200 p-5 hover:shadow-md transition-all duration-300 card-hover group animate-fade-in-up"
-            :style="{ animationDelay: `${index * 0.05}s` }"
+            class="bg-white rounded-2xl border border-warm-200 p-5 hover:shadow-md transition-all duration-300 card-hover group"
           >
             <div class="space-y-3">
               <div class="flex items-center justify-between">

@@ -18,6 +18,16 @@
       </div>
     </div>
     <div class="space-y-3 px-6 pb-6">
+      <div v-if="listLoading" class="space-y-3" aria-busy="true">
+        <van-skeleton
+          v-for="n in 5"
+          :key="n"
+          title
+          :row="1"
+          class="rounded-xl overflow-hidden"
+        />
+      </div>
+      <template v-else>
       <van-swipe-cell
         v-for="tag in tags"
         :key="tag.id"
@@ -61,6 +71,7 @@
         <p class="text-gray-500 font-medium">暂无标签</p>
         <p class="text-sm text-gray-400 mt-2">点击右上角按钮创建标签</p>
       </div>
+      </template>
     </div>
 
     <!-- 标签表单弹窗 -->
@@ -98,6 +109,7 @@ const showTagForm = ref(false);
 const editingTag = ref<TagData | undefined>(undefined);
 const showDeleteConfirm = ref(false);
 const deletingTag = ref<TagData | undefined>();
+const listLoading = ref(true)
 
 const tags = computed(() => tagStore.tags);
 
@@ -105,16 +117,19 @@ const tagCount = computed(() => tags.value.length);
 
 // 初始化数据
 const initData = async () => {
+  listLoading.value = true
   try {
-    await tagStore.fetchTags();
+    await tagStore.fetchTags()
   } catch (error) {
-    console.error('Failed to fetch tags:', error);
+    console.error('Failed to fetch tags:', error)
     showToast({
       message: '加载标签数据失败',
       type: 'fail'
-    });
+    })
+  } finally {
+    listLoading.value = false
   }
-};
+}
 
 const handleEdit = (tag: TagData) => {
   editingTag.value = tag;
