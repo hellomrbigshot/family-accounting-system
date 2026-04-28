@@ -1,7 +1,7 @@
 {
-  "version": "0.0.35",
-  "buildTime": "2026-04-27T10:03:39.079Z",
-  "buildNumber": "38",
-  "gitCommit": "main-24f7fab",
+  "version": "0.0.36",
+  "buildTime": "2026-04-28T07:31:16.204Z",
+  "buildNumber": "39",
+  "gitCommit": "main-ebcddad",
   "environment": "ci"
 }
