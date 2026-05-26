@@ -8,13 +8,13 @@
           <div ref="categoryChartRef" class="h-64"></div>
           <!-- 图例 -->
           <div class="mt-4 space-y-2">
-            <div 
-              v-for="item in categoryChartData" 
+            <div
+              v-for="item in categoryChartData"
               :key="item.name"
               class="flex items-center justify-between text-sm"
             >
               <div class="flex items-center space-x-2">
-                <div 
+                <div
                   class="w-3 h-3 rounded-full"
                   :style="{ backgroundColor: item.color }"
                 ></div>
@@ -36,13 +36,13 @@
           <div ref="extraCategoryChartRef" class="h-64"></div>
           <!-- 图例 -->
           <div class="mt-4 space-y-2">
-            <div 
-              v-for="item in extraCategoryChartData" 
+            <div
+              v-for="item in extraCategoryChartData"
               :key="item.name"
               class="flex items-center justify-between text-sm"
             >
               <div class="flex items-center space-x-2">
-                <div 
+                <div
                   class="w-3 h-3 rounded-full"
                   :style="{ backgroundColor: item.color }"
                 ></div>
@@ -64,13 +64,13 @@
           <div ref="tagChartRef" class="h-64"></div>
           <!-- 图例 -->
           <div class="mt-4 space-y-2">
-            <div 
-              v-for="item in tagChartData" 
+            <div
+              v-for="item in tagChartData"
               :key="item.name"
               class="flex items-center justify-between text-sm"
             >
               <div class="flex items-center space-x-2">
-                <div 
+                <div
                   class="w-3 h-3 rounded-full"
                   :style="{ backgroundColor: item.color }"
                 ></div>
@@ -90,8 +90,14 @@ import { useReportStore } from '@/stores/report';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
 import { formatAmount } from '@/utils/format';
-import * as echarts from 'echarts';
+import { PieChart } from 'echarts/charts';
+import { TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { use, init, getInstanceByDom } from 'echarts/core';
+import type { ECharts } from 'echarts/core';
 import type { ReportData } from '@/api/report';
+
+use([PieChart, TooltipComponent, CanvasRenderer]);
 
 interface Props {
   data: ReportData;
@@ -109,9 +115,9 @@ const tagStore = useTagStore();
 const categoryChartRef = ref<HTMLElement>();
 const tagChartRef = ref<HTMLElement>();
 const extraCategoryChartRef = ref<HTMLElement>();
-let categoryChart: echarts.ECharts | null = null;
-let tagChart: echarts.ECharts | null = null;
-let extraCategoryChart: echarts.ECharts | null = null;
+let categoryChart: ECharts | null = null;
+let tagChart: ECharts | null = null;
+let extraCategoryChart: ECharts | null = null;
 
 // 预定义的颜色数组 - 重新设计确保对比度
 const colors = [
@@ -135,16 +141,16 @@ const colors = [
 // 转换分类数据格式，将分类 ID 映射为分类名称和图标
 const transformCategoryData = (data: Record<string, number> | undefined) => {
   const result: Array<{ name: string; value: number; color: string; icon: string }> = [];
-  
+
   if (!data || typeof data !== 'object') {
     return result;
   }
-  
+
   Object.entries(data).forEach(([categoryId, amount], index) => {
     if (typeof amount !== 'number' || amount <= 0) {
       return;
     }
-    
+
     const category = categoryStore.allCategoriesForMapping.find(c => c.id === categoryId && c.type === 'expense');
     if (category) {
       result.push({
@@ -155,23 +161,23 @@ const transformCategoryData = (data: Record<string, number> | undefined) => {
       });
     }
   });
-  
+
   return result.sort((a, b) => b.value - a.value);
 };
 
 // 转换标签数据格式，将标签 ID 映射为标签名称
 const transformTagData = (data: Record<string, number> | undefined) => {
   const result: Array<{ name: string; value: number; color: string }> = [];
-  
+
   if (!data || typeof data !== 'object') {
     return result;
   }
-  
+
   Object.entries(data).forEach(([tagId, amount], index) => {
     if (typeof amount !== 'number' || amount <= 0) {
       return;
     }
-    
+
     const tag = tagStore.tags.find(t => t.id === tagId);
     if (tag) {
       result.push({
@@ -181,7 +187,7 @@ const transformTagData = (data: Record<string, number> | undefined) => {
       });
     }
   });
-  
+
   return result.sort((a, b) => b.value - a.value);
 };
 
@@ -203,13 +209,13 @@ const extraCategoryChartData = computed(() => {
 // 初始化图表
 const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: number; color: string }>) => {
   // 检查 DOM 元素上是否已有图表实例
-  const existingChart = echarts.getInstanceByDom(chartRef);
+  const existingChart = getInstanceByDom(chartRef);
   if (existingChart) {
     existingChart.dispose();
   }
-  
-  const chart = echarts.init(chartRef);
-  
+
+  const chart = init(chartRef);
+
   const option = {
     tooltip: {
       trigger: 'item',
@@ -245,13 +251,13 @@ const initChart = (chartRef: HTMLElement, data: Array<{ name: string; value: num
       }
     ]
   };
-  
+
   chart.setOption(option);
   return chart;
 };
 
 // 更新图表
-const updateChart = (chart: echarts.ECharts | null, data: Array<{ name: string; value: number; color: string }>) => {
+const updateChart = (chart: ECharts | null, data: Array<{ name: string; value: number; color: string }>) => {
   if (chart) {
     const option = {
       series: [
@@ -320,14 +326,14 @@ watch(() => props.loading, (loading) => {
         categoryChart.dispose();
         categoryChart = null;
       }
-      
+
       if (extraCategoryChart && extraCategoryChartData.value.length > 0) {
         updateChart(extraCategoryChart, extraCategoryChartData.value);
       } else if (extraCategoryChart && extraCategoryChartData.value.length === 0) {
         extraCategoryChart.dispose();
         extraCategoryChart = null;
       }
-      
+
       if (tagChart && tagChartData.value.length > 0) {
         updateChart(tagChart, tagChartData.value);
       } else if (tagChart && tagChartData.value.length === 0) {
@@ -346,22 +352,22 @@ onMounted(async () => {
       categoryStore.fetchAllCategoriesForMapping()
     ]);
   }
-  
+
   if (tagStore.tags.length === 0) {
     await tagStore.fetchTags();
   }
-  
+
   // 初始化图表 - 只在有数据时初始化
   nextTick(() => {
     // 只在有数据且 DOM 元素存在时初始化图表
     if (categoryChartRef.value && categoryChartData.value.length > 0) {
       categoryChart = initChart(categoryChartRef.value, categoryChartData.value);
     }
-    
+
     if (extraCategoryChartRef.value && extraCategoryChartData.value.length > 0) {
       extraCategoryChart = initChart(extraCategoryChartRef.value, extraCategoryChartData.value);
     }
-    
+
     if (tagChartRef.value && tagChartData.value.length > 0) {
       tagChart = initChart(tagChartRef.value, tagChartData.value);
     }
@@ -383,4 +389,4 @@ onUnmounted(() => {
     tagChart = null;
   }
 });
-</script> 
+</script>

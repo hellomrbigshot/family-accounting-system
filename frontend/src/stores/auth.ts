@@ -17,14 +17,14 @@ const encryptPassword = (password: string): { encrypted: string; timestamp: numb
   // 生成时间戳和随机数
   const timestamp = Date.now();
   const nonce = generateNonce();
-  
+
   // 创建加密数据对象
   const data = {
     password,
     timestamp,
     nonce
   };
-  
+
   // 使用 AES 加密
   const encrypted = CryptoJS.AES.encrypt(
     JSON.stringify(data),
@@ -35,7 +35,7 @@ const encryptPassword = (password: string): { encrypted: string; timestamp: numb
       iv: CryptoJS.enc.Utf8.parse(nonce)
     }
   ).toString();
-  
+
   return {
     encrypted,
     timestamp,
@@ -44,10 +44,15 @@ const encryptPassword = (password: string): { encrypted: string; timestamp: numb
 };
 
 export const useAuthStore = defineStore('auth', () => {
+  interface AuthUser {
+    _id: string;
+    roomNumber: string;
+  }
+
   const router = useRouter();
   const token = ref<string | null>(null);
   const refreshToken = ref<string | null>(null);
-  const user = ref<any>(null);
+  const user = ref<AuthUser | null>(null);
 
   // 从 cookie 中获取 token
   const getTokenFromCookie = () => {
@@ -96,7 +101,6 @@ export const useAuthStore = defineStore('auth', () => {
   // 登录
   const login = async (roomNumber: string, password: string) => {
     try {
-      console.log('Attempting login with:', { roomNumber });
       const { encrypted, timestamp, nonce } = encryptPassword(password);
       const response = await axios.post('/auth/login', {
         roomNumber,
@@ -105,29 +109,28 @@ export const useAuthStore = defineStore('auth', () => {
         nonce
       });
 
-      console.log('Login response:', response.data);
       const { token: newToken, refreshToken: newRefreshToken, user: newUser } = response.data;
-      
+
       if (!newToken) {
         throw new Error('No token received from server');
       }
-      
+
       // 设置 token 到 cookie，默认过期时间为 15 天
       setTokenToCookie(newToken, 15 * 24 * 60 * 60);
       setRefreshTokenToCookie(newRefreshToken);
-      
+
       token.value = newToken;
       refreshToken.value = newRefreshToken;
       user.value = newUser;
-      
+
       // 获取用户信息
       await fetchUserInfo();
-      
+
       showToast({
         type: 'success',
         message: '登录成功'
       });
-      
+
       // 获取重定向地址
       const redirect = router.currentRoute.value.query.redirect as string;
       router.push(redirect || '/');
@@ -247,4 +250,4 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     getTokenFromCookie
   };
-}); 
+});

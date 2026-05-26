@@ -29,7 +29,7 @@
       </div>
       <template v-else>
       <van-swipe-cell
-        v-for="tag in tags"
+        v-for="tag in visibleTags"
         :key="tag.id"
         class="mb-2 tag-item"
       >
@@ -79,7 +79,7 @@
       </van-swipe-cell>
       
       <!-- 空状态 -->
-      <div v-if="tags.length === 0" class="p-12 text-center">
+      <div v-if="visibleTags.length === 0" class="p-12 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-warm-100 flex items-center justify-center">
           <span class="text-3xl">🏷️</span>
         </div>
@@ -127,9 +127,9 @@ const showDeleteConfirm = ref(false);
 const deletingTag = ref<TagData | undefined>();
 const listLoading = ref(true)
 
-const tags = computed(() => tagStore.tags);
+const visibleTags = computed(() => tagStore.tags.filter(tag => !tag.archived));
 
-const tagCount = computed(() => tags.value.length);
+const tagCount = computed(() => visibleTags.value.length);
 
 const getTemporaryStatusText = (tag: TagData) => {
   const today = dayjs().startOf('day');

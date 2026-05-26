@@ -382,7 +382,7 @@ const selectableTags = computed(() => tagStore.getSelectableTags(form.date, form
 const syncTagsForDate = () => {
   const activeSelectableIds = new Set(
     tagStore.tags
-      .filter(tag => tag.type !== 'temporary' || tagStore.isTagActiveOnDate(tag, form.date))
+      .filter(tag => !tag.archived && (tag.type !== 'temporary' || tagStore.isTagActiveOnDate(tag, form.date)))
       .map(tag => tag.id)
   );
   const autoTagIds = tagStore

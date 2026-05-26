@@ -35,13 +35,14 @@ export const useTagStore = defineStore('tag', {
     getSelectableTags(date: string, selectedTagIds: string[] = []) {
       const selectedSet = new Set(selectedTagIds)
       return this.tags.filter(tag => {
+        if (tag.archived) return selectedSet.has(tag.id)
         if (!this.isTemporaryTag(tag)) return true
         return this.isTagActiveOnDate(tag, date) || selectedSet.has(tag.id)
       })
     },
 
     getAutoApplyTags(date: string) {
-      return this.tags.filter(tag => tag.type === 'temporary' && tag.autoApply !== false && this.isTagActiveOnDate(tag, date))
+      return this.tags.filter(tag => !tag.archived && tag.type === 'temporary' && tag.autoApply !== false && this.isTagActiveOnDate(tag, date))
     },
 
     async fetchTags() {

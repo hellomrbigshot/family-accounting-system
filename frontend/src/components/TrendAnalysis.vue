@@ -51,7 +51,16 @@
 import { useReportStore } from '@/stores/report';
 import dayjs from '@/utils/dayjs';
 import { formatAmount } from '@/utils/format';
-import * as echarts from 'echarts';
+import { BarChart } from 'echarts/charts';
+import {
+  GridComponent,
+  TooltipComponent
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { use, init, getInstanceByDom } from 'echarts/core';
+import type { ECharts } from 'echarts/core';
+
+use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 interface Props {
   loading?: boolean;
@@ -69,7 +78,7 @@ interface TrendItem {
 const reportStore = useReportStore();
 const currentTrend = ref<'daily' | 'weekly' | 'monthly'>('daily');
 const chartRef = ref<HTMLElement>();
-let chart: echarts.ECharts | null = null;
+let chart: ECharts | null = null;
 
 const currentTrendData = computed((): TrendItem[] => {
   switch (currentTrend.value) {
@@ -102,13 +111,13 @@ const formatDate = (date: string) => {
 // 初始化图表
 const initChart = (chartRef: HTMLElement) => {
   // 检查 DOM 元素上是否已有图表实例
-  const existingChart = echarts.getInstanceByDom(chartRef);
+  const existingChart = getInstanceByDom(chartRef);
   if (existingChart) {
     existingChart.dispose();
   }
-  
-  const chart = echarts.init(chartRef);
-  
+
+  const chart = init(chartRef);
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -165,7 +174,7 @@ const initChart = (chartRef: HTMLElement) => {
       }
     ]
   };
-  
+
   chart.setOption(option);
   return chart;
 };
@@ -175,13 +184,13 @@ const updateChart = () => {
   if (!chart || !chartRef.value) {
     return;
   }
-  
+
   if (currentTrendData.value.length === 0) {
     chart.dispose();
     chart = null;
     return;
   }
-  
+
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -237,7 +246,7 @@ const updateChart = () => {
       }
     ]
   };
-  
+
   chart.setOption(option, true); // 添加 true 参数，强制更新
 };
 
@@ -288,4 +297,4 @@ onUnmounted(() => {
     chart = null;
   }
 });
-</script> 
+</script>
