@@ -88,7 +88,7 @@
                   :key="tag.id"
                   class="inline-flex items-center px-2 py-1 bg-gray-100 rounded-full text-xs"
                 >
-                  <div 
+                  <div
                     class="w-2 h-2 rounded-full mr-1 flex-shrink-0"
                     :style="{ backgroundColor: tag.color }"
                   ></div>
@@ -186,26 +186,39 @@
       <div class="space-y-2 max-h-60 overflow-y-auto">
         <van-checkbox-group v-model="form.tags">
           <van-cell
-            v-for="(tag, index) in tagStore.tags"
+            v-for="(tag, index) in selectableTags"
             :key="tag.id"
             clickable
             class="tag-cell"
-            @click="toggle(index)"
+            @click="toggleTag(tag, index)"
           >
             <template #title>
               <div class="flex items-center space-x-3">
-                <div 
+                <div
                   class="w-4 h-4 rounded-full flex-shrink-0"
                   :style="{ backgroundColor: tag.color }"
                 ></div>
-                <span class="text-gray-900">{{ tag.name }}</span>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-gray-900">{{ tag.name }}</span>
+                    <span
+                      v-if="tag.type === 'temporary'"
+                      class="rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-orange-700"
+                    >
+                      限时
+                    </span>
+                  </div>
+                  <div v-if="tag.type === 'temporary'" class="text-xs text-gray-500 mt-0.5">
+                    {{ tag.startDate }} 至 {{ tag.endDate }}
+                  </div>
+                </div>
               </div>
             </template>
             <template #right-icon>
-              <van-checkbox 
+              <van-checkbox
                 :name="tag.id"
                 :ref="el => checkboxRefs[index] = el"
-                @click.stop
+                @click.stop="handleCheckboxClick(tag)"
               />
             </template>
           </van-cell>
@@ -262,6 +275,7 @@ const isEditMode = computed(() => props.editMode || false);
 
 // 标签选择相关
 const checkboxRefs = ref<any[]>([]);
+const manuallyRemovedAutoTagIds = ref<Set<string>>(new Set());
 
 // 在组件更新前清空 checkboxRefs 数组
 onBeforeUpdate(() => {
@@ -271,6 +285,20 @@ onBeforeUpdate(() => {
 // 标签切换方法
 const toggle = (index: number) => {
   checkboxRefs.value[index]?.toggle();
+};
+
+const toggleTag = (tag: TagData, index: number) => {
+  const wasSelected = form.tags.includes(tag.id);
+  toggle(index);
+  if (tag.type === 'temporary' && tag.autoApply !== false && wasSelected) {
+    manuallyRemovedAutoTagIds.value.add(tag.id);
+  }
+};
+
+const handleCheckboxClick = (tag: TagData) => {
+  if (tag.type === 'temporary' && tag.autoApply !== false && form.tags.includes(tag.id)) {
+    manuallyRemovedAutoTagIds.value.add(tag.id);
+  }
 };
 
 // 重置表单数据
@@ -286,6 +314,7 @@ const resetForm = () => {
   form.description = '';
   form.tags = [];
   form.isExtra = false;
+  manuallyRemovedAutoTagIds.value = new Set();
   showNumberKeyboard.value = false;
 };
 
@@ -348,6 +377,25 @@ const selectedTags = computed(() => {
   return tagStore.tags.filter((tag: TagData) => form.tags.includes(tag.id));
 });
 
+const selectableTags = computed(() => tagStore.getSelectableTags(form.date, form.tags));
+
+const syncTagsForDate = () => {
+  const activeSelectableIds = new Set(
+    tagStore.tags
+      .filter(tag => tag.type !== 'temporary' || tagStore.isTagActiveOnDate(tag, form.date))
+      .map(tag => tag.id)
+  );
+  const autoTagIds = tagStore
+    .getAutoApplyTags(form.date)
+    .filter(tag => !manuallyRemovedAutoTagIds.value.has(tag.id))
+    .map(tag => tag.id);
+
+  form.tags = Array.from(new Set([
+    ...form.tags.filter(tagId => activeSelectableIds.has(tagId)),
+    ...autoTagIds
+  ]));
+};
+
 // 金额验证
 const amountValidator = (value: string) => {
   if (!value) return false;
@@ -361,6 +409,7 @@ const amountValidator = (value: string) => {
 const onDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   const [year, month, day] = selectedValues;
   form.date = dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD');
+  syncTagsForDate();
   showDatePicker.value = false;
 };
 
@@ -432,7 +481,7 @@ watch(() => props.show, async (newValue) => {
   if (newValue) {
     // 重置表单
     resetForm();
-    
+
     // 如果是新增模式且有保留的日期，恢复保留的日期
     if (!isEditMode.value && lastSubmittedDate.value) {
       form.date = lastSubmittedDate.value;
@@ -443,21 +492,21 @@ watch(() => props.show, async (newValue) => {
         dateObj.date().toString().padStart(2, '0')
       ];
     }
-    
-          // 确保分类列表已加载
-      if (categoryStore.allCategoriesForMapping.length === 0) {
-        try {
-          await Promise.all([
-            categoryStore.fetchCategories(),
-            categoryStore.fetchAllCategoriesForMapping(),
-            categoryStore.fetchUserPermissions()
-          ]);
-        } catch (error) {
-          console.error('Failed to fetch categories:', error);
-          showToast('获取分类列表失败');
-        }
+
+    // 确保分类列表已加载
+    if (categoryStore.allCategoriesForMapping.length === 0) {
+      try {
+        await Promise.all([
+          categoryStore.fetchCategories(),
+          categoryStore.fetchAllCategoriesForMapping(),
+          categoryStore.fetchUserPermissions()
+        ]);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        showToast('获取分类列表失败');
       }
-    
+    }
+
     // 确保标签列表已加载
     if (tagStore.tags.length === 0) {
       try {
@@ -472,7 +521,7 @@ watch(() => props.show, async (newValue) => {
       // 格式化日期，确保只保留日期部分，不包含时分秒
       const formattedDate = dayjs(props.editData.date).format('YYYY-MM-DD');
       form.date = formattedDate;
-      
+
       // 同时更新日期选择器的当前值
       const dateObj = dayjs(formattedDate);
       currentDate.value = [
@@ -485,6 +534,8 @@ watch(() => props.show, async (newValue) => {
       form.description = props.editData.description;
       form.tags = props.editData.tags;
       form.isExtra = props.editData.isExtra || false;
+    } else {
+      syncTagsForDate();
     }
   }
 });
@@ -573,4 +624,4 @@ const handleAmountFieldBlur = () => {
 :deep(.van-switch--on) {
   background-color: var(--color-error);
 }
-</style> 
+</style>

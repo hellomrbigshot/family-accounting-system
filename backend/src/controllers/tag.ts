@@ -9,6 +9,61 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+const normalizeDate = (value: string | Date) => {
+  const dateText = value instanceof Date ? value.toISOString().slice(0, 10) : value;
+  return new Date(`${dateText}T00:00:00.000Z`);
+};
+
+const formatTag = (tag: any) => ({
+  id: tag._id,
+  name: tag.name,
+  color: tag.color,
+  type: tag.type || 'normal',
+  startDate: tag.startDate ? tag.startDate.toISOString().slice(0, 10) : undefined,
+  endDate: tag.endDate ? tag.endDate.toISOString().slice(0, 10) : undefined,
+  autoApply: tag.autoApply !== false,
+  archived: tag.archived === true,
+  createdAt: tag.createdAt
+});
+
+const validateTagPayload = (body: any) => {
+  const type = body.type || 'normal';
+  if (!['normal', 'temporary'].includes(type)) {
+    return { error: '标签类型无效' };
+  }
+
+  if (type === 'temporary') {
+    if (!body.startDate || !body.endDate) {
+      return { error: '限时标签需要设置开始和结束日期' };
+    }
+    const startDate = normalizeDate(body.startDate);
+    const endDate = normalizeDate(body.endDate);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return { error: '日期格式无效' };
+    }
+    if (startDate > endDate) {
+      return { error: '开始日期不能晚于结束日期' };
+    }
+    return {
+      value: {
+        type,
+        startDate,
+        endDate,
+        autoApply: body.autoApply !== false
+      }
+    };
+  }
+
+  return {
+    value: {
+      type,
+      startDate: undefined,
+      endDate: undefined,
+      autoApply: false
+    }
+  };
+};
+
 // 获取标签列表
 export const getTags = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -16,16 +71,12 @@ export const getTags = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ message: '未授权访问' });
     }
 
-    const tags = await Tag.find({ roomNumber: req.user.roomNumber });
-    
+    const tags = await Tag.find({ roomNumber: req.user.roomNumber, archived: { $ne: true } })
+      .sort({ type: 1, startDate: -1, createdAt: -1 });
+
     // 格式化响应数据
-    const formattedTags = tags.map(tag => ({
-      id: tag._id,
-      name: tag.name,
-      color: tag.color,
-      createdAt: tag.createdAt
-    }));
-    
+    const formattedTags = tags.map(formatTag);
+
     res.json(formattedTags);
   } catch (error) {
     console.error('获取标签列表失败:', error);
@@ -47,10 +98,15 @@ export const createTag = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ message: '标签名称为必填项' });
     }
 
+    const parsedPayload = validateTagPayload(req.body);
+    if (parsedPayload.error) {
+      return res.status(400).json({ message: parsedPayload.error });
+    }
+
     // 检查标签是否已存在
-    const existingTag = await Tag.findOne({ 
-      roomNumber: req.user.roomNumber, 
-      name 
+    const existingTag = await Tag.findOne({
+      roomNumber: req.user.roomNumber,
+      name
     });
     if (existingTag) {
       return res.status(400).json({ message: '标签名称已存在' });
@@ -59,18 +115,14 @@ export const createTag = async (req: AuthenticatedRequest, res: Response) => {
     const tag = new Tag({
       roomNumber: req.user.roomNumber,
       name,
-      color
+      color,
+      ...parsedPayload.value
     });
 
     await tag.save();
-    
+
     // 格式化响应数据
-    res.status(201).json({
-      id: tag._id,
-      name: tag.name,
-      color: tag.color,
-      createdAt: tag.createdAt
-    });
+    res.status(201).json(formatTag(tag));
   } catch (error) {
     console.error('创建标签失败:', error);
     res.status(500).json({ message: '创建标签失败' });
@@ -92,10 +144,15 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ message: '标签名称为必填项' });
     }
 
+    const parsedPayload = validateTagPayload(req.body);
+    if (parsedPayload.error) {
+      return res.status(400).json({ message: parsedPayload.error });
+    }
+
     // 检查标签是否存在
-    const tag = await Tag.findOne({ 
-      _id: id, 
-      roomNumber: req.user.roomNumber 
+    const tag = await Tag.findOne({
+      _id: id,
+      roomNumber: req.user.roomNumber
     });
     if (!tag) {
       return res.status(404).json({ message: '标签不存在' });
@@ -103,9 +160,9 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
 
     // 检查新名称是否与其他标签重复
     if (name !== tag.name) {
-      const existingTag = await Tag.findOne({ 
-        roomNumber: req.user.roomNumber, 
-        name 
+      const existingTag = await Tag.findOne({
+        roomNumber: req.user.roomNumber,
+        name
       });
       if (existingTag) {
         return res.status(400).json({ message: '标签名称已存在' });
@@ -115,16 +172,15 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
     // 更新标签
     tag.name = name;
     if (color) tag.color = color;
+    tag.type = parsedPayload.value!.type;
+    tag.startDate = parsedPayload.value!.startDate;
+    tag.endDate = parsedPayload.value!.endDate;
+    tag.autoApply = parsedPayload.value!.autoApply;
 
     await tag.save();
 
     // 格式化响应数据
-    res.json({
-      id: tag._id,
-      name: tag.name,
-      color: tag.color,
-      createdAt: tag.createdAt
-    });
+    res.json(formatTag(tag));
   } catch (error) {
     console.error('更新标签失败:', error);
     res.status(500).json({ message: '更新标签失败' });
@@ -140,9 +196,9 @@ export const deleteTag = async (req: AuthenticatedRequest, res: Response) => {
 
     const { id } = req.params;
 
-    const tag = await Tag.findOneAndDelete({ 
-      _id: id, 
-      roomNumber: req.user.roomNumber 
+    const tag = await Tag.findOneAndDelete({
+      _id: id,
+      roomNumber: req.user.roomNumber
     });
 
     if (!tag) {
@@ -154,4 +210,4 @@ export const deleteTag = async (req: AuthenticatedRequest, res: Response) => {
     console.error('删除标签失败:', error);
     res.status(500).json({ message: '删除标签失败' });
   }
-}; 
+};
