@@ -82,8 +82,8 @@
           :list-loading="expenseStore.recentExpensesListLoading"
           :show-refresh="true"
           :max-items="20"
-          empty-text="7天内暂无支出"
-          finished-text="只显示7天内近20条支出"
+          empty-text="最近 7 天还没有支出，点 + 记一笔吧。"
+          finished-text="最近 7 天已显示全部"
           @refresh="handleRefresh"
         />
       </div>
