@@ -50,11 +50,11 @@
         <div class="flex items-start">
           <van-icon name="info-o" class="text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
           <div class="text-sm text-blue-700">
-            <p class="font-medium mb-1">搜索提示：</p>
+            <p class="font-medium mb-1">没找到记录，换个词试试：</p>
             <ul class="text-xs space-y-1">
-              <li>• 输入"额外支出"、"额外"或"extra"可搜索额外支出记录</li>
-              <li>• 输入分类名称、描述内容或金额进行搜索</li>
-              <li>• 支持标签名称搜索</li>
+              <li>• 额外支出可搜"额外"或"extra"</li>
+              <li>• 也支持分类、备注、金额和标签</li>
+              <li>• 有筛选条件时，可以先放宽范围</li>
             </ul>
           </div>
         </div>
@@ -118,6 +118,7 @@
           :list-loading="expenseStore.expensesListLoading"
           show-delete
           :show-refresh="false"
+          :empty-text="expenseEmptyText"
           @refresh="handleRefresh"
           @edit="handleEdit"
         />
@@ -476,6 +477,18 @@ const totalAmount = computed(() => {
 
 // 当前筛选器
 const currentFilter = computed(() => filterStore.currentFilter);
+
+const expenseEmptyText = computed(() => {
+  if (searchQuery.value) {
+    return '没找到相关支出，换个关键词试试。';
+  }
+
+  if (currentFilter.value) {
+    return '当前筛选暂无结果，调整条件试试。';
+  }
+
+  return '这段时间还没有支出，换个日期试试。';
+});
 
 // 清除当前筛选器
 const clearCurrentFilter = () => {

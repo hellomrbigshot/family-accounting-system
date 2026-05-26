@@ -4,6 +4,11 @@ export interface TagData {
   id: string
   name: string
   color?: string
+  type?: 'normal' | 'temporary'
+  startDate?: string
+  endDate?: string
+  autoApply?: boolean
+  archived?: boolean
   createdAt: string
 }
 
@@ -30,4 +35,4 @@ class TagApi {
   }
 }
 
-export const tagApi = new TagApi() 
+export const tagApi = new TagApi()

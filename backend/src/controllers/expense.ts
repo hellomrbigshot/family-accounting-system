@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Expense } from '../models/expense';
 import { Types } from 'mongoose';
+import { validateExpenseTags } from '../utils/tag';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -13,8 +14,17 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
   try {
     const { date, category, amount, description, tags, isExtra } = req.body;
 
-    if (!req.user?._id) {
+    if (!req.user?._id || !req.user?.roomNumber) {
       return res.status(401).json({ message: '未授权访问' });
+    }
+
+    const validatedTags = await validateExpenseTags({
+      tagIds: tags || [],
+      date,
+      roomNumber: req.user.roomNumber
+    });
+    if (validatedTags.error) {
+      return res.status(400).json({ message: validatedTags.error });
     }
 
     const expense = new Expense({
@@ -23,7 +33,7 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
       category,
       amount,
       description,
-      tags: tags || [],
+      tags: validatedTags.tags,
       isExtra: isExtra || false
     });
 
@@ -48,7 +58,7 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
   } catch (error) {
     console.error('创建支出记录失败:', error);
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         message: '支出记录创建失败',
         error: error.message
       });
@@ -60,12 +70,12 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
 
 export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { 
-      startDate, 
-      endDate, 
-      category, 
+    const {
+      startDate,
+      endDate,
+      category,
       categories,
-      isExtra, 
+      isExtra,
       tags,
       minAmount,
       maxAmount,
@@ -73,7 +83,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
       amountValue,
       description
     } = req.query;
-    
+
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
     }
@@ -169,7 +179,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     console.error('获取支出记录失败:', error);
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         message: '获取支出记录失败',
         error: error.message
       });
@@ -182,7 +192,7 @@ export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
 export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
-    
+
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
     }
@@ -231,7 +241,7 @@ export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) 
   } catch (error) {
     console.error('获取统计数据失败:', error);
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         message: '获取统计数据失败',
         error: error.message
       });
@@ -244,7 +254,7 @@ export const getExpenseStats = async (req: AuthenticatedRequest, res: Response) 
 export const deleteExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    
+
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
     }
@@ -262,7 +272,7 @@ export const deleteExpense = async (req: AuthenticatedRequest, res: Response) =>
   } catch (error) {
     console.error('删除支出记录失败:', error);
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         message: '删除支出记录失败',
         error: error.message
       });
@@ -277,8 +287,27 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
     const { id } = req.params;
     const { date, category, amount, description, tags, isExtra } = req.body;
 
-    if (!req.user?._id) {
+    if (!req.user?._id || !req.user?.roomNumber) {
       return res.status(401).json({ message: '未授权访问' });
+    }
+
+    const existingExpense = await Expense.findOne({
+      _id: id,
+      userId: new Types.ObjectId(req.user._id)
+    });
+
+    if (!existingExpense) {
+      return res.status(404).json({ message: '支出记录不存在' });
+    }
+
+    const validatedTags = await validateExpenseTags({
+      tagIds: tags || [],
+      date,
+      roomNumber: req.user.roomNumber,
+      existingTagIds: existingExpense.tags.map(tag => tag.toString())
+    });
+    if (validatedTags.error) {
+      return res.status(400).json({ message: validatedTags.error });
     }
 
     const expense = await Expense.findOneAndUpdate(
@@ -291,7 +320,7 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
         category,
         amount,
         description,
-        tags: tags || [],
+        tags: validatedTags.tags,
         isExtra: isExtra || false
       },
       { new: true }
@@ -320,7 +349,7 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
   } catch (error) {
     console.error('更新支出记录失败:', error);
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         message: '更新支出记录失败',
         error: error.message
       });
@@ -328,4 +357,4 @@ export const updateExpense = async (req: AuthenticatedRequest, res: Response) =>
       res.status(500).json({ message: '更新支出记录失败' });
     }
   }
-}; 
+};

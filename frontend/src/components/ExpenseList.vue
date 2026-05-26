@@ -14,17 +14,22 @@
         v-else
         v-model:loading="loading"
         :finished="finished"
-        :finished-text="finishedText"
+        :finished-text="listFinishedText"
         @load="onLoad"
       >
-        <ExpenseListItem
-          v-for="expense in displayExpenses"
-          :key="expense.id"
-          :expense="expense"
-          :show-delete="showDelete"
-          @edit="handleEdit"
-          @delete="handleDelete"
-        />
+        <div v-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8 leading-relaxed">
+          {{ emptyText }}
+        </div>
+        <template v-else>
+          <ExpenseListItem
+            v-for="expense in displayExpenses"
+            :key="expense.id"
+            :expense="expense"
+            :show-delete="showDelete"
+            @edit="handleEdit"
+            @delete="handleDelete"
+          />
+        </template>
       </van-list>
     </van-pull-refresh>
     
@@ -39,7 +44,7 @@
           class="rounded-xl overflow-hidden"
         />
       </div>
-      <div v-else-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8">
+      <div v-else-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8 leading-relaxed">
         {{ emptyText }}
       </div>
       <div v-else>
@@ -102,8 +107,9 @@ const emit = defineEmits<{
 // 设置默认值
 const showRefresh = computed(() => props.showRefresh ?? true)
 const maxItems = computed(() => props.maxItems ?? 0)
-const emptyText = computed(() => props.emptyText ?? '暂无支出记录')
-const finishedText = computed(() => props.finishedText ?? '没有更多了')
+const emptyText = computed(() => props.emptyText ?? '还没有支出，先记一笔吧。')
+const finishedText = computed(() => props.finishedText ?? '已显示全部')
+const listFinishedText = computed(() => displayExpenses.value.length === 0 ? '' : finishedText.value)
 const showDelete = computed(() => props.showDelete ?? false)
 const listLoading = computed(() => props.listLoading ?? false)
 

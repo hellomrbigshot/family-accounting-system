@@ -2,248 +2,158 @@
 
 ## 模块概述
 
-标签模块提供支出标签的增删改查功能，支持标签的创建、更新、删除和查询。
+标签模块用于管理支出标签，支持普通标签与限时标签。
+限时标签有生效时间范围；删除标签使用软删除（归档），以保证历史支出和分析数据可追溯。
 
 ## 接口列表
 
 ### 1. 获取标签列表
 
-**接口地址**: `GET /api/tags`
+- 地址: `GET /api/tags`
+- 鉴权: `Authorization: Bearer <token>`
 
-**请求方式**: GET
+成功响应 `200`:
 
-**请求头**:
-```
-Authorization: Bearer <your_jwt_token>
-```
-
-**成功响应** (200):
 ```json
 [
   {
     "id": "507f1f77bcf86cd799439011",
-    "name": "必需品",
-    "color": "#FF6B6B",
-    "createdAt": "2024-12-19T10:30:00.000Z",
-    "updatedAt": "2024-12-19T10:30:00.000Z"
-  },
-  {
-    "id": "507f1f77bcf86cd799439012",
-    "name": "奢侈品",
-    "color": "#4ECDC4",
-    "createdAt": "2024-12-19T10:30:00.000Z",
-    "updatedAt": "2024-12-19T10:30:00.000Z"
+    "name": "新疆旅游",
+    "color": "#3B82F6",
+    "type": "temporary",
+    "startDate": "2026-05-20",
+    "endDate": "2026-05-28",
+    "autoApply": true,
+    "archived": false,
+    "createdAt": "2026-05-20T08:00:00.000Z"
   }
 ]
 ```
 
 ### 2. 创建标签
 
-**接口地址**: `POST /api/tags`
+- 地址: `POST /api/tags`
+- 鉴权: `Authorization: Bearer <token>`
+- 请求头: `Content-Type: application/json`
 
-**请求方式**: POST
+请求体（普通标签）:
 
-**请求头**:
-```
-Content-Type: application/json
-Authorization: Bearer <your_jwt_token>
-```
-
-**请求参数**:
 ```json
 {
-  "name": "紧急支出",
-  "color": "#FF8A80"
+  "name": "家庭常规",
+  "color": "#F97316",
+  "type": "normal"
 }
 ```
 
-**参数说明**:
-- `name` (string, 必填): 标签名称，最大50字符
-- `color` (string, 可选): 颜色代码，格式：#RRGGBB
+请求体（限时标签）:
 
-**成功响应** (201):
 ```json
 {
-  "message": "标签创建成功",
-  "tag": {
-    "id": "507f1f77bcf86cd799439013",
-    "name": "紧急支出",
-    "color": "#FF8A80",
-    "createdAt": "2024-12-19T10:30:00.000Z",
-    "updatedAt": "2024-12-19T10:30:00.000Z"
-  }
+  "name": "新疆旅游",
+  "color": "#3B82F6",
+  "type": "temporary",
+  "startDate": "2026-05-20",
+  "endDate": "2026-05-28",
+  "autoApply": true
 }
 ```
 
-**错误响应** (400):
+成功响应 `201`:
+
 ```json
 {
-  "message": "标签名称不能为空"
+  "id": "507f1f77bcf86cd799439011",
+  "name": "新疆旅游",
+  "color": "#3B82F6",
+  "type": "temporary",
+  "startDate": "2026-05-20",
+  "endDate": "2026-05-28",
+  "autoApply": true,
+  "archived": false,
+  "createdAt": "2026-05-20T08:00:00.000Z"
 }
 ```
+
+常见错误:
+
+- `400`: 标签名称为必填项
+- `400`: 标签名称已存在
+- `400`: 标签类型无效
+- `400`: 限时标签需要设置开始和结束日期
+- `400`: 开始日期不能晚于结束日期
 
 ### 3. 更新标签
 
-**接口地址**: `PUT /api/tags/:id`
+- 地址: `PUT /api/tags/:id`
+- 鉴权: `Authorization: Bearer <token>`
+- 请求头: `Content-Type: application/json`
 
-**请求方式**: PUT
+请求体与创建标签一致。
 
-**请求头**:
-```
-Content-Type: application/json
-Authorization: Bearer <your_jwt_token>
-```
+成功响应 `200`:
 
-**路径参数**:
-- `id` (string, 必填): 标签ID
-
-**请求参数**:
 ```json
 {
-  "name": "非常紧急",
-  "color": "#FF5252"
+  "id": "507f1f77bcf86cd799439011",
+  "name": "新疆旅游（调整）",
+  "color": "#3B82F6",
+  "type": "temporary",
+  "startDate": "2026-05-20",
+  "endDate": "2026-05-29",
+  "autoApply": true,
+  "archived": false,
+  "createdAt": "2026-05-20T08:00:00.000Z"
 }
 ```
 
-**成功响应** (200):
-```json
-{
-  "message": "标签更新成功",
-  "tag": {
-    "id": "507f1f77bcf86cd799439013",
-    "name": "非常紧急",
-    "color": "#FF5252",
-    "createdAt": "2024-12-19T10:30:00.000Z",
-    "updatedAt": "2024-12-19T10:35:00.000Z"
-  }
-}
-```
+常见错误:
 
-**错误响应** (404):
-```json
-{
-  "message": "标签不存在"
-}
-```
+- `404`: 标签不存在
+- `400`: 标签名称已存在
 
-### 4. 删除标签
+### 4. 删除标签（软删除）
 
-**接口地址**: `DELETE /api/tags/:id`
+- 地址: `DELETE /api/tags/:id`
+- 鉴权: `Authorization: Bearer <token>`
 
-**请求方式**: DELETE
+行为说明:
 
-**请求头**:
-```
-Authorization: Bearer <your_jwt_token>
-```
+- 接口会把标签标记为 `archived: true`，不会物理删除。
+- 已归档标签不能再用于新增/编辑时新选中。
+- 历史支出和报表仍可读取标签名称用于展示与统计。
 
-**路径参数**:
-- `id` (string, 必填): 标签ID
+成功响应 `200`:
 
-**成功响应** (200):
 ```json
 {
   "message": "标签删除成功"
 }
 ```
 
-**错误响应** (404/400):
-```json
-{
-  "message": "标签不存在或无法删除"
-}
-```
+## 数据结构
 
-## 数据模型
-
-### 标签结构
-```typescript
+```ts
 interface Tag {
   id: string;
   name: string;
   color?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  type: "normal" | "temporary";
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string;   // YYYY-MM-DD
+  autoApply: boolean;
+  archived: boolean;
+  createdAt: string;
 }
 ```
 
-## 预定义标签
-
-系统初始化时会创建以下默认标签：
-
-| 标签名称 | 颜色 |
-|----------|------|
-| 必需品 | #FF6B6B |
-| 奢侈品 | #4ECDC4 |
-| 紧急支出 | #FF8A80 |
-| 计划支出 | #96CEB4 |
-| 意外支出 | #FFEAA7 |
-
-## 错误码说明
+## 错误码
 
 | 状态码 | 说明 |
-|--------|------|
+|---|---|
 | 200 | 操作成功 |
 | 201 | 创建成功 |
 | 400 | 请求参数错误 |
 | 401 | 未授权 |
 | 404 | 标签不存在 |
 | 500 | 服务器内部错误 |
-
-## 示例代码
-
-### 获取标签列表
-```javascript
-fetch('/api/tags', {
-  method: 'GET',
-  headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
-  }
-})
-.then(response => response.json())
-.then(data => {
-  console.log('标签列表:', data);
-});
-```
-
-### 创建标签
-```javascript
-const tagData = {
-  name: "紧急支出",
-  color: "#FF8A80"
-};
-
-fetch('/api/tags', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
-  },
-  body: JSON.stringify(tagData)
-})
-.then(response => response.json())
-.then(data => {
-  console.log('创建成功:', data);
-});
-```
-
-### 更新标签
-```javascript
-const updateData = {
-  name: "非常紧急",
-  color: "#FF5252"
-};
-
-fetch('/api/tags/507f1f77bcf86cd799439013', {
-  method: 'PUT',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
-  },
-  body: JSON.stringify(updateData)
-})
-.then(response => response.json())
-.then(data => {
-  console.log('更新成功:', data);
-});
-``` 

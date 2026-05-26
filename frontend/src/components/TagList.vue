@@ -29,7 +29,7 @@
       </div>
       <template v-else>
       <van-swipe-cell
-        v-for="tag in tags"
+        v-for="tag in visibleTags"
         :key="tag.id"
         class="mb-2 tag-item"
       >
@@ -42,7 +42,22 @@
               class="w-4 h-4 rounded-full shadow-sm ring-2 ring-white" 
               :style="{ backgroundColor: tag.color }" 
             />
-            <span class="font-semibold text-gray-900 font-display">{{ tag.name }}</span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold text-gray-900 font-display">{{ tag.name }}</span>
+                <span
+                  v-if="tag.type === 'temporary'"
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                  :class="getTemporaryStatusClass(tag)"
+                >
+                  {{ getTemporaryStatusText(tag) }}
+                </span>
+              </div>
+              <div v-if="tag.type === 'temporary'" class="text-xs text-gray-500 mt-1">
+                {{ tag.startDate }} 至 {{ tag.endDate }}
+                <span v-if="tag.autoApply !== false"> · 自动选中</span>
+              </div>
+            </div>
           </div>
         </div>
         <template #right>
@@ -64,7 +79,7 @@
       </van-swipe-cell>
       
       <!-- 空状态 -->
-      <div v-if="tags.length === 0" class="p-12 text-center">
+      <div v-if="visibleTags.length === 0" class="p-12 text-center">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-warm-100 flex items-center justify-center">
           <span class="text-3xl">🏷️</span>
         </div>
@@ -101,6 +116,7 @@
 import { useTagStore } from '@/stores/tag';
 import type { TagData } from '@/api/tag';
 import TagForm from './TagForm.vue';
+import dayjs from '@/utils/dayjs';
 
 const router = useRouter();
 const tagStore = useTagStore();
@@ -111,9 +127,23 @@ const showDeleteConfirm = ref(false);
 const deletingTag = ref<TagData | undefined>();
 const listLoading = ref(true)
 
-const tags = computed(() => tagStore.tags);
+const visibleTags = computed(() => tagStore.tags.filter(tag => !tag.archived));
 
-const tagCount = computed(() => tags.value.length);
+const tagCount = computed(() => visibleTags.value.length);
+
+const getTemporaryStatusText = (tag: TagData) => {
+  const today = dayjs().startOf('day');
+  if (tag.startDate && today.isBefore(dayjs(tag.startDate).startOf('day'))) return '即将生效';
+  if (tag.endDate && today.isAfter(dayjs(tag.endDate).startOf('day'))) return '已过期';
+  return '生效中';
+};
+
+const getTemporaryStatusClass = (tag: TagData) => {
+  const status = getTemporaryStatusText(tag);
+  if (status === '生效中') return 'bg-green-100 text-green-700';
+  if (status === '即将生效') return 'bg-blue-100 text-blue-700';
+  return 'bg-gray-200 text-gray-600';
+};
 
 // 初始化数据
 const initData = async () => {
