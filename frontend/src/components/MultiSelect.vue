@@ -24,13 +24,19 @@
               class="flex items-center p-3 bg-gray-50 rounded-lg"
             >
               <van-checkbox :name="getValue(option)" />
-              <div class="ml-3 flex items-center">
+              <div class="ml-3 flex min-w-0 flex-1 items-center">
                 <div 
                   v-if="getColor(option)"
                   class="w-3 h-3 rounded-full mr-2 flex-shrink-0"
                   :style="{ backgroundColor: getColor(option) }"
                 ></div>
-                <span class="text-gray-900">{{ getLabel(option) }}</span>
+                <span class="min-w-0 flex-1 truncate text-gray-900">{{ getLabel(option) }}</span>
+                <span
+                  v-if="getBadge(option)"
+                  class="ml-2 flex-shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-[11px] font-semibold text-gray-600"
+                >
+                  {{ getBadge(option) }}
+                </span>
               </div>
             </div>
           </van-checkbox-group>
@@ -70,6 +76,7 @@ interface Props {
   labelKey?: string
   valueKey?: string
   colorKey?: string
+  badgeKey?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -78,7 +85,8 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: '请选择',
   labelKey: 'name',
   valueKey: 'id',
-  colorKey: 'color'
+  colorKey: 'color',
+  badgeKey: ''
 })
 
 const emit = defineEmits<{
@@ -103,6 +111,10 @@ const getValue = (option: Option) => {
 // 获取选项的颜色
 const getColor = (option: Option) => {
   return option[props.colorKey] || ''
+}
+
+const getBadge = (option: Option) => {
+  return props.badgeKey ? option[props.badgeKey] || '' : ''
 }
 
 // 显示文本
@@ -137,4 +149,4 @@ watch(showPicker, (newVal) => {
 watch(() => props.modelValue, (newVal) => {
   selectedValues.value = [...newVal]
 }, { immediate: true })
-</script> 
+</script>
