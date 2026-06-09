@@ -5,6 +5,10 @@ node_modules
 
 # Testing
 coverage
+e2e/artifacts/
+e2e/config.env
+playwright-report/
+test-results/
 
 # Production
 dist
