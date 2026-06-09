@@ -70,16 +70,15 @@
           <van-cell-group inset class="mt-4 flex-1 flex flex-col">
             <van-cell title="颜色" class="font-semibold" />
             <div class="flex-1 min-h-0 overflow-y-auto">
-              <div class="grid grid-cols-6 gap-3 p-4 bg-warm-50 rounded-xl">
+              <div class="choice-grid color-choice-grid">
                 <button
                   v-for="color in colorOptions"
                   :key="color"
                   type="button"
                   @click="form.color = color"
-                  class="w-12 h-12 rounded-xl flex items-center justify-center hover:ring-2 hover:ring-offset-2 hover:ring-warm-500 transition-all duration-200 shadow-sm border-2 border-white"
+                  class="choice-button color-choice"
                   :class="{
-                    'ring-2 ring-warm-500 ring-offset-2 scale-110 shadow-md': form.color === color,
-                    'hover:scale-105': form.color !== color
+                    'is-selected': form.color === color
                   }"
                   :style="{ backgroundColor: color }"
                 >
@@ -343,6 +342,47 @@ watch(() => props.tag, (newTag) => {
 .tag-field :deep(.van-field__control) {
   color: var(--color-gray-900);
   font-family: var(--font-body);
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 0.875rem;
+  place-items: center;
+  padding: 1rem;
+  background: var(--color-warm-50);
+  border-radius: 0.75rem;
+}
+
+.choice-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.75rem;
+  border: 2px solid white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.choice-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.color-choice {
+  box-shadow: 0 4px 10px rgba(124, 45, 18, 0.08);
+}
+
+.color-choice:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(124, 45, 18, 0.14);
+}
+
+.color-choice.is-selected {
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.36), 0 10px 18px rgba(124, 45, 18, 0.14);
 }
 
 :deep(.van-popup__content) {
