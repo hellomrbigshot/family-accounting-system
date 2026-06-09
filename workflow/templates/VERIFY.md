@@ -11,7 +11,7 @@
 | 验证日期 | |
 | 前端地址 | http://localhost:5180 |
 | 后端地址 | |
-| 使用的工具 | agent-browser CLI / chrome-devtools MCP / cursor-ide-browser / 手动 |
+| 使用的工具 | agent-browser CLI / 浏览器自动化工具 / 手动 |
 
 ## 检查清单
 
