@@ -44,6 +44,16 @@ pnpm test:e2e smoke
 - 支出页、日历页、分类/标签页、报表页、更多页
 - 预算弹窗可打开
 
+## DEV E2E Bridge（仅 VERIFY）
+
+复杂 VERIFY 脚本（`e2e/scripts/verify-history.sh`）可在开发模式使用 `window.__FAS_E2E__.invoke`。
+
+**硬性规则**见 [E2E Bridge 规则](e2e-bridge.md)，摘要：
+
+- handler **只**在 `frontend/src/e2e/handlers.ts` 维护
+- **禁止**在 Vue 组件中 `e2eRegister`
+- `pnpm test:e2e` **不得**依赖 bridge
+
 ## 不纳入长期 E2E 的内容
 
 以下复杂流程优先在 VERIFY 阶段专项验证，不默认放入长期守门脚本：

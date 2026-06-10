@@ -21,6 +21,7 @@
           type="default"
           size="large"
           block
+          data-testid="pwa-install-dismiss"
           @click="dismissPrompt"
         >
           稍后再说
@@ -39,8 +40,18 @@
 </template>
 
 <script setup lang="ts">
+import { e2ePwaState } from '@/e2e/state'
 
 const showInstallPrompt = ref(false)
+
+if (import.meta.env.DEV) {
+  watch(() => e2ePwaState.showInstall, (visible) => {
+    if (visible) showInstallPrompt.value = true
+  })
+  watch(showInstallPrompt, (visible) => {
+    if (!visible) e2ePwaState.showInstall = false
+  })
+}
 
 const installApp = async () => {
   const deferredPrompt = (window as any).deferredPrompt
@@ -76,5 +87,6 @@ onMounted(() => {
       }
     }, 3000)
   }
+
 })
 </script> 

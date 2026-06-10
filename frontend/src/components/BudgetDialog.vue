@@ -73,6 +73,7 @@
         <van-button 
           type="primary" 
           :loading="loading" 
+          data-testid="budget-confirm"
           @click="handleConfirm"
           class="!px-6 min-w-[100px] rounded-lg shadow-warm"
         >
@@ -275,6 +276,7 @@ const handleAmountFieldBlur = () => {
     showNumberKeyboard.value = false;
   }, 300);
 };
+
 </script>
 
 <style scoped>

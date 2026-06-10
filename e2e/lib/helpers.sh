@@ -90,5 +90,63 @@ ab_screenshot() {
   ab screenshot "$E2E_ROOT/artifacts/${name}.png"
 }
 
+# DEV E2E bridge（frontend/src/e2e/bridge.ts）
+ab_e2e_invoke() {
+  local handler="$1"
+  ab eval "(async () => { const r = await window.__FAS_E2E__.invoke('${handler}'); return typeof r === 'string' ? r : (r ?? 'ok'); })()"
+}
+
+ab_e2e_invoke_arg() {
+  local handler="$1"
+  local arg="$2"
+  ab eval "(async () => { await window.__FAS_E2E__.invoke('${handler}', ${arg}); return 'ok'; })()"
+}
+
+ab_e2e_invoke2() {
+  local handler="$1"
+  local arg1="$2"
+  local arg2="$3"
+  ab eval "(async () => { await window.__FAS_E2E__.invoke('${handler}', ${arg1}, ${arg2}); return 'ok'; })()"
+}
+
+ab_e2e_create_expense() {
+  local mark="$1"
+  local amount="${2:-12.34}"
+  local date="${3:-$(date +%Y-%m-%d)}"
+  ab eval "(async () => {
+    const category = await window.__FAS_E2E__.invoke('meta.firstExpenseCategoryId');
+    if (!category) throw new Error('no expense category');
+    await window.__FAS_E2E__.invoke('home.createExpense', {
+      category,
+      amount: '${amount}',
+      description: '${mark}',
+      date: '${date}'
+    });
+    return category;
+  })()"
+}
+
+ab_click_testid() {
+  ab click "[data-testid=\"$1\"]"
+}
+
+ab_confirm_dialog() {
+  ab eval "(() => { const dlg = document.querySelector('[role=dialog]') || document.querySelector('.van-dialog'); const btn = dlg && [...dlg.querySelectorAll('button')].find(b => b.textContent.trim() === '确认'); btn?.click(); return !!btn; })()"
+  ab wait 1500
+}
+
+ab_swipe_reveal() {
+  local text="$1"
+  ab eval "(() => { const cell = [...document.querySelectorAll('.van-swipe-cell')].find(c => c.textContent.includes('${text}')); if (!cell) throw new Error('missing swipe cell: ${text}'); const wrap = cell.querySelector('.van-swipe-cell__wrapper'); if (wrap) wrap.style.transform = 'translate3d(-140px, 0, 0)'; return true; })()"
+}
+
+ab_swipe_action() {
+  local text="$1"
+  local action="$2"
+  ab_swipe_reveal "$text"
+  ab wait 300
+  ab eval "(() => { const cell = [...document.querySelectorAll('.van-swipe-cell')].find(c => c.textContent.includes('${text}')); const btn = cell && [...cell.querySelectorAll('*')].find(e => e.textContent.trim() === '${action}'); btn?.click(); return !!btn; })()"
+}
+
 # 每个场景脚本结束时关闭浏览器，避免 daemon 堆积
 trap ab_teardown EXIT

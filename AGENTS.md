@@ -17,6 +17,7 @@
 - [项目与编码规则](agents/coding-rules.md)
 - [五阶段开发工作流](agents/workflow.md)
 - [VERIFY / TEST 测试规则](agents/testing.md)
+- [E2E Bridge 规则（DEV VERIFY）](agents/e2e-bridge.md)
 - [Issue → PR 通用流程](agents/issue-pr.md)
 
 ## 常用命令

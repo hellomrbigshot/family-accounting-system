@@ -18,7 +18,7 @@
 | SPEC | 与用户确认后再 CODE | 标记 `source: retroactive`，从实现推导 |
 | VERIFY | 必须浏览器逐项验证 | 可选：补一次 MCP 验证并记录 |
 | TEST | 必须编写并通过 E2E | 按 [`FEATURE-INVENTORY.md`](FEATURE-INVENTORY.md) 优先级补 E2E |
-| GREEN | 五阶段全完成 | `legacy-green`：代码已上线；`full-green`：E2E 也已覆盖 |
+| GREEN | 五阶段全完成 | `legacy-green`：代码已上线；`full-green`：文档完整，含稳定 E2E 或明确的 VERIFY-only 记录 |
 
 ## 补档步骤（每个功能模块）
 
@@ -60,10 +60,11 @@ TEST 阶段只维护少量稳定确定性脚本：`e2e/scripts/auth.sh` 与 `e2e
 - `scenarios`：是否已有 VERIFY 自然语言说明
 - `e2e`：是否被 `auth` / `smoke` 稳定脚本覆盖
 
-### 5. 模块 E2E 全绿后
+### 5. 标记 full-green
 
-- 将 GREEN.md 状态改为 `full-green`
-- 在 FEATURE-INVENTORY 中将 workflow 与 E2E 均标为 ✅。未纳入稳定脚本但已有 VERIFY 说明的模块保持 🔄。
+- 将 GREEN.md 状态改为 `full-green`，写清稳定 E2E 与 VERIFY-only 的 AC 分工
+- 在 FEATURE-INVENTORY 中将 workflow 标为 ✅
+- e2e 列：稳定脚本覆盖标 ✅；永久 VERIFY-only（如 `filters`、`pwa`）标 🔄 或 ⬜，与 GREEN.md 一致
 
 ## 推荐补档顺序
 
@@ -109,4 +110,4 @@ e2e/
 
 > 请为 `workflow/history/features/expenses` 补全追溯 SPEC，并在 `e2e/scenarios/expenses.md` 编写 VERIFY 自然语言步骤。若它属于核心守门路径，再考虑更新 `e2e/scripts/smoke.sh`。
 
-AI 应：读源码 → 更新历史 SPEC → 写自然语言场景 → 必要时更新稳定 smoke → 运行 `pnpm test:e2e` → 更新 FEATURE-INVENTORY。
+AI 应：读源码 → 更新历史 SPEC → 写自然语言场景 → 必要时更新稳定 smoke → 运行 `pnpm test:e2e` → 运行 `bash e2e/scripts/verify-history.sh` 并更新 `VERIFY-LOG.md` → 更新 FEATURE-INVENTORY。

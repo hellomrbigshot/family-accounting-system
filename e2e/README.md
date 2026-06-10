@@ -23,6 +23,7 @@ cp e2e/config.env.example e2e/config.env   # 可选，改测试账号/地址
 pnpm test:e2e        # auth + smoke
 pnpm test:e2e auth   # 认证专项
 pnpm test:e2e smoke  # 核心入口 smoke
+bash e2e/scripts/verify-history.sh  # 历史功能 VERIFY（探索式，非守门）
 ```
 
 ## 当前覆盖
@@ -43,7 +44,9 @@ pnpm test:e2e smoke  # 核心入口 smoke
 - 更多页
 - 预算弹窗可打开
 
-复杂流程（新增支出、编辑/删除、数字键盘、限时标签、筛选器组合等）暂不作为长期 E2E 守门项，按需求在 VERIFY 阶段参考 `e2e/scenarios/*.md` 专项验证。
+复杂流程（新增支出、编辑/删除、数字键盘、限时标签、筛选器组合、预算保存、PWA 安装/更新等）暂不作为长期 E2E 守门项，按需求在 VERIFY 阶段参考 `e2e/scenarios/*.md` 专项验证。
+
+**永久 VERIFY-only 模块**：`filters`（筛选器全流程）、`pwa`（手动 VERIFY）。详见各模块 `workflow/history/features/<id>/GREEN.md`。
 
 ## 目录结构
 
@@ -55,7 +58,8 @@ e2e/
 ├── lib/helpers.sh          # agent-browser 命令封装
 ├── scripts/
 │   ├── auth.sh             # 确定性认证测试
-│   └── smoke.sh            # 确定性核心入口测试
+│   ├── smoke.sh            # 确定性核心入口测试
+│   └── verify-history.sh   # 历史功能全量 VERIFY（含原跳过 AC）
 ├── scenarios/              # VERIFY 阶段自然语言参考
 └── artifacts/              # 截图输出，已 gitignore
 ```
@@ -71,6 +75,20 @@ agent-browser errors
 ```
 
 也可以读取 `e2e/scenarios/<模块>.md`，按自然语言步骤操作并记录到 `workflow/current/VERIFY.md`。
+
+全量历史 VERIFY 可一键执行：
+
+```bash
+bash e2e/scripts/verify-history.sh
+```
+
+结果写入 `workflow/history/VERIFY-LOG.md`。
+
+### DEV E2E bridge（仅 VERIFY）
+
+开发模式暴露 `window.__FAS_E2E__.invoke(handler, ...args)`。handler **集中**在 `frontend/src/e2e/handlers.ts`，禁止散落到 Vue 组件。规则见 [agents/e2e-bridge.md](../agents/e2e-bridge.md)。
+
+`pnpm test:e2e` 守门脚本不使用 bridge。
 
 ## 环境变量
 

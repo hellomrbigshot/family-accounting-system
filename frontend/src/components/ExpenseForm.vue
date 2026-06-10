@@ -128,6 +128,7 @@
               native-type="submit"
               :loading="loading"
               :disabled="loading"
+              data-testid="expense-save"
             >
               {{ isEditMode ? '更新' : '保存' }}
             </van-button>
@@ -553,6 +554,7 @@ onMounted(async () => {
     console.error('Failed to load data:', error);
     showToast('加载数据失败');
   }
+
 });
 
 // 金额输入框点击事件

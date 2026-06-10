@@ -121,7 +121,6 @@ import BudgetDialog from '@/components/BudgetDialog.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
 import type { ExpenseData } from '@/api/expense';
-
 const router = useRouter();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
@@ -205,6 +204,7 @@ onMounted(async () => {
     console.error('Failed to initialize:', error);
     showToast('初始化失败');
   }
+
 });
 
 // 监听月份变化，自动更新预算和本月支出数据

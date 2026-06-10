@@ -24,6 +24,7 @@
           type="default"
           size="large"
           block
+          data-testid="pwa-update-dismiss"
           @click="dismissUpdate"
         >
           稍后更新
@@ -44,6 +45,7 @@
 
 <script setup lang="ts">
 import { registerSW } from 'virtual:pwa-register'
+import { e2ePwaState } from '@/e2e/state'
 
 const showUpdatePrompt = ref(false)
 const updating = ref(false)
@@ -109,8 +111,19 @@ const dismissUpdate = () => {
   localStorage.setItem('pwa-update-dismissed', Date.now().toString())
 }
 
+if (import.meta.env.DEV) {
+  watch(() => e2ePwaState.showUpdate, (visible) => {
+    if (visible) {
+      showUpdatePrompt.value = true
+      newVersion.value = e2ePwaState.updateNewVersion
+    }
+  })
+  watch(showUpdatePrompt, (visible) => {
+    if (!visible) e2ePwaState.showUpdate = false
+  })
+}
+
 onMounted(async () => {
-  // 获取当前版本信息
   try {
     const response = await fetch('/src/version.json')
     const data = await response.json()

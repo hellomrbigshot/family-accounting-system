@@ -102,6 +102,7 @@
             <van-button
               type="primary"
               native-type="submit"
+              data-testid="tag-save"
               class="!px-6 min-w-[100px] rounded-lg"
             >
               保存
@@ -316,6 +317,7 @@ watch(() => props.tag, (newTag) => {
     resetForm();
   }
 }, { immediate: true });
+
 </script>
 
 <style scoped>

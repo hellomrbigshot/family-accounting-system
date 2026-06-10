@@ -113,6 +113,7 @@
               block
               :loading="loading"
               native-type="submit"
+              data-testid="filter-save"
               class="rounded-xl shadow-warm font-semibold"
             >
               {{ isEditMode ? '更新' : '创建' }}
@@ -713,6 +714,7 @@ watch(() => props.show, (newValue) => {
     initForm()
   }
 })
+
 </script>
 
 <style scoped>

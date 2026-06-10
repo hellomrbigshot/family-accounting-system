@@ -57,6 +57,7 @@
             <van-button
               type="primary"
               native-type="submit"
+              data-testid="category-save"
               class="!px-6 min-w-[100px] rounded-lg"
             >
               保存
@@ -192,6 +193,7 @@ const icons = [
   // 通讯网络
   '📞', '🌐', '📡', '📶', '💻', '📺'
 ];
+
 </script>
 
 <style scoped>
