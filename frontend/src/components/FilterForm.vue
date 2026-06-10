@@ -71,10 +71,11 @@
           <!-- 标签选择 -->
           <MultiSelect
             v-model="form.tags"
-            :options="tagStore.tags"
+            :options="tagOptions"
             label="标签筛选"
             title="选择标签"
             placeholder="不限"
+            badge-key="badge"
             @confirm="handleTagsConfirm"
             @clear="handleTagsClear"
           />
@@ -112,6 +113,7 @@
               block
               :loading="loading"
               native-type="submit"
+              data-testid="filter-save"
               class="rounded-xl shadow-warm font-semibold"
             >
               {{ isEditMode ? '更新' : '创建' }}
@@ -273,6 +275,13 @@ const tagStore = useTagStore()
 const categoryStore = useCategoryStore()
 const loading = ref(false)
 const isEditMode = computed(() => !!props.editData)
+
+const tagOptions = computed(() =>
+  tagStore.tags.map(tag => ({
+    ...tag,
+    badge: tag.archived ? '已归档' : ''
+  }))
+)
 
 // 表单数据
 const form = reactive({
@@ -705,6 +714,7 @@ watch(() => props.show, (newValue) => {
     initForm()
   }
 })
+
 </script>
 
 <style scoped>

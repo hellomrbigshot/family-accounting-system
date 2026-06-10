@@ -6,12 +6,14 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './main.css'
+import { installE2E } from './e2e/bridge'
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+installE2E(pinia)
 
 // 等待路由准备就绪
 router.isReady().then(() => {

@@ -212,6 +212,7 @@ const confirmDelete = async () => {
 
 onMounted(() => {
   initData();
+
 });
 </script>
 

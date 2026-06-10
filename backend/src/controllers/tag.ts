@@ -101,11 +101,14 @@ export const createTag = async (req: AuthenticatedRequest, res: Response) => {
     // 检查标签是否已存在
     const existingTag = await Tag.findOne({
       roomNumber: req.user.roomNumber,
-      name,
-      archived: { $ne: true }
+      name
     });
     if (existingTag) {
-      return res.status(400).json({ message: '标签名称已存在' });
+      return res.status(400).json({
+        message: existingTag.archived
+          ? '标签名称曾被使用，请换一个名称'
+          : '标签名称已存在'
+      });
     }
 
     const tag = new Tag({
@@ -159,11 +162,14 @@ export const updateTag = async (req: AuthenticatedRequest, res: Response) => {
     if (name !== tag.name) {
       const existingTag = await Tag.findOne({
         roomNumber: req.user.roomNumber,
-        name,
-        archived: { $ne: true }
+        name
       });
       if (existingTag) {
-        return res.status(400).json({ message: '标签名称已存在' });
+        return res.status(400).json({
+          message: existingTag.archived
+            ? '标签名称曾被使用，请换一个名称'
+            : '标签名称已存在'
+        });
       }
     }
 

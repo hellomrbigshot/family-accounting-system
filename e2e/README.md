@@ -1,0 +1,100 @@
+# E2E 测试（agent-browser）
+
+项目采用轻量 E2E 策略：
+
+- `e2e/scenarios/*.md`：自然语言验收说明，供 VERIFY 阶段用 agent-browser 探索验证。
+- `e2e/scripts/*.sh`：确定性 agent-browser 命令脚本，供 TEST 阶段稳定执行。
+
+`pnpm test:e2e` 不依赖 `agent-browser chat`，也不需要 AI Gateway。
+
+## 首次安装
+
+```bash
+pnpm install
+pnpm test:e2e:install
+cp e2e/config.env.example e2e/config.env   # 可选，改测试账号/地址
+```
+
+## 运行
+
+前提：本地已启动 `pnpm dev`，前端默认 `http://localhost:5180`。
+
+```bash
+pnpm test:e2e        # auth + smoke
+pnpm test:e2e auth   # 认证专项
+pnpm test:e2e smoke  # 核心入口 smoke
+bash e2e/scripts/verify-history.sh  # 历史功能 VERIFY（探索式，非守门）
+```
+
+## 当前覆盖
+
+`auth.sh` 覆盖：
+
+- 错误密码停留登录页
+- 正确登录进入首页
+- 退出登录回到登录页
+
+`smoke.sh` 覆盖：
+
+- 首页、本月总览、最近支出
+- 支出页
+- 日历页
+- 分类/标签页
+- 报表页
+- 更多页
+- 预算弹窗可打开
+
+复杂流程（新增支出、编辑/删除、数字键盘、限时标签、筛选器组合、预算保存、PWA 安装/更新等）暂不作为长期 E2E 守门项，按需求在 VERIFY 阶段参考 `e2e/scenarios/*.md` 专项验证。
+
+**永久 VERIFY-only 模块**：`filters`（筛选器全流程）、`pwa`（手动 VERIFY）。详见各模块 `workflow/history/features/<id>/GREEN.md`。
+
+## 目录结构
+
+```text
+e2e/
+├── config.env.example
+├── config.env              # 本地配置，已 gitignore
+├── run.sh                  # E2E 入口
+├── lib/helpers.sh          # agent-browser 命令封装
+├── scripts/
+│   ├── auth.sh             # 确定性认证测试
+│   ├── smoke.sh            # 确定性核心入口测试
+│   └── verify-history.sh   # 历史功能全量 VERIFY（含原跳过 AC）
+├── scenarios/              # VERIFY 阶段自然语言参考
+└── artifacts/              # 截图输出，已 gitignore
+```
+
+## VERIFY 阶段
+
+需要探索式验证时，可以直接用 agent-browser：
+
+```bash
+agent-browser open http://localhost:5180/login
+agent-browser snapshot -i
+agent-browser errors
+```
+
+也可以读取 `e2e/scenarios/<模块>.md`，按自然语言步骤操作并记录到 `workflow/current/VERIFY.md`。
+
+全量历史 VERIFY 可一键执行：
+
+```bash
+bash e2e/scripts/verify-history.sh
+```
+
+结果写入 `workflow/history/VERIFY-LOG.md`。
+
+### DEV E2E bridge（仅 VERIFY）
+
+开发模式暴露 `window.__FAS_E2E__.invoke(handler, ...args)`。handler **集中**在 `frontend/src/e2e/handlers.ts`，禁止散落到 Vue 组件。规则见 [agents/e2e-bridge.md](../agents/e2e-bridge.md)。
+
+`pnpm test:e2e` 守门脚本不使用 bridge。
+
+## 环境变量
+
+| 变量 | 默认 | 说明 |
+|------|------|------|
+| `E2E_BASE_URL` | `http://localhost:5180` | 前端地址 |
+| `E2E_ROOM_NUMBER` | `888888` | 测试房间号 |
+| `E2E_PASSWORD` | `123456` | 测试密码 |
+| `E2E_DEVICE` | `iPhone 15` | 移动端设备模拟 |

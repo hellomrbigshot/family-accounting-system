@@ -14,6 +14,10 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
+    devDependencies:
+      agent-browser:
+        specifier: ^0.27.1
+        version: 0.27.1
 
   backend:
     dependencies:
@@ -1394,6 +1398,11 @@ packages:
   acorn@8.14.1:
     resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  agent-browser@0.27.1:
+    resolution: {integrity: sha512-lLzpWDV7nlVsA5km7yMCH1wppvnLLNx160hLwLdDUkCst9x38UhhxoiTmmJ2qreOnCa/Hp4/Gm6Adkahhtb6Hg==}
+    engines: {node: '>=24.0.0', pnpm: '>=11.0.0'}
     hasBin: true
 
   ajv@8.17.1:
@@ -5257,6 +5266,8 @@ snapshots:
       acorn: 8.14.1
 
   acorn@8.14.1: {}
+
+  agent-browser@0.27.1: {}
 
   ajv@8.17.1:
     dependencies:

@@ -5,7 +5,14 @@
   "scripts": {
     "dev": "pnpm run --parallel dev",
     "build": "pnpm run --parallel build",
-    "start": "pnpm run --parallel start"
+    "start": "pnpm run --parallel start",
+    "test:e2e": "bash e2e/run.sh",
+    "test:e2e:install": "agent-browser install",
+    "test:e2e:auth": "bash e2e/run.sh auth",
+    "test:e2e:smoke": "bash e2e/run.sh smoke"
+  },
+  "devDependencies": {
+    "agent-browser": "^0.27.1"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",

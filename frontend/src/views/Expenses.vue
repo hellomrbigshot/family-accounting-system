@@ -185,7 +185,6 @@ import type { ExpenseQuery } from '@/api/expense';
 import type { FilterData } from '@/api/filter';
 import dayjs from '@/utils/dayjs';
 import { formatAmount } from '@/utils/format';
-
 const route = useRoute();
 const expenseStore = useExpenseStore();
 const categoryStore = useCategoryStore();
@@ -464,6 +463,7 @@ onMounted(async () => {
     tagStore.fetchTags(),
     categoryStore.fetchCategories()
   ]);
+
 });
 
 // 处理删除成功后的刷新
