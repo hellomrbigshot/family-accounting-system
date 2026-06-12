@@ -52,9 +52,8 @@ VERIFY 通过后：
 pnpm test:e2e
 ```
 
-- 当前 `pnpm test:e2e` 默认运行 `e2e/scripts/auth.sh` 与 `e2e/scripts/smoke.sh`
-- 不依赖 `agent-browser chat` 或 AI Gateway
-- 复杂流程优先放在 VERIFY 场景中按需求专项验证
+- 运行 `e2e/scripts/auth.sh` 与 `e2e/scripts/smoke.sh`
+- **新功能**：在 [`e2e/TEST-CATALOG.md`](../e2e/TEST-CATALOG.md) 登记每条 AC 的 automated / verify-only，并补充至少 1 条确定性断言（或新建功能脚本）
 - 结果写入 `workflow/current/TEST.md`
 
 ## GREEN
@@ -62,11 +61,17 @@ pnpm test:e2e
 VERIFY 和 TEST 都通过后：
 
 - 填写 `workflow/current/GREEN.md`
-- 确认 SPEC 每条 AC 已满足
-- 确认 `pnpm test:e2e` 绿色
-- 确认没有无关改动和新增类型/语法问题
+- SPEC 每条 AC 在 TEST-CATALOG 有映射（automated 或 verify-only + 原因）
+- `pnpm test:e2e` 绿色
+- 按 [`workflow/ARCHIVE-CHECKLIST.md`](../workflow/ARCHIVE-CHECKLIST.md) 合并进 `workflow/history/features/<模块>/`（不建 issue 子目录）
+- 运行 `bash workflow/scripts/reset-current.sh` 重置 `workflow/current/`
 
-GREEN 是任务完成标准，不跳过阶段。
+## E2E 运行策略
+
+| 时机 | 命令 |
+|------|------|
+| 单功能完成 | `pnpm test:e2e` |
+| 发版前 / 大重构 | `pnpm test:e2e` + `bash e2e/scripts/verify-history.sh` |
 
 ## 新任务启动
 
@@ -93,4 +98,4 @@ cp workflow/templates/GREEN.md workflow/current/GREEN.md
 
 - 从现有代码反向写追溯 SPEC，标记 `source: retroactive`
 - 不与 `workflow/current/` 混用
-- 新功能完成后，可将 `workflow/current/` 归档到 `workflow/history/features/<模块>/` 或子目录
+- 新功能完成后，按 [`ARCHIVE-CHECKLIST.md`](../workflow/ARCHIVE-CHECKLIST.md) 合并进 `workflow/history/features/<模块>/`

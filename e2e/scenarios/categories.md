@@ -1,11 +1,7 @@
-# 分类 — 自然语言 E2E
+# 分类 — VERIFY 步骤
 
-来源：`workflow/history/features/categories/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：分类列表
-- AC-2：新建 / 编辑 / 删除
+> AC 定义：[workflow/history/features/categories/SPEC.md](../../workflow/history/features/categories/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · categories 段
 
 ## 场景
 

@@ -10,11 +10,12 @@ ab_login
 ab_assert_text "本月总览"
 ab_assert_text "最近支出"
 
-echo "== smoke 支出页 =="
+echo "== smoke 支出页（AC-1 / AC-7） =="
 ab open "$E2E_BASE_URL/expenses"
 ab wait 1200
 ab_assert_url_contains "/expenses"
 ab_assert_text "支出记录"
+ab_assert_expense_stats_badge
 
 echo "== smoke 日历页 =="
 ab open "$E2E_BASE_URL/calendar"

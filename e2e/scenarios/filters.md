@@ -1,12 +1,7 @@
-# 筛选器 — 自然语言 E2E
+# 筛选器 — VERIFY 步骤
 
-来源：`workflow/history/features/filters/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：管理筛选器
-- AC-2：应用筛选器
-- AC-3：清除筛选
+> AC 定义：[workflow/history/features/filters/SPEC.md](../../workflow/history/features/filters/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · filters 段（永久 verify-only）
 
 ## 场景
 

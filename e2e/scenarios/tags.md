@@ -1,12 +1,7 @@
-# 标签 — 自然语言 E2E
+# 标签 — VERIFY 步骤
 
-来源：`workflow/history/features/tags/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：普通标签
-- AC-2：限时标签
-- AC-3：归档标签
+> AC 定义：[workflow/history/features/tags/SPEC.md](../../workflow/history/features/tags/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · tags 段
 
 ## 场景
 

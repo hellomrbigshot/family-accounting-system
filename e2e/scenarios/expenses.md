@@ -1,16 +1,7 @@
-# 支出 — 自然语言 E2E
+# 支出 — VERIFY 步骤
 
-来源：`workflow/history/features/expenses/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：列表展示
-- AC-7：列表统计笔数
-- AC-2：新增支出
-- AC-3：编辑 / 删除
-- AC-4：搜索
-- AC-5：日期范围
-- AC-6：从日历或日期 query 进入
+> AC 定义：[workflow/history/features/expenses/SPEC.md](../../workflow/history/features/expenses/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · expenses 段
 
 ## 场景
 

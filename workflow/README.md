@@ -37,14 +37,19 @@ cp workflow/templates/GREEN.md workflow/current/GREEN.md
 1. **SPEC** — 定义验收标准，确认后再写代码
 2. **CODE** — 实现功能，记录改动
 3. **VERIFY** — 浏览器视觉确认
-4. **TEST** — 编写并运行 E2E 测试
-5. **GREEN** — 全部通过，任务完成
+4. **TEST** — 更新 [`e2e/TEST-CATALOG.md`](../e2e/TEST-CATALOG.md)，补充确定性断言，运行 `pnpm test:e2e`
+5. **GREEN** — 按 [`ARCHIVE-CHECKLIST.md`](ARCHIVE-CHECKLIST.md) 归档并重置 `current`
+
+## 归档（GREEN）
+
+[`ARCHIVE-CHECKLIST.md`](ARCHIVE-CHECKLIST.md) · 重置命令：`bash workflow/scripts/reset-current.sh`
 
 ## 历史功能（补档）
 
 已实现、但引入流程前交付的功能见 [`history/`](history/)：
 
-- [`history/FEATURE-INVENTORY.md`](history/FEATURE-INVENTORY.md) — 功能清单与 E2E 覆盖状态
+- [`history/FEATURE-INVENTORY.md`](history/FEATURE-INVENTORY.md) — 功能清单与测试覆盖状态
+- [`../e2e/TEST-CATALOG.md`](../e2e/TEST-CATALOG.md) — AC → VERIFY / TEST 映射
 - [`history/features/`](history/features/) — 各模块追溯 SPEC
 - [`../e2e/scripts/`](../e2e/scripts/) · [`../e2e/scenarios/`](../e2e/scenarios/) — agent-browser E2E 脚本
 

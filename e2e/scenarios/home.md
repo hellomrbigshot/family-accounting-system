@@ -1,13 +1,7 @@
-# 首页 — 自然语言 E2E
+# 首页 — VERIFY 步骤
 
-来源：`workflow/history/features/home/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：本月总览
-- AC-3：最近支出
-- AC-4：快捷入口
-- AC-2：超预算展示依赖特定数据状态，作为条件断言
+> AC 定义：[workflow/history/features/home/SPEC.md](../../workflow/history/features/home/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · home 段
 
 ## 场景
 

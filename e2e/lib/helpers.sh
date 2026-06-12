@@ -74,6 +74,19 @@ ab_assert_text() {
   ab eval "document.body.innerText.includes('$text') ? 'PASS:$text' : (() => { throw new Error('missing text: $text') })()"
 }
 
+# 支出页统计徽章：总计: ¥xxx · N 笔（Issue #40 / expenses AC-7）
+ab_assert_expense_stats_badge() {
+  ab eval "(() => {
+    const badge = [...document.querySelectorAll('span')]
+      .map(s => s.textContent?.trim())
+      .find(t => t && t.includes('总计') && t.includes('笔'));
+    if (!badge || !/总计:\\s*¥[\\d,]+(?:\\.\\d+)?\\s*·\\s*\\d+\\s*笔/.test(badge)) {
+      throw new Error('invalid expense stats badge: ' + (badge || 'missing'));
+    }
+    return 'PASS:' + badge;
+  })()"
+}
+
 ab_assert_url_contains() {
   local path="$1"
   ab get url | grep -q "$path"

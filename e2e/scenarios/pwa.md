@@ -1,13 +1,7 @@
-# PWA — 自然语言 VERIFY
+# PWA — VERIFY 步骤
 
-来源：`workflow/history/features/pwa/SPEC.md`
-
-> 本模块不纳入 `pnpm test:e2e` 稳定守门。以下步骤供改 PWA 相关代码时手动 VERIFY。
-
-## 覆盖范围
-
-- AC-1：安装提示
-- AC-2：更新提示
+> AC 定义：[workflow/history/features/pwa/SPEC.md](../../workflow/history/features/pwa/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · pwa 段（verify-only，不纳入 `pnpm test:e2e`）
 
 ## AC-1：安装提示
 
@@ -34,8 +28,4 @@
 
 ## 记录方式
 
-手动 VERIFY 后，在 PR 或 `workflow/current/VERIFY.md` 中注明：
-
-- 浏览器与设备
-- 验证日期
-- AC-1 / AC-2 各自结果（通过 / 跳过及原因）
+手动 VERIFY 后，在 PR 或 `workflow/current/VERIFY.md` 中注明浏览器与设备、验证日期、AC-1 / AC-2 各自结果。
