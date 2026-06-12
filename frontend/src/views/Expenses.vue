@@ -108,7 +108,7 @@
           <div class="flex items-center space-x-3">
             <h2 class="text-xl font-display font-bold text-gray-900">支出记录</h2>
             <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md">
-              总计: {{ formatAmount(totalAmount) }}
+              总计: {{ formatAmount(totalAmount) }} · {{ expenseCount }} 笔
             </span>
           </div>
         </div>
@@ -474,6 +474,8 @@ const handleRefresh = async () => {
 const totalAmount = computed(() => {
   return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0);
 });
+
+const expenseCount = computed(() => filteredExpenses.value.length);
 
 // 当前筛选器
 const currentFilter = computed(() => filterStore.currentFilter);

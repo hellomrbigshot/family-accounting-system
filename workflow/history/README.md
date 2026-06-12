@@ -94,6 +94,8 @@ workflow/history/
     │   ├── SPEC.md           # 追溯验收标准
     │   └── GREEN.md          # legacy-green / full-green
     ├── expenses/
+    │   ├── SPEC.md
+    │   └── GREEN.md
     └── ...
 
 e2e/
