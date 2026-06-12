@@ -7,9 +7,10 @@
 3. SPEC：将 Issue 转成 `workflow/current/SPEC.md`。
 4. CODE：按 SPEC 实现。
 5. VERIFY：用 agent-browser 或可用浏览器工具验证。
-6. TEST：运行 `pnpm test:e2e`。
+6. TEST：更新 [`e2e/TEST-CATALOG.md`](../e2e/TEST-CATALOG.md)，补充确定性断言，运行 `pnpm test:e2e`。
 7. Review：检查边界、风险、无关改动。
-8. Commit / PR：用户要求时提交、推送并创建 PR。
+8. GREEN：按 [`workflow/ARCHIVE-CHECKLIST.md`](../workflow/ARCHIVE-CHECKLIST.md) 归档到 `workflow/history/features/<模块>/`，运行 `bash workflow/scripts/reset-current.sh`。
+9. Commit / PR：用户要求时提交、推送并创建 PR（PR 模板含归档自检）。
 
 ## GitHub CLI
 

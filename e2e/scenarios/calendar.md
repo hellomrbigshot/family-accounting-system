@@ -1,11 +1,7 @@
-# 日历 — 自然语言 E2E
+# 日历 — VERIFY 步骤
 
-来源：`workflow/history/features/calendar/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：月份范围查询
-- AC-2：跳转支出列表
+> AC 定义：[workflow/history/features/calendar/SPEC.md](../../workflow/history/features/calendar/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · calendar 段
 
 ## 场景
 

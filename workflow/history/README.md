@@ -1,6 +1,6 @@
 # 历史功能补档指南
 
-`workflow/current/` 只用于**当前进行中的任务**。已实现的功能归档在 `workflow/history/features/`，自然语言验证说明在 `e2e/scenarios/`，稳定 E2E 守门脚本在 `e2e/scripts/`。
+`workflow/current/` 只用于**当前进行中的任务**。已实现的功能归档在 `workflow/history/features/`，步骤见 [`../ARCHIVE-CHECKLIST.md`](../ARCHIVE-CHECKLIST.md)。
 
 ## 为什么要补档
 
@@ -49,22 +49,16 @@ cp workflow/templates/GREEN.md workflow/history/features/<模块ID>/GREEN.md
 - 勾选「代码已上线、功能可用」
 - E2E 状态在 FEATURE-INVENTORY 中单独跟踪
 
-### 4. 编写 VERIFY / E2E
+### 4. 编写 VERIFY 步骤与 TEST 映射
 
-在 `e2e/scenarios/<模块>.md` 中，将 SPEC 的每条 AC 写成自然语言步骤与断言，供 VERIFY 阶段用 agent-browser 探索验证。
+在 `e2e/scenarios/<模块>.md` 中写自然语言操作步骤（AC 定义链接到 history SPEC，不在 scenarios 重复）。
 
-TEST 阶段只维护少量稳定确定性脚本：`e2e/scripts/auth.sh` 与 `e2e/scripts/smoke.sh`。复杂流程不长期纳入 `pnpm test:e2e` 守门，避免测试体系过重和脆弱。
-
-更新 FEATURE-INVENTORY 中该模块状态时区分：
-
-- `scenarios`：是否已有 VERIFY 自然语言说明
-- `e2e`：是否被 `auth` / `smoke` 稳定脚本覆盖
+在 [`e2e/TEST-CATALOG.md`](../../e2e/TEST-CATALOG.md) 登记每条 AC 的 **automated** / **smoke** / **verify-only** 及对应脚本。
 
 ### 5. 标记 full-green
 
-- 将 GREEN.md 状态改为 `full-green`，写清稳定 E2E 与 VERIFY-only 的 AC 分工
-- 在 FEATURE-INVENTORY 中将 workflow 标为 ✅
-- e2e 列：稳定脚本覆盖标 ✅；永久 VERIFY-only（如 `filters`、`pwa`）标 🔄 或 ⬜，与 GREEN.md 一致
+- 将 GREEN.md 状态改为 `full-green`，区分 automated 与 verify-only
+- 在 FEATURE-INVENTORY 中将 workflow 标为 ✅，`test` 列如实标注
 
 ## 推荐补档顺序
 
@@ -94,6 +88,8 @@ workflow/history/
     │   ├── SPEC.md           # 追溯验收标准
     │   └── GREEN.md          # legacy-green / full-green
     ├── expenses/
+    │   ├── SPEC.md
+    │   └── GREEN.md
     └── ...
 
 e2e/

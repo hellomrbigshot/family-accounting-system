@@ -52,3 +52,16 @@
 
 - 复杂流程通过 `window.__FAS_E2E__`（仅 DEV，handler 见 `frontend/src/e2e/handlers.ts`）走 store/API。
 - 原 9 项跳过 AC 已纳入本脚本。
+
+## Issue #40（2026-06-12）
+
+| 字段 | 内容 |
+|------|------|
+| 工具 | cursor-ide-browser + CDP |
+| 文档 | [expenses/SPEC.md](features/expenses/SPEC.md) · [expenses/GREEN.md](features/expenses/GREEN.md) |
+| TEST | `pnpm test:e2e` pass |
+
+### 通过
+- expenses AC-7 默认列表显示笔数（`总计: ¥82.27 · 8 笔`）
+- expenses AC-7 搜索后笔数同步（`E2E限时` → 1 笔）
+- expenses AC-7 筛选器应用后笔数同步（「大额支出」→ 0 笔）

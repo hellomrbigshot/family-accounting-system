@@ -1,12 +1,7 @@
-# 报表 — 自然语言 E2E
+# 报表 — VERIFY 步骤
 
-来源：`workflow/history/features/reports/SPEC.md`
-
-## 覆盖范围
-
-- AC-1：日期查询
-- AC-2：图表
-- AC-3：加载态
+> AC 定义：[workflow/history/features/reports/SPEC.md](../../workflow/history/features/reports/SPEC.md)  
+> 测试映射：[TEST-CATALOG.md](../TEST-CATALOG.md) · reports 段
 
 ## 场景
 
