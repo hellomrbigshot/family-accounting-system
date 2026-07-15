@@ -51,6 +51,8 @@ AC 定义以 `workflow/history/features/<模块>/SPEC.md` 为准；本表只记�
 | AC-5 日期范围 | [expenses.md](scenarios/expenses.md) 步骤 9 | — | verify-only |
 | AC-6 日历跳转 | [expenses.md](scenarios/expenses.md) 步骤 10 · [calendar.md](scenarios/calendar.md) | — | verify-only |
 | AC-7 统计笔数 (#40) | [expenses.md](scenarios/expenses.md) 步骤 3–4 | `smoke.sh`：`ab_assert_expense_stats_badge` | **automated** |
+| AC-8 列表分页 (#3) | [expenses.md](scenarios/expenses.md) 步骤 15–16 | — | verify-only（依赖大量数据才能稳定触发翻页） |
+| AC-9 虚拟滚动 (#3) | [expenses.md](scenarios/expenses.md) 步骤 15 | `smoke.sh`：`ab_assert_expense_virtual_list` | **automated** |
 
 ## filters
 

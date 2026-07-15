@@ -23,7 +23,29 @@ export interface ExpenseQuery {
   amountOperator?: 'gt' | 'lt' | 'eq' | 'gte' | 'lte'
   amountValue?: number
   description?: string
+  page?: number
+  pageSize?: number
 }
+
+export interface ExpenseListPagination {
+  page: number
+  pageSize: number
+  total: number
+  hasMore: boolean
+}
+
+export interface ExpenseListSummary {
+  count: number
+  totalAmount: number
+}
+
+export interface ExpensePaginatedResponse {
+  list: ExpenseData[]
+  pagination: ExpenseListPagination
+  summary: ExpenseListSummary
+}
+
+export type ExpenseListResponse = ExpenseData[] | ExpensePaginatedResponse
 
 export interface ExpenseStats {
   total: number
@@ -47,10 +69,16 @@ export type ExpenseStatsResponse = {
   dateStats: ExpenseDateStatRow[]
 }
 
+export const isExpensePaginatedResponse = (
+  data: ExpenseListResponse
+): data is ExpensePaginatedResponse => {
+  return !Array.isArray(data) && Array.isArray(data.list)
+}
+
 class ExpenseApi {
   private baseUrl = '/expenses'
 
-  async getList(query?: ExpenseQuery) {
+  async getList(query?: ExpenseQuery): Promise<ExpenseListResponse> {
     const response = await axios.get(this.baseUrl, { params: query })
     return response.data
   }
@@ -71,8 +99,8 @@ class ExpenseApi {
   }
 
   async delete(id: string): Promise<void> {
-    await axios.delete(`${this.baseUrl}/${id}`);
+    await axios.delete(`${this.baseUrl}/${id}`)
   }
 }
 
-export const expenseApi = new ExpenseApi() 
+export const expenseApi = new ExpenseApi()

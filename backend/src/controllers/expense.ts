@@ -68,114 +68,162 @@ export const createExpense = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
+const formatExpense = (expense: {
+  _id: unknown;
+  date: Date;
+  category: unknown;
+  amount: number;
+  description?: string;
+  tags: unknown[];
+  isExtra?: boolean;
+  createdAt: Date;
+}) => ({
+  id: expense._id,
+  date: expense.date,
+  category: expense.category,
+  amount: expense.amount,
+  description: expense.description,
+  tags: expense.tags,
+  isExtra: expense.isExtra,
+  createdAt: expense.createdAt
+});
+
+const buildExpenseListQuery = (
+  userId: string,
+  queryParams: AuthenticatedRequest['query']
+) => {
+  const {
+    startDate,
+    endDate,
+    category,
+    categories,
+    isExtra,
+    tags,
+    minAmount,
+    maxAmount,
+    amountOperator,
+    amountValue,
+    description
+  } = queryParams;
+
+  const query: Record<string, unknown> = { userId: new Types.ObjectId(userId) };
+
+  if (startDate && endDate) {
+    query.date = {
+      $gte: new Date(startDate as string),
+      $lte: new Date(endDate as string)
+    };
+  }
+
+  if (category) {
+    query.category = category;
+  } else if (categories) {
+    const categoryArray = Array.isArray(categories) ? categories : [categories];
+    query.category = { $in: categoryArray };
+  }
+
+  if (isExtra !== undefined) {
+    query.isExtra = isExtra === 'true';
+  }
+
+  if (tags) {
+    const tagArray = Array.isArray(tags) ? tags : [tags];
+    query.tags = { $in: tagArray.map(tag => new Types.ObjectId(tag as string)) };
+  }
+
+  if (minAmount !== undefined || maxAmount !== undefined) {
+    const amount: Record<string, number> = {};
+    if (minAmount !== undefined) {
+      amount.$gte = parseFloat(minAmount as string);
+    }
+    if (maxAmount !== undefined) {
+      amount.$lte = parseFloat(maxAmount as string);
+    }
+    query.amount = amount;
+  }
+
+  if (amountOperator && amountValue !== undefined) {
+    const value = parseFloat(amountValue as string);
+    switch (amountOperator) {
+      case 'gt':
+        query.amount = { $gt: value };
+        break;
+      case 'lt':
+        query.amount = { $lt: value };
+        break;
+      case 'eq':
+        query.amount = value;
+        break;
+      case 'gte':
+        query.amount = { $gte: value };
+        break;
+      case 'lte':
+        query.amount = { $lte: value };
+        break;
+    }
+  }
+
+  if (description) {
+    query.description = { $regex: description as string, $options: 'i' };
+  }
+
+  return query;
+};
+
 export const getExpenses = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const {
-      startDate,
-      endDate,
-      category,
-      categories,
-      isExtra,
-      tags,
-      minAmount,
-      maxAmount,
-      amountOperator,
-      amountValue,
-      description
-    } = req.query;
+    const { page: pageRaw, pageSize: pageSizeRaw } = req.query;
 
     if (!req.user?._id) {
       return res.status(401).json({ message: '未授权访问' });
     }
 
-    const query: any = { userId: new Types.ObjectId(req.user._id) };
+    const query = buildExpenseListQuery(req.user._id, req.query);
+    const usePagination = pageRaw !== undefined || pageSizeRaw !== undefined;
 
-    // 时间范围筛选
-    if (startDate && endDate) {
-      query.date = {
-        $gte: new Date(startDate as string),
-        $lte: new Date(endDate as string)
-      };
+    if (!usePagination) {
+      const expenses = await Expense.find(query)
+        .sort({ date: -1, updatedAt: -1 })
+        .exec();
+
+      return res.json(expenses.map(formatExpense));
     }
 
-    // 分类筛选（支持单个或多个分类）
-    if (category) {
-      query.category = category;
-    } else if (categories) {
-      const categoryArray = Array.isArray(categories) ? categories : [categories];
-      query.category = { $in: categoryArray };
-    }
+    const page = Math.max(1, parseInt(String(pageRaw ?? '1'), 10) || 1);
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(String(pageSizeRaw ?? '20'), 10) || 20)
+    );
+    const skip = (page - 1) * pageSize;
 
-    // 额外支出筛选
-    if (isExtra !== undefined) {
-      query.isExtra = isExtra === 'true';
-    }
+    const [total, aggregateResult, expenses] = await Promise.all([
+      Expense.countDocuments(query),
+      Expense.aggregate([
+        { $match: query },
+        { $group: { _id: null, totalAmount: { $sum: '$amount' } } }
+      ]),
+      Expense.find(query)
+        .sort({ date: -1, updatedAt: -1 })
+        .skip(skip)
+        .limit(pageSize)
+        .exec()
+    ]);
 
-    // 标签筛选
-    if (tags) {
-      const tagArray = Array.isArray(tags) ? tags : [tags];
-      query.tags = { $in: tagArray.map(tag => new Types.ObjectId(tag as string)) };
-    }
+    const totalAmount = aggregateResult[0]?.totalAmount ?? 0;
 
-    // 金额范围筛选
-    if (minAmount !== undefined || maxAmount !== undefined) {
-      query.amount = {};
-      if (minAmount !== undefined) {
-        query.amount.$gte = parseFloat(minAmount as string);
+    res.json({
+      list: expenses.map(formatExpense),
+      pagination: {
+        page,
+        pageSize,
+        total,
+        hasMore: skip + expenses.length < total
+      },
+      summary: {
+        count: total,
+        totalAmount
       }
-      if (maxAmount !== undefined) {
-        query.amount.$lte = parseFloat(maxAmount as string);
-      }
-    }
-
-    // 金额比较筛选
-    if (amountOperator && amountValue !== undefined) {
-      const value = parseFloat(amountValue as string);
-      switch (amountOperator) {
-        case 'gt':
-          query.amount = { $gt: value };
-          break;
-        case 'lt':
-          query.amount = { $lt: value };
-          break;
-        case 'eq':
-          query.amount = value;
-          break;
-        case 'gte':
-          query.amount = { $gte: value };
-          break;
-        case 'lte':
-          query.amount = { $lte: value };
-          break;
-      }
-    }
-
-    // 描述关键词搜索
-    if (description) {
-      query.description = { $regex: description as string, $options: 'i' };
-    }
-
-    if (isExtra !== undefined) {
-      query.isExtra = isExtra === 'true';
-    }
-
-    const expenses = await Expense.find(query)
-      .sort({ date: -1, updatedAt: -1 })
-      .exec();
-
-    // 格式化响应数据
-    const formattedExpenses = expenses.map(expense => ({
-      id: expense._id,
-      date: expense.date,
-      category: expense.category,
-      amount: expense.amount,
-      description: expense.description,
-      tags: expense.tags,
-      isExtra: expense.isExtra,
-      createdAt: expense.createdAt
-    }));
-
-    res.json(formattedExpenses);
+    });
   } catch (error) {
     console.error('获取支出记录失败:', error);
     if (error instanceof Error) {

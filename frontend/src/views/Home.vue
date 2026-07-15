@@ -84,7 +84,7 @@
           :max-items="20"
           empty-text="最近 7 天还没有支出，点 + 记一笔吧。"
           finished-text="最近 7 天已显示全部"
-          @refresh="handleRefresh"
+          :refresh-handler="handleRefresh"
         />
       </div>
     </div>

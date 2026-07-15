@@ -1,62 +1,35 @@
 <template>
   <div class="bg-white">
     <van-pull-refresh v-if="showRefresh" v-model="refreshing" @refresh="onRefresh">
-      <div v-if="listLoading" class="px-2 py-3 space-y-3" aria-busy="true">
-        <van-skeleton
-          v-for="n in 6"
-          :key="n"
-          title
-          :row="1"
-          class="rounded-xl overflow-hidden"
-        />
-      </div>
-      <van-list
-        v-else
-        v-model:loading="loading"
-        :finished="finished"
+      <ExpenseListContent
+        :expenses="displayExpenses"
+        :list-loading="listLoading"
+        :show-delete="showDelete"
+        :empty-text="emptyText"
         :finished-text="listFinishedText"
-        @load="onLoad"
-      >
-        <div v-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8 leading-relaxed">
-          {{ emptyText }}
-        </div>
-        <template v-else>
-          <ExpenseListItem
-            v-for="expense in displayExpenses"
-            :key="expense.id"
-            :expense="expense"
-            :show-delete="showDelete"
-            @edit="handleEdit"
-            @delete="handleDelete"
-          />
-        </template>
-      </van-list>
+        :finished="finished"
+        :loading-more="loadingMore"
+        :virtual="virtual"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @load-more="onLoadMore"
+      />
     </van-pull-refresh>
-    
+
     <!-- 无刷新功能的简单列表 -->
     <div v-else>
-      <div v-if="listLoading" class="px-2 py-3 space-y-3" aria-busy="true">
-        <van-skeleton
-          v-for="n in 6"
-          :key="n"
-          title
-          :row="1"
-          class="rounded-xl overflow-hidden"
-        />
-      </div>
-      <div v-else-if="displayExpenses.length === 0" class="text-center text-gray-500 py-8 leading-relaxed">
-        {{ emptyText }}
-      </div>
-      <div v-else>
-        <ExpenseListItem
-          v-for="expense in displayExpenses"
-          :key="expense.id"
-          :expense="expense"
-          :show-delete="showDelete"
-          @edit="handleEdit"
-          @delete="handleDelete"
-        />
-      </div>
+      <ExpenseListContent
+        :expenses="displayExpenses"
+        :list-loading="listLoading"
+        :show-delete="showDelete"
+        :empty-text="emptyText"
+        :finished-text="listFinishedText"
+        :finished="true"
+        :loading-more="false"
+        :virtual="false"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
     </div>
 
     <!-- 删除确认对话框 -->
@@ -70,11 +43,11 @@
         确定要删除这条支出记录吗？
       </div>
     </van-dialog>
-  </div> 
+  </div>
 </template>
 <script setup lang="ts">
 import { useExpenseStore } from '@/stores/expense'
-import ExpenseListItem from '@/components/ExpenseListItem.vue'
+import ExpenseListContent from '@/components/ExpenseListContent.vue'
 
 interface ExpenseWithCategory {
   id: string
@@ -87,6 +60,13 @@ interface ExpenseWithCategory {
   createdAt: string
 }
 
+const emit = defineEmits<{
+  (e: 'refresh'): void
+  (e: 'load-more'): void
+  (e: 'delete', expense: ExpenseWithCategory): void
+  (e: 'edit', expense: ExpenseWithCategory): void
+}>()
+
 const props = defineProps<{
   expenses: ExpenseWithCategory[]
   showRefresh?: boolean
@@ -96,31 +76,32 @@ const props = defineProps<{
   finishedText?: string
   /** 为 true 时展示骨架屏，不渲染列表项（数据就绪后由父组件置为 false） */
   listLoading?: boolean
+  /** 是否启用虚拟滚动（支出页长列表）；滚动宿主为整页，便于下拉刷新 */
+  virtual?: boolean
+  /** 是否还有下一页 */
+  hasMore?: boolean
+  /** 正在加载下一页 */
+  loadingMore?: boolean
+  /** 下拉刷新时调用；支持 Promise，完成后才会结束刷新动画 */
+  refreshHandler?: () => void | Promise<void>
 }>()
 
-const emit = defineEmits<{
-  (e: 'refresh'): void
-  (e: 'delete', expense: ExpenseWithCategory): void
-  (e: 'edit', expense: ExpenseWithCategory): void
-}>()
-
-// 设置默认值
 const showRefresh = computed(() => props.showRefresh ?? true)
 const maxItems = computed(() => props.maxItems ?? 0)
 const emptyText = computed(() => props.emptyText ?? '还没有支出，先记一笔吧。')
 const finishedText = computed(() => props.finishedText ?? '已显示全部')
-const listFinishedText = computed(() => displayExpenses.value.length === 0 ? '' : finishedText.value)
 const showDelete = computed(() => props.showDelete ?? false)
 const listLoading = computed(() => props.listLoading ?? false)
+const virtual = computed(() => props.virtual ?? false)
+const loadingMore = computed(() => props.loadingMore ?? false)
+const finished = computed(() => !(props.hasMore ?? false))
+const listFinishedText = computed(() => displayExpenses.value.length === 0 ? '' : finishedText.value)
 
 const expenseStore = useExpenseStore()
 const refreshing = ref(false)
-const loading = ref(false)
-const finished = ref(false)
 const showDeleteDialog = ref(false)
 const expenseToDelete = ref<{ id: string } | null>(null)
 
-// 显示的支出列表（可能被限制数量）
 const displayExpenses = computed(() => {
   if (maxItems.value > 0) {
     return props.expenses.slice(0, maxItems.value)
@@ -128,50 +109,51 @@ const displayExpenses = computed(() => {
   return props.expenses
 })
 
-// 处理刷新
-const onRefresh = () => {
-  finished.value = false
-  emit('refresh')
-  refreshing.value = false
-}
-
-// 处理加载更多
-const onLoad = () => {
-  if (maxItems.value > 0 && props.expenses.length >= maxItems.value) {
-    finished.value = true
+const runRefresh = async () => {
+  if (props.refreshHandler) {
+    await props.refreshHandler()
+  } else {
+    emit('refresh')
   }
-  loading.value = false
 }
 
-// 处理删除
+const onRefresh = async () => {
+  try {
+    await runRefresh()
+  } finally {
+    refreshing.value = false
+  }
+}
+
+const onLoadMore = () => {
+  if (finished.value || loadingMore.value || listLoading.value) return
+  emit('load-more')
+}
+
 const handleDelete = (expense: ExpenseWithCategory) => {
-  expenseToDelete.value = expense;
-  showDeleteDialog.value = true;
+  expenseToDelete.value = expense
+  showDeleteDialog.value = true
 }
 
-// 处理编辑
 const handleEdit = (expense: ExpenseWithCategory) => {
   emit('edit', expense)
 }
 
-// 确认删除
 const confirmDelete = async () => {
   if (!expenseToDelete.value) return
-  
+
   try {
-    await expenseStore.deleteExpense(expenseToDelete.value.id)
+    const ok = await expenseStore.deleteExpense(expenseToDelete.value.id)
+    if (!ok) return
     showToast('删除成功')
-    emit('refresh')
+    // 约定：删除后必须重新拉首屏，避免分页空洞
+    await runRefresh()
   } catch (error) {
     console.error('删除支出记录失败:', error)
     showToast('删除失败')
   } finally {
     expenseToDelete.value = null
-    showDeleteDialog.value = false;
+    showDeleteDialog.value = false
   }
 }
 </script>
-
-<style scoped>
-/* 样式已移至 ExpenseListItem 组件 */
-</style> 
