@@ -10,29 +10,24 @@
 |------|------|
 | 测试工具 | [agent-browser](https://agent-browser.dev/) |
 | 脚本目录 | `e2e/scripts/` |
-| 复杂步骤 | `e2e/scenarios/` |
-| 运行命令 | `pnpm test:e2e` / `pnpm test:e2e <模块>` |
+| AC 映射 | [`e2e/TEST-CATALOG.md`](../../e2e/TEST-CATALOG.md) |
+| 运行命令 | `pnpm test:e2e` / `pnpm test:e2e auth` / `pnpm test:e2e smoke` |
 
-## 场景映射
+## 本任务 AC 映射（必填）
 
-| 场景 ID | 对应 AC | 脚本/场景 | 描述 | 状态 |
-|---------|---------|-----------|------|------|
-| E2E-1 | AC-1 | `e2e/scripts/xxx.sh` | | ⬜ |
-| E2E-2 | AC-2 | `e2e/scenarios/xxx.md` | | ⬜ |
+| AC | 脚本 / 断言 | 类型 | 状态 |
+|----|-------------|------|------|
+| AC-1 | | automated / smoke / verify-only | ⬜ |
 
-## 测试数据
+**要求**：至少 1 条 AC 为 **automated**（在 `auth.sh` / `smoke.sh` 或新建 `e2e/scripts/<模块>-issue-<N>.sh`）；其余若 verify-only 须写原因。
 
-<!-- 默认账号见 e2e/config.env.example -->
+完成后同步更新 [`e2e/TEST-CATALOG.md`](../../e2e/TEST-CATALOG.md)。
 
 ## 运行记录
 
 ```bash
-pnpm test:e2e              # 全部
-pnpm test:e2e auth         # 单模块
-
-# 调试（token 友好）
-agent-browser snapshot -i
-agent-browser find placeholder "..." fill "..."
+pnpm test:e2e
+pnpm test:e2e smoke
 ```
 
 | 运行时间 | 命令 | 结果 | 备注 |
@@ -41,7 +36,7 @@ agent-browser find placeholder "..." fill "..."
 
 ## 结论
 
-- [ ] 所有 E2E 场景已编写或引用 scenarios
+- [ ] TEST-CATALOG 已更新
+- [ ] 至少 1 条 automated 断言已添加
 - [ ] `pnpm test:e2e` 通过
 - [ ] 可进入 GREEN 阶段
-- [ ] 未通过，需回到 CODE → VERIFY → TEST

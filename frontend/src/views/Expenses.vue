@@ -95,7 +95,7 @@
             type="primary" 
             class="w-full rounded-lg" 
             :disabled="!!currentFilter"
-            @click="handleSearch"
+            @click="handleDateQuery"
           >
             {{ currentFilter ? '查询（已禁用）' : '查询' }}
           </van-button>
@@ -116,10 +116,14 @@
         <ExpenseList
           :expenses="filteredExpenses"
           :list-loading="expenseStore.expensesListLoading"
+          :loading-more="expenseStore.expensesLoadingMore"
+          :has-more="listHasMore"
           show-delete
-          :show-refresh="false"
+          show-refresh
+          virtual
           :empty-text="expenseEmptyText"
-          @refresh="handleRefresh"
+          :refresh-handler="handleRefresh"
+          @load-more="handleLoadMore"
           @edit="handleEdit"
         />
       </div>
@@ -257,18 +261,18 @@ const onEndDateConfirm = ({ selectedValues }: { selectedValues: string[] }) => {
   showEndDatePicker.value = false;
 };
 
-const handleSearch = () => {
-  expenseStore.fetchExpenses(query);
-};
+const handleDateQuery = () => {
+  fetchExpenses()
+}
 
 const handleSuccess = () => {
   showForm.value = false;
-  expenseStore.fetchExpenses(query);
+  fetchExpenses();
 };
 
 const handleEditSuccess = () => {
   showEditForm.value = false;
-  expenseStore.fetchExpenses(query);
+  fetchExpenses();
 };
 
 const handleEdit = (expense: any) => {
@@ -312,92 +316,113 @@ const filteredExpenses = computed(() => {
   });
 });
 
-const fetchExpenses = async () => {
-  try {
-    let expenseQuery: ExpenseQuery = {
-      startDate: query.startDate,
-      endDate: query.endDate
-    };
+const buildExpenseQuery = (): ExpenseQuery => {
+  let expenseQuery: ExpenseQuery = {
+    startDate: query.startDate,
+    endDate: query.endDate
+  };
 
-    // 如果有当前筛选器，应用筛选器条件
-    if (currentFilter.value) {
-      const conditions = currentFilter.value.conditions;
-      
-      // 应用时间范围
-      if (conditions.timeRange) {
-        if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
-          // 根据预设时间范围设置查询参数
-          const now = dayjs();
-          switch (conditions.timeRange.preset) {
-            case 'week':
-              expenseQuery.startDate = now.startOf('week').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.endOf('week').format('YYYY-MM-DD');
-              break;
-            case 'month':
-              expenseQuery.startDate = now.startOf('month').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.endOf('month').format('YYYY-MM-DD');
-              break;
-            case 'quarter':
-              // dayjs 不支持 quarter，使用月份计算
-              const quarterStart = now.month(Math.floor(now.month() / 3) * 3);
-              expenseQuery.startDate = quarterStart.startOf('month').format('YYYY-MM-DD');
-              expenseQuery.endDate = quarterStart.add(2, 'month').endOf('month').format('YYYY-MM-DD');
-              break;
-            case 'year':
-              expenseQuery.startDate = now.startOf('year').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.endOf('year').format('YYYY-MM-DD');
-              break;
-            case 'lastWeek':
-              expenseQuery.startDate = now.subtract(1, 'week').startOf('week').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.subtract(1, 'week').endOf('week').format('YYYY-MM-DD');
-              break;
-            case 'lastMonth':
-              expenseQuery.startDate = now.subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');
-              break;
-            case 'lastYear':
-              expenseQuery.startDate = now.subtract(1, 'year').startOf('year').format('YYYY-MM-DD');
-              expenseQuery.endDate = now.subtract(1, 'year').endOf('year').format('YYYY-MM-DD');
-              break;
-          }
-        } else if (conditions.timeRange.custom) {
-          expenseQuery.startDate = conditions.timeRange.custom.startDate;
-          expenseQuery.endDate = conditions.timeRange.custom.endDate;
-        }
-      }
-      
-      // 应用额外支出筛选
-      if (conditions.isExtra !== undefined) {
-        expenseQuery.isExtra = conditions.isExtra;
-      }
-      
-      // 应用分类筛选
-      if (conditions.categories && conditions.categories.length > 0) {
-        expenseQuery.categories = conditions.categories;
-      }
-      
-      // 应用标签筛选
-      if (conditions.tags && conditions.tags.length > 0) {
-        expenseQuery.tags = conditions.tags;
-      }
-      
-      // 应用金额范围筛选
-      if (conditions.amountRange) {
-        expenseQuery.amountOperator = conditions.amountRange.operator;
-        expenseQuery.amountValue = conditions.amountRange.value;
-      }
-      
-      // 应用描述关键词筛选
-      if (conditions.description) {
-        expenseQuery.description = conditions.description;
-      }
-    }
-
-    await expenseStore.fetchExpenses(expenseQuery);
-  } catch (error) {
-    console.error('Failed to fetch expenses:', error);
+  if (!currentFilter.value) {
+    return expenseQuery;
   }
+
+  const conditions = currentFilter.value.conditions;
+
+  if (conditions.timeRange) {
+    if (conditions.timeRange.type === 'preset' && conditions.timeRange.preset) {
+      const now = dayjs();
+      switch (conditions.timeRange.preset) {
+        case 'week':
+          expenseQuery.startDate = now.startOf('week').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.endOf('week').format('YYYY-MM-DD');
+          break;
+        case 'month':
+          expenseQuery.startDate = now.startOf('month').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.endOf('month').format('YYYY-MM-DD');
+          break;
+        case 'quarter': {
+          const quarterStart = now.month(Math.floor(now.month() / 3) * 3);
+          expenseQuery.startDate = quarterStart.startOf('month').format('YYYY-MM-DD');
+          expenseQuery.endDate = quarterStart.add(2, 'month').endOf('month').format('YYYY-MM-DD');
+          break;
+        }
+        case 'year':
+          expenseQuery.startDate = now.startOf('year').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.endOf('year').format('YYYY-MM-DD');
+          break;
+        case 'lastWeek':
+          expenseQuery.startDate = now.subtract(1, 'week').startOf('week').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.subtract(1, 'week').endOf('week').format('YYYY-MM-DD');
+          break;
+        case 'lastMonth':
+          expenseQuery.startDate = now.subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.subtract(1, 'month').endOf('month').format('YYYY-MM-DD');
+          break;
+        case 'lastYear':
+          expenseQuery.startDate = now.subtract(1, 'year').startOf('year').format('YYYY-MM-DD');
+          expenseQuery.endDate = now.subtract(1, 'year').endOf('year').format('YYYY-MM-DD');
+          break;
+      }
+    } else if (conditions.timeRange.custom) {
+      expenseQuery.startDate = conditions.timeRange.custom.startDate;
+      expenseQuery.endDate = conditions.timeRange.custom.endDate;
+    }
+  }
+
+  if (conditions.isExtra !== undefined) {
+    expenseQuery.isExtra = conditions.isExtra;
+  }
+
+  if (conditions.categories && conditions.categories.length > 0) {
+    expenseQuery.categories = conditions.categories;
+  }
+
+  if (conditions.tags && conditions.tags.length > 0) {
+    expenseQuery.tags = conditions.tags;
+  }
+
+  if (conditions.amountRange) {
+    expenseQuery.amountOperator = conditions.amountRange.operator;
+    expenseQuery.amountValue = conditions.amountRange.value;
+  }
+
+  if (conditions.description) {
+    expenseQuery.description = conditions.description;
+  }
+
+  return expenseQuery;
 };
+
+const fetchExpenses = async (options?: { append?: boolean }) => {
+  try {
+    const searching = !!searchQuery.value.trim()
+    await expenseStore.fetchExpenses(buildExpenseQuery(), {
+      ...options,
+      // 搜索需覆盖当前筛选下的全部记录，再做客户端过滤（分类名/标签名等）
+      unpaged: searching || undefined,
+      append: searching ? false : options?.append
+    })
+  } catch (error) {
+    console.error('Failed to fetch expenses:', error)
+  }
+}
+
+const handleLoadMore = () => {
+  if (searchQuery.value.trim()) return
+  fetchExpenses({ append: true })
+}
+
+let searchReloadTimer: ReturnType<typeof setTimeout> | null = null
+watch(searchQuery, () => {
+  if (searchReloadTimer) clearTimeout(searchReloadTimer)
+  searchReloadTimer = setTimeout(() => {
+    fetchExpenses()
+  }, 300)
+})
+
+onBeforeUnmount(() => {
+  if (searchReloadTimer) clearTimeout(searchReloadTimer)
+})
 
 // 在组件挂载时设置默认日期范围并加载数据
 onMounted(async () => {
@@ -471,11 +496,24 @@ const handleRefresh = async () => {
   await fetchExpenses();
 };
 
-const totalAmount = computed(() => {
-  return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0);
-});
+const listHasMore = computed(() => {
+  if (searchQuery.value.trim()) return false
+  return expenseStore.expensesPagination.hasMore
+})
 
-const expenseCount = computed(() => filteredExpenses.value.length);
+const totalAmount = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return expenseStore.expensesSummary.totalAmount
+  }
+  return filteredExpenses.value.reduce((total, expense) => total + expense.amount, 0)
+})
+
+const expenseCount = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return expenseStore.expensesSummary.count
+  }
+  return filteredExpenses.value.length
+})
 
 // 当前筛选器
 const currentFilter = computed(() => filterStore.currentFilter);

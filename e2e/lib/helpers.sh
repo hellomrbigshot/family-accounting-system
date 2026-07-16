@@ -87,6 +87,33 @@ ab_assert_expense_stats_badge() {
   })()"
 }
 
+# 支出页虚拟列表容器（Issue #3）— 有数据时必须挂载；条数较多时渲染行应少于总数
+ab_assert_expense_virtual_list() {
+  ab eval "(() => {
+    const badge = [...document.querySelectorAll('span')]
+      .map(s => s.textContent?.trim())
+      .find(t => t && t.includes('总计') && t.includes('笔'));
+    const countMatch = badge && badge.match(/·\\s*(\\d+)\\s*笔/);
+    const count = countMatch ? Number(countMatch[1]) : 0;
+    const virtual = document.querySelector('[data-testid=\"expense-virtual-list\"]');
+    if (count > 0) {
+      if (!virtual) throw new Error('missing expense virtual list when count=' + count);
+      const rendered = virtual.querySelectorAll('[data-index]').length;
+      // 视口通常装不下 8+ 行完整支出卡片，用于兜底 AC-9
+      if (count >= 8 && rendered >= count) {
+        throw new Error('virtual list rendered too many rows: rendered=' + rendered + ' count=' + count);
+      }
+      return 'PASS:virtual-list count=' + count + ' rendered=' + rendered;
+    }
+    const emptyHint = document.body.innerText.includes('还没有支出')
+      || document.body.innerText.includes('这段时间还没有支出')
+      || document.body.innerText.includes('没找到相关支出')
+      || document.body.innerText.includes('当前筛选暂无结果');
+    if (emptyHint || count === 0) return 'PASS:empty-list-skip-virtual';
+    throw new Error('missing expense virtual list container');
+  })()"
+}
+
 ab_assert_url_contains() {
   local path="$1"
   ab get url | grep -q "$path"

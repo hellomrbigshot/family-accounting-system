@@ -22,14 +22,27 @@
 | VERIFY | workflow/current/VERIFY.md | ⬜ | |
 | TEST | workflow/current/TEST.md | ⬜ | |
 
+## AC 测试映射（必填）
+
+<!-- 复制到 e2e/TEST-CATALOG.md 对应模块；每条 AC 一行 -->
+
+| AC | TEST 断言 / 脚本 | 类型 |
+|----|------------------|------|
+| AC-1 | | automated / smoke / verify-only |
+| AC-2 | | |
+
+类型说明见 [`e2e/TEST-CATALOG.md`](../../e2e/TEST-CATALOG.md)。
+
 ## 最终检查清单
 
-- [ ] SPEC 每条验收标准（AC-*）均已满足
+- [ ] SPEC 每条 AC 在 TEST-CATALOG 有登记（automated 或 verify-only + 原因）
+- [ ] 至少 1 条与本任务相关的 **automated** 断言已加入 `e2e/scripts/`
 - [ ] VERIFY 检查清单全部勾选
-- [ ] E2E 测试全部通过（`pnpm test:e2e` 绿色）
+- [ ] `pnpm test:e2e` 通过
 - [ ] 无新增 TypeScript / lint 错误
 - [ ] 未引入与任务无关的代码变更
-- [ ] commit message 符合规范（中文，如 `feat:` / `fix:`）
+- [ ] 已按 [ARCHIVE-CHECKLIST.md](../ARCHIVE-CHECKLIST.md) 归档到 `workflow/history/features/<模块>/`
+- [ ] `workflow/current/` 已重置（`bash workflow/scripts/reset-current.sh`）
 
 ## 结论
 

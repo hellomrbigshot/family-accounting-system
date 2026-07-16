@@ -74,13 +74,16 @@ Authorization: Bearer <your_jwt_token>
 - `startDate` (string, 可选): 开始日期，格式：YYYY-MM-DD
 - `endDate` (string, 可选): 结束日期，格式：YYYY-MM-DD
 - `category` (string, 可选): 分类ID
+- `page` (number, 可选): 页码，从 1 开始；传入 `page` 或 `pageSize` 任一即启用分页响应
+- `pageSize` (number, 可选): 每页条数，默认 20，最大 100
 
 **请求示例**:
 ```
 GET /api/expenses?startDate=2024-12-01&endDate=2024-12-31&category=507f1f77bcf86cd799439011
+GET /api/expenses?startDate=2024-12-01&endDate=2024-12-31&page=1&pageSize=20
 ```
 
-**成功响应** (200):
+**成功响应** (200，未传分页参数时仍为数组，兼容旧调用方):
 ```json
 [
   {
@@ -93,6 +96,33 @@ GET /api/expenses?startDate=2024-12-01&endDate=2024-12-31&category=507f1f77bcf86
     "createdAt": "2024-12-19T10:30:00.000Z"
   }
 ]
+```
+
+**成功响应** (200，分页模式):
+```json
+{
+  "list": [
+    {
+      "id": "507f1f77bcf86cd799439013",
+      "date": "2024-12-19T00:00:00.000Z",
+      "category": "507f1f77bcf86cd799439011",
+      "amount": 100.5,
+      "description": "买菜",
+      "tags": ["507f1f77bcf86cd799439012"],
+      "createdAt": "2024-12-19T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 45,
+    "hasMore": true
+  },
+  "summary": {
+    "count": 45,
+    "totalAmount": 1234.5
+  }
+}
 ```
 
 ### 3. 获取支出统计
