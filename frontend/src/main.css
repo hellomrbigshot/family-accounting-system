@@ -194,20 +194,52 @@
   }
 }
 
-/* 全局悬浮按钮样式 - 应用于 teleported 组件 */
-.van-floating-bubble {
+/* 首页悬浮操作按钮：统一尺寸，分别配色 */
+.home-floating-action {
+  --van-floating-bubble-size: 56px;
+  --van-floating-bubble-icon-size: 24px;
+  --van-floating-bubble-z-index: 1000;
+}
+
+.home-floating-action .van-icon {
+  color: white !important;
+}
+
+.home-floating-action--add {
+  background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%) !important;
+}
+
+.home-floating-action--add:active {
+  background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%) !important;
+}
+
+.home-floating-action--voice {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+}
+
+.home-floating-action--voice:active,
+.home-floating-action--voice.home-floating-action--recording {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.home-floating-action--voice.home-floating-action--processing {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+}
+
+/* 全局悬浮按钮样式 - 应用于 teleported 组件（未使用 home-floating-action 时的兜底） */
+.van-floating-bubble:not(.home-floating-action) {
   background: linear-gradient(135deg, var(--color-warm-500) 0%, var(--color-warm-600) 100%) !important;
   box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35), 0 4px 12px rgba(249, 115, 22, 0.2) !important;
   border: 2px solid rgba(255, 255, 255, 0.3) !important;
   /* transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; */
 }
 
-.van-floating-bubble:active {
+.van-floating-bubble:not(.home-floating-action):active {
   background: linear-gradient(135deg, var(--color-warm-600) 0%, var(--color-warm-700) 100%) !important;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3), 0 2px 6px rgba(249, 115, 22, 0.15) !important;
 }
 
-.van-floating-bubble .van-icon {
+.van-floating-bubble:not(.home-floating-action) .van-icon {
   color: white !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }

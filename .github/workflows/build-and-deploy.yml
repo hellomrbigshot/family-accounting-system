@@ -104,6 +104,10 @@ jobs:
           export NODE_ENV=production
           export MONGODB_URI=${{ secrets.MONGODB_URI }}
           export JWT_SECRET=${{ secrets.JWT_SECRET }}
+          export MIMO_API_KEY=${{ secrets.MIMO_API_KEY }}
+          export MIMO_BASE_URL=${{ secrets.MIMO_BASE_URL }}
+          export MIMO_MODEL=${{ secrets.MIMO_MODEL }}
+          export MIMO_ASR_MODEL=${{ secrets.MIMO_ASR_MODEL }}
           
           # 安装 pnpm（如果尚未安装）
           if ! command -v pnpm &> /dev/null; then

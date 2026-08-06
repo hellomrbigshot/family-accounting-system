@@ -16,6 +16,17 @@
 
       <!-- 表单内容 -->
       <div class="flex-1 overflow-y-auto p-6 bg-white">
+        <div
+          v-if="props.voiceRawText"
+          class="rounded-xl bg-indigo-50 border border-indigo-100 p-4 mb-5"
+        >
+          <div class="flex items-center gap-2 mb-2">
+            <van-icon name="audio" class="text-indigo-500" size="16" />
+            <p class="text-xs font-medium text-indigo-600">语音识别内容</p>
+          </div>
+          <p class="text-sm text-gray-800 leading-relaxed">{{ props.voiceRawText }}</p>
+        </div>
+
         <van-form class="space-y-5" @submit="handleSubmit">
           <!-- 日期选择 -->
           <van-field
@@ -257,6 +268,15 @@ const props = defineProps<{
     tags: string[];
     isExtra: boolean;
   };
+  initialData?: {
+    date: string;
+    category: string;
+    amount: number;
+    description: string;
+    tags?: string[];
+    isExtra?: boolean;
+  };
+  voiceRawText?: string;
 }>();
 
 // 组件事件定义
@@ -477,6 +497,26 @@ const handleShowUpdate = (value: boolean) => {
   emit('update:show', value);
 };
 
+const applyInitialData = () => {
+  if (!props.initialData) {
+    return;
+  }
+
+  form.date = props.initialData.date;
+  const dateObj = dayjs(props.initialData.date);
+  currentDate.value = [
+    dateObj.year().toString(),
+    (dateObj.month() + 1).toString().padStart(2, '0'),
+    dateObj.date().toString().padStart(2, '0')
+  ];
+  form.category = props.initialData.category;
+  form.amount = props.initialData.amount.toString();
+  form.description = props.initialData.description;
+  form.tags = [...(props.initialData.tags || [])];
+  form.isExtra = props.initialData.isExtra || false;
+  syncTagsForDate();
+};
+
 // 监听显示状态
 watch(() => props.show, async (newValue) => {
   if (newValue) {
@@ -484,7 +524,7 @@ watch(() => props.show, async (newValue) => {
     resetForm();
 
     // 如果是新增模式且有保留的日期，恢复保留的日期
-    if (!isEditMode.value && lastSubmittedDate.value) {
+    if (!isEditMode.value && !props.initialData && lastSubmittedDate.value) {
       form.date = lastSubmittedDate.value;
       const dateObj = dayjs(lastSubmittedDate.value);
       currentDate.value = [
@@ -514,7 +554,7 @@ watch(() => props.show, async (newValue) => {
         await tagStore.fetchTags();
       } catch (error) {
         console.error('Failed to fetch tags:', error);
-        showToast('获取标签列表失败');
+        showToast('获取标签失败');
       }
     }
 
@@ -535,6 +575,8 @@ watch(() => props.show, async (newValue) => {
       form.description = props.editData.description;
       form.tags = props.editData.tags;
       form.isExtra = props.editData.isExtra || false;
+    } else if (props.initialData) {
+      applyInitialData();
     } else {
       syncTagsForDate();
     }

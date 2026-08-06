@@ -10,6 +10,7 @@ import healthRoutes from './health';
 import budgetRoutes from './budget';
 import reportRoutes from './report';
 import filterRoutes from './filter';
+import voiceRoutes from './voice';
 
 const router: Router = Router();
 
@@ -24,5 +25,6 @@ router.use('/health', healthRoutes);
 router.use('/budgets', budgetRoutes);
 router.use('/reports', reportRoutes);
 router.use('/filters', filterRoutes);
+router.use('/voice', voiceRoutes);
 
 export default router; 

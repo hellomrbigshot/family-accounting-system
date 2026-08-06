@@ -10,7 +10,11 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3000,
       MONGODB_URI: process.env.MONGODB_URI,
-      JWT_SECRET: process.env.JWT_SECRET
+      JWT_SECRET: process.env.JWT_SECRET,
+      MIMO_API_KEY: process.env.MIMO_API_KEY,
+      MIMO_BASE_URL: process.env.MIMO_BASE_URL,
+      MIMO_MODEL: process.env.MIMO_MODEL,
+      MIMO_ASR_MODEL: process.env.MIMO_ASR_MODEL,
     }
   }]
 }; 
