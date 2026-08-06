@@ -106,18 +106,21 @@ jobs:
         SSH_PORT: ${{ steps.ssh.outputs.port }}
         SSH_USER: ${{ secrets.ALIYUN_USERNAME }}
       run: |
-        set -euo pipefail
+        set -eo pipefail
         mkdir -p ~/.ssh
         printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
         chmod 600 ~/.ssh/id_deploy
         ssh-keyscan -H "$SSH_HOST" -p "$SSH_PORT" >> ~/.ssh/known_hosts 2>/dev/null || true
 
         tar czf /tmp/deploy-dist.tar.gz backend/dist frontend/dist
-        scp -i ~/.ssh/id_deploy -P "$SSH_PORT" -o StrictHostKeyChecking=no \
-          /tmp/deploy-dist.tar.gz "${SSH_USER}@${SSH_HOST}:/tmp/deploy-dist.tar.gz"
+        SFTP_BATCH=$(mktemp)
+        echo 'put /tmp/deploy-dist.tar.gz /tmp/deploy-dist.tar.gz' > "$SFTP_BATCH"
+        sftp -i ~/.ssh/id_deploy -P "$SSH_PORT" -o StrictHostKeyChecking=no -b "$SFTP_BATCH" \
+          "${SSH_USER}@${SSH_HOST}"
+        rm -f "$SFTP_BATCH"
         ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" -o StrictHostKeyChecking=no \
           "${SSH_USER}@${SSH_HOST}" \
-          "set -euo pipefail && cd /home/family-accounting-system && tar xzf /tmp/deploy-dist.tar.gz && rm -f /tmp/deploy-dist.tar.gz"
+          "cd /home/family-accounting-system && tar xzf /tmp/deploy-dist.tar.gz && rm -f /tmp/deploy-dist.tar.gz"
         rm -f /tmp/deploy-dist.tar.gz
 
     - name: Deploy to Aliyun
