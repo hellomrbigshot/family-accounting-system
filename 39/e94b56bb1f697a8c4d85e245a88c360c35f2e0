@@ -1,0 +1,20 @@
+.github/workflows/build-and-deploy.yml
+  s_e099637e901a0f::t_970ed8806af3ad 127-145,184-187
+  s_e099637e901a0f::t_f82de89dd10aca 146-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "39e94b56bb1f697a8c4d85e245a88c360c35f2e0",
+  "prompts": {},
+  "sessions": {
+    "s_e099637e901a0f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7e2d97bc-c486-4184-9f26-fa9797500515",
+        "model": "composer-2.5"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
