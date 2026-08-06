@@ -1,7 +1,7 @@
 {
-  "version": "0.0.41",
-  "buildTime": "2026-08-06T11:33:06.851Z",
-  "buildNumber": "44",
-  "gitCommit": "main-cd4dc20",
+  "version": "0.0.42",
+  "buildTime": "2026-08-06T11:57:35.455Z",
+  "buildNumber": "46",
+  "gitCommit": "main-11b46a2",
   "environment": "ci"
 }
