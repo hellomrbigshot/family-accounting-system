@@ -1,0 +1,76 @@
+backend/src/routes/index.ts
+  s_e099637e901a0f::t_2940170cf1fdd0 28
+  s_e099637e901a0f::t_ff260c92b581cc 13
+frontend/src/views/Home.vue
+  s_e099637e901a0f::t_f1a9aad54d5be2 153-154
+  s_e099637e901a0f::t_aa077a1c126f30 102-105,107
+  s_e099637e901a0f::t_c48686f82de66f 148-152,155-156,165-166,169-173,176-180,182-183
+  s_e099637e901a0f::t_7a4abd35fdba58 95,99
+  s_e099637e901a0f::t_d465f07afc67b8 101,106,117,147,157-164,167-168,181,184-189,300
+  s_e099637e901a0f::t_4b1e5b30648c92 115-116,118
+  s_e099637e901a0f::t_4544fbbabb5e9b 174-175
+  s_e099637e901a0f::t_67a9681d245834 133,135
+ecosystem.config.js
+  s_e099637e901a0f::t_5d4bc84398407b 13-17
+backend/src/services/voice/resolveTags.ts
+  s_e099637e901a0f::t_003e3499d003c2 1-51
+frontend/src/components/VoiceRecordButton.vue
+  s_e099637e901a0f::t_804077dbb87de0 1,13,15-53,64-176
+  s_e099637e901a0f::t_0b442071cc337f 54-63
+  s_e099637e901a0f::t_5b8460d28c317d 2-12,14
+frontend/src/composables/useVoiceRecorder.ts
+  s_e099637e901a0f::t_46004ad3818e59 1-162
+frontend/src/main.css
+  s_e099637e901a0f::t_3577b2bcd18c92 229-230,237,242
+  s_e099637e901a0f::t_dddd558e956506 197-228
+backend/src/routes/voice.ts
+  s_e099637e901a0f::t_5aa4f9f2721077 1-17
+backend/.env.example
+  s_e099637e901a0f::t_1a663d2882e882 25-35
+.github/workflows/build-and-deploy.yml
+  s_e099637e901a0f::t_b22cd70682738f 107-110
+backend/package.json
+  s_e099637e901a0f::t_e47d5d0457a9d0 25-26
+  s_e099637e901a0f::t_f9a87891c0aa06 36
+backend/src/controllers/voice.ts
+  s_e099637e901a0f::t_4ba1190bd678e5 1-5,11-22,24,28-37,53-59,63-69
+  s_e099637e901a0f::t_294e5110903ea9 6-10,23,25-27,38-52,60-62
+frontend/src/api/voice.ts
+  s_e099637e901a0f::t_0e0ff35f298eb3 10-12
+  s_e099637e901a0f::t_7bf119cfd90c56 1-9,13-31
+frontend/src/components/ExpenseForm.vue
+  s_e099637e901a0f::t_c0636350f3d7da 515
+  s_e099637e901a0f::t_4eb0897f72d98c 279
+  s_e099637e901a0f::t_e8ed86d73a121e 500-514,516-519,557,578-579
+  s_e099637e901a0f::t_0f9ee4b722ac62 527
+  s_e099637e901a0f::t_4141505d2ae6fd 19-29
+  s_e099637e901a0f::t_d0166d13a3896a 271-275,277-278
+  s_e099637e901a0f::t_a750e07137a412 276
+backend/src/services/mimo/client.ts
+  s_e099637e901a0f::t_07906b267359b4 1-38
+backend/src/services/mimo/asr.ts
+  s_e099637e901a0f::t_6d33238dd70c25 1-32
+backend/src/services/voice/resolveCategory.ts
+  s_e099637e901a0f::t_82340bfa918770 1-44
+backend/src/services/mimo/parseExpense.ts
+  s_e099637e901a0f::t_328e32c748e0de 1-9,12-13,19-21,37-38,42-60,63-64,75-82,84-87,91-96,98-107,109-114,116
+  s_e099637e901a0f::t_11e2a0d5e0e115 10-11,14-18,22-36,39-41,61-62,65-74,83,88-90,97,108,115
+pnpm-lock.yaml
+  s_e099637e901a0f::t_c6d3fe3eb484c3 48-50,73-75,1300-1302,1476-1478,1618-1621,1712-1715,2800-2803,3075-3078,3316-3319,3348-3350,3564-3566,5179-5182,5375-5376,5575-5578,5659-5665,6979-6985,7233-7238,7527-7528,7585-7588,7857-7858
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "21221a7d1f76de24901d12281a3d4e6370f36453",
+  "prompts": {},
+  "sessions": {
+    "s_e099637e901a0f": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7e2d97bc-c486-4184-9f26-fa9797500515",
+        "model": "composer-2.5"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
