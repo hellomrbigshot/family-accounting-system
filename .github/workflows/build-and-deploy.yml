@@ -33,13 +33,11 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
     - name: Install dependencies
-      run: |
-        pnpm install
+      run: pnpm install --frozen-lockfile
 
     - name: Check if version was manually updated
       id: version-check
       run: |
-        # 检查最近的提交是否包含版本更新
         LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
         if [[ "$LAST_COMMIT_MSG" == *"chore: bump version"* ]]; then
           echo "manual_version_update=true" >> $GITHUB_OUTPUT
@@ -49,31 +47,28 @@ jobs:
           echo "📝 未检测到手动版本更新，将执行自动版本更新"
         fi
 
-    - name: Update version and build
+    - name: Update version
       run: |
         cd frontend
-        
-        # 只有在没有手动版本更新时才执行版本更新
         if [[ "${{ steps.version-check.outputs.manual_version_update }}" != "true" ]]; then
           echo "🔄 执行自动版本更新..."
           node scripts/version.js patch
         else
           echo "⏭️  跳过自动版本更新"
         fi
-        
-        # # 构建前端
-        # echo "🔨 构建前端..."
-        # pnpm run build
-        
-        # # 构建后端
-        # echo "🔨 构建后端..."
-        # cd ../backend
-        # pnpm run build
+
+    - name: Build project on CI
+      run: |
+        set -euo pipefail
+        echo "🔨 在 GitHub Actions 构建前后端..."
+        pnpm build
+        test -f backend/dist/app.js
+        test -f frontend/dist/index.html
+        echo "✅ 构建产物校验通过"
 
     - name: Commit version changes
       if: steps.version-check.outputs.manual_version_update != 'true'
       run: |
-        # 检查是否有文件变更
         if [[ -n "$(git status --porcelain)" ]]; then
           git add .
           git commit -m "chore: bump version to $(node -p "require('./frontend/package.json').version") [skip ci]"
@@ -83,8 +78,6 @@ jobs:
     - name: Create Git tag
       run: |
         VERSION=$(node -p "require('./frontend/package.json').version")
-        
-        # 检查标签是否已存在
         if git tag -l "v$VERSION" | grep -q "v$VERSION"; then
           echo "🏷️  标签 v$VERSION 已存在，跳过创建"
         else
@@ -93,14 +86,26 @@ jobs:
           git push origin "v$VERSION"
         fi
 
-    - name: Deploy to Aliyun
-      uses: appleboy/ssh-action@master
+    - name: Upload build artifacts to server
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.ALIYUN_HOST }}
         username: ${{ secrets.ALIYUN_USERNAME }}
         key: ${{ secrets.ALIYUN_SSH_KEY }}
+        source: "backend/dist,frontend/dist"
+        target: "/home/family-accounting-system"
+        overwrite: true
+
+    - name: Deploy to Aliyun
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.ALIYUN_HOST }}
+        username: ${{ secrets.ALIYUN_USERNAME }}
+        key: ${{ secrets.ALIYUN_SSH_KEY }}
+        script_stop: true
         script: |
-          # 设置环境变量
+          set -euo pipefail
+
           export NODE_ENV=production
           export MONGODB_URI=${{ secrets.MONGODB_URI }}
           export JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -108,49 +113,40 @@ jobs:
           export MIMO_BASE_URL=${{ secrets.MIMO_BASE_URL }}
           export MIMO_MODEL=${{ secrets.MIMO_MODEL }}
           export MIMO_ASR_MODEL=${{ secrets.MIMO_ASR_MODEL }}
-          
-          # 安装 pnpm（如果尚未安装）
+
           if ! command -v pnpm &> /dev/null; then
             echo "Installing pnpm..."
             curl -fsSL https://get.pnpm.io/install.sh | sh -
             export PNPM_HOME="$HOME/.local/share/pnpm"
             export PATH="$PNPM_HOME:$PATH"
           fi
-          
-          # 进入项目目录
+
           cd /home/family-accounting-system
-          
-          # 拉取最新代码和标签
+
+          echo "Pulling latest code..."
           git pull origin main
           git fetch --tags
-          
-          # 获取最新版本
+
           LATEST_VERSION=$(git describe --tags --abbrev=0)
           echo "Deploying version: $LATEST_VERSION"
-          
-          # 安装依赖
-          echo "Cleaning and installing dependencies..."
-          rm -rf node_modules
-          # 临时设置 NODE_ENV 为开发环境以安装 devDependencies
-          NODE_ENV=development pnpm install
-          
-          # 部署项目
-          echo "Building project..."
-          pnpm build
-          
-          # 重启服务
+
+          echo "Installing runtime dependencies..."
+          NODE_ENV=development pnpm install --frozen-lockfile
+
+          echo "Verifying build artifacts..."
+          test -f backend/dist/app.js
+          test -f frontend/dist/index.html
+
           echo "Restarting services..."
-          pm2 restart family-accounting || pm2 start ecosystem.config.js
-          
-          # 等待服务启动
+          if pm2 describe family-accounting > /dev/null 2>&1; then
+            pm2 restart family-accounting --update-env
+          else
+            pm2 start ecosystem.config.js --update-env
+          fi
+
           echo "Waiting for service to start..."
           sleep 10
-          
-          # 健康检查
+
           echo "Performing health check..."
-          if curl -f http://localhost:3000/api/health; then
-            echo "Deployment successful! Version: $LATEST_VERSION"
-          else
-            echo "Health check failed!"
-            exit 1
-          fi 
+          curl -f http://localhost:3000/api/health
+          echo "Deployment successful! Version: $LATEST_VERSION"
