@@ -86,22 +86,36 @@ jobs:
           git push origin "v$VERSION"
         fi
 
+    - name: Parse SSH target
+      id: ssh
+      env:
+        SSH_HOST: ${{ secrets.ALIYUN_HOST }}
+      run: |
+        if [[ "$SSH_HOST" == *:* ]]; then
+          echo "host=${SSH_HOST%%:*}" >> $GITHUB_OUTPUT
+          echo "port=${SSH_HOST##*:}" >> $GITHUB_OUTPUT
+        else
+          echo "host=$SSH_HOST" >> $GITHUB_OUTPUT
+          echo "port=22" >> $GITHUB_OUTPUT
+        fi
+
     - name: Upload build artifacts to server
       env:
         SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_KEY }}
-        SSH_HOST: ${{ secrets.ALIYUN_HOST }}
+        SSH_HOST: ${{ steps.ssh.outputs.host }}
+        SSH_PORT: ${{ steps.ssh.outputs.port }}
         SSH_USER: ${{ secrets.ALIYUN_USERNAME }}
       run: |
         set -euo pipefail
         mkdir -p ~/.ssh
         printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
         chmod 600 ~/.ssh/id_deploy
-        ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+        ssh-keyscan -H "$SSH_HOST" -p "$SSH_PORT" >> ~/.ssh/known_hosts 2>/dev/null || true
 
         tar czf /tmp/deploy-dist.tar.gz backend/dist frontend/dist
-        scp -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no \
+        scp -i ~/.ssh/id_deploy -P "$SSH_PORT" -o StrictHostKeyChecking=no \
           /tmp/deploy-dist.tar.gz "${SSH_USER}@${SSH_HOST}:/tmp/deploy-dist.tar.gz"
-        ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no \
+        ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" -o StrictHostKeyChecking=no \
           "${SSH_USER}@${SSH_HOST}" \
           "set -euo pipefail && cd /home/family-accounting-system && tar xzf /tmp/deploy-dist.tar.gz && rm -f /tmp/deploy-dist.tar.gz"
         rm -f /tmp/deploy-dist.tar.gz
@@ -109,7 +123,8 @@ jobs:
     - name: Deploy to Aliyun
       uses: appleboy/ssh-action@v1.2.0
       with:
-        host: ${{ secrets.ALIYUN_HOST }}
+        host: ${{ steps.ssh.outputs.host }}
+        port: ${{ steps.ssh.outputs.port }}
         username: ${{ secrets.ALIYUN_USERNAME }}
         key: ${{ secrets.ALIYUN_SSH_KEY }}
         script_stop: true
