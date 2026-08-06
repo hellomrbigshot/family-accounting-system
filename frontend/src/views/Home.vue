@@ -92,11 +92,19 @@
     <!-- 悬浮按钮 -->
     <van-floating-bubble
       v-if="!showAddExpenseDialog"
+      class="home-floating-action home-floating-action--add"
       axis="xy"
       magnetic="x"
       :gap="{ x: 24, y: 60 }"
+      teleport="body"
       icon="plus"
-      @click="showAddExpenseDialog = true"
+      @click="openManualExpense"
+    />
+
+    <!-- 独立语音按钮 -->
+    <VoiceRecordButton
+      v-if="!showAddExpenseDialog"
+      @success="handleVoiceSuccess"
     />
 
     <!-- 预算设置对话框 -->
@@ -104,8 +112,10 @@
 
     <!-- 添加支出对话框 -->
     <ExpenseForm 
-      v-model:show="showAddExpenseDialog" 
-      @success="handleRefresh"
+      v-model:show="showAddExpenseDialog"
+      :initial-data="voiceInitialData"
+      :voice-raw-text="voiceRawText"
+      @success="handleExpenseFormSuccess"
     />
   </div>
 </template>
@@ -120,7 +130,9 @@ import { formatAmount } from '@/utils/format'
 import BudgetDialog from '@/components/BudgetDialog.vue';
 import ExpenseForm from '@/components/ExpenseForm.vue';
 import ExpenseList from '@/components/ExpenseList.vue';
+import VoiceRecordButton from '@/components/VoiceRecordButton.vue';
 import type { ExpenseData } from '@/api/expense';
+import type { VoiceExpenseResult } from '@/api/voice';
 const router = useRouter();
 const budgetStore = useBudgetStore();
 const expenseStore = useExpenseStore();
@@ -132,6 +144,49 @@ const showBudgetDialog = ref(false);
 
 // 添加支出对话框
 const showAddExpenseDialog = ref(false);
+const voiceRawText = ref<string | undefined>(undefined);
+const voiceInitialData = ref<{
+  date: string;
+  category: string;
+  amount: number;
+  description: string;
+  tags: string[];
+  isExtra: boolean;
+} | undefined>(undefined);
+
+const clearVoicePrefill = () => {
+  voiceInitialData.value = undefined;
+  voiceRawText.value = undefined;
+};
+
+const openManualExpense = () => {
+  clearVoicePrefill();
+  showAddExpenseDialog.value = true;
+};
+
+const handleVoiceSuccess = (result: VoiceExpenseResult) => {
+  voiceRawText.value = result.rawText;
+  voiceInitialData.value = {
+    date: result.date,
+    category: result.categoryId,
+    amount: result.amount,
+    description: result.description,
+    tags: result.tags,
+    isExtra: result.isExtra,
+  };
+  showAddExpenseDialog.value = true;
+};
+
+const handleExpenseFormSuccess = async () => {
+  clearVoicePrefill();
+  await handleRefresh();
+};
+
+watch(showAddExpenseDialog, (value) => {
+  if (!value) {
+    clearVoicePrefill();
+  }
+});
 
 // 本月支出 - 使用本月支出数据计算（排除额外支出）
 const monthlyExpense = computed(() => {
@@ -242,4 +297,4 @@ watch(() => dayjs().month(), async (newMonth) => {
   background: var(--color-warm-50);
   border-color: var(--color-warm-400);
 }
-</style> 
+</style>
