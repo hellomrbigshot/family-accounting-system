@@ -124,57 +124,64 @@ jobs:
         rm -f /tmp/deploy-dist.tar.gz
 
     - name: Deploy to Aliyun
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ steps.ssh.outputs.host }}
-        port: ${{ steps.ssh.outputs.port }}
-        username: ${{ secrets.ALIYUN_USERNAME }}
-        key: ${{ secrets.ALIYUN_SSH_KEY }}
-        script_stop: true
-        script: |
-          set -euo pipefail
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_KEY }}
+        SSH_HOST: ${{ steps.ssh.outputs.host }}
+        SSH_PORT: ${{ steps.ssh.outputs.port }}
+        SSH_USER: ${{ secrets.ALIYUN_USERNAME }}
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        MIMO_API_KEY: ${{ secrets.MIMO_API_KEY }}
+        MIMO_BASE_URL: ${{ secrets.MIMO_BASE_URL }}
+        MIMO_MODEL: ${{ secrets.MIMO_MODEL }}
+        MIMO_ASR_MODEL: ${{ secrets.MIMO_ASR_MODEL }}
+      run: |
+        set -eo pipefail
+        mkdir -p ~/.ssh
+        printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_deploy
+        chmod 600 ~/.ssh/id_deploy
+        ssh-keyscan -H "$SSH_HOST" -p "$SSH_PORT" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          export NODE_ENV=production
-          export MONGODB_URI=${{ secrets.MONGODB_URI }}
-          export JWT_SECRET=${{ secrets.JWT_SECRET }}
-          export MIMO_API_KEY=${{ secrets.MIMO_API_KEY }}
-          export MIMO_BASE_URL=${{ secrets.MIMO_BASE_URL }}
-          export MIMO_MODEL=${{ secrets.MIMO_MODEL }}
-          export MIMO_ASR_MODEL=${{ secrets.MIMO_ASR_MODEL }}
+        DEPLOY_SCRIPT=$(mktemp)
+        {
+          echo 'set -e'
+          echo 'export NODE_ENV=production'
+          echo "export MONGODB_URI=$(printf '%q' "$MONGODB_URI")"
+          echo "export JWT_SECRET=$(printf '%q' "$JWT_SECRET")"
+          echo "export MIMO_API_KEY=$(printf '%q' "$MIMO_API_KEY")"
+          echo "export MIMO_BASE_URL=$(printf '%q' "$MIMO_BASE_URL")"
+          echo "export MIMO_MODEL=$(printf '%q' "$MIMO_MODEL")"
+          echo "export MIMO_ASR_MODEL=$(printf '%q' "$MIMO_ASR_MODEL")"
+          echo 'if ! command -v pnpm &> /dev/null; then'
+          echo '  echo "Installing pnpm..."'
+          echo '  curl -fsSL https://get.pnpm.io/install.sh | sh -'
+          echo '  export PNPM_HOME="$HOME/.local/share/pnpm"'
+          echo '  export PATH="$PNPM_HOME:$PATH"'
+          echo 'fi'
+          echo 'cd /home/family-accounting-system'
+          echo 'echo "Pulling latest code..."'
+          echo 'git pull origin main'
+          echo 'git fetch --tags'
+          echo 'LATEST_VERSION=$(git describe --tags --abbrev=0)'
+          echo 'echo "Deploying version: $LATEST_VERSION"'
+          echo 'echo "Installing runtime dependencies..."'
+          echo 'NODE_ENV=development pnpm install --frozen-lockfile'
+          echo 'echo "Verifying build artifacts..."'
+          echo 'test -f backend/dist/app.js'
+          echo 'test -f frontend/dist/index.html'
+          echo 'echo "Restarting services..."'
+          echo 'if pm2 describe family-accounting > /dev/null 2>&1; then'
+          echo '  pm2 restart family-accounting --update-env'
+          echo 'else'
+          echo '  pm2 start ecosystem.config.js --update-env'
+          echo 'fi'
+          echo 'echo "Waiting for service to start..."'
+          echo 'sleep 10'
+          echo 'echo "Performing health check..."'
+          echo 'curl -f http://localhost:3000/api/health'
+          echo 'echo "Deployment successful! Version: $LATEST_VERSION"'
+        } > "$DEPLOY_SCRIPT"
 
-          if ! command -v pnpm &> /dev/null; then
-            echo "Installing pnpm..."
-            curl -fsSL https://get.pnpm.io/install.sh | sh -
-            export PNPM_HOME="$HOME/.local/share/pnpm"
-            export PATH="$PNPM_HOME:$PATH"
-          fi
-
-          cd /home/family-accounting-system
-
-          echo "Pulling latest code..."
-          git pull origin main
-          git fetch --tags
-
-          LATEST_VERSION=$(git describe --tags --abbrev=0)
-          echo "Deploying version: $LATEST_VERSION"
-
-          echo "Installing runtime dependencies..."
-          NODE_ENV=development pnpm install --frozen-lockfile
-
-          echo "Verifying build artifacts..."
-          test -f backend/dist/app.js
-          test -f frontend/dist/index.html
-
-          echo "Restarting services..."
-          if pm2 describe family-accounting > /dev/null 2>&1; then
-            pm2 restart family-accounting --update-env
-          else
-            pm2 start ecosystem.config.js --update-env
-          fi
-
-          echo "Waiting for service to start..."
-          sleep 10
-
-          echo "Performing health check..."
-          curl -f http://localhost:3000/api/health
-          echo "Deployment successful! Version: $LATEST_VERSION"
+        ssh -i ~/.ssh/id_deploy -p "$SSH_PORT" -o StrictHostKeyChecking=no \
+          "${SSH_USER}@${SSH_HOST}" bash -s < "$DEPLOY_SCRIPT"
+        rm -f "$DEPLOY_SCRIPT"
