@@ -17,14 +17,27 @@
       <!-- 表单内容 -->
       <div class="flex-1 overflow-y-auto p-6 bg-white">
         <div
-          v-if="props.voiceRawText"
+          v-if="displayVoiceRawText"
           class="rounded-xl bg-indigo-50 border border-indigo-100 p-4 mb-5"
         >
-          <div class="flex items-center gap-2 mb-2">
-            <van-icon name="audio" class="text-indigo-500" size="16" />
-            <p class="text-xs font-medium text-indigo-600">语音识别内容</p>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <van-icon name="audio" class="text-indigo-500 flex-shrink-0" size="16" />
+              <p class="text-xs font-medium text-indigo-600">语音识别内容</p>
+            </div>
+            <van-button
+              size="mini"
+              type="primary"
+              plain
+              icon="replay"
+              :disabled="voiceRerecording"
+              data-testid="voice-rerecord"
+              @click="handleVoiceRerecord"
+            >
+              重新录制
+            </van-button>
           </div>
-          <p class="text-sm text-gray-800 leading-relaxed">{{ props.voiceRawText }}</p>
+          <p class="text-sm text-gray-800 leading-relaxed">{{ displayVoiceRawText }}</p>
         </div>
 
         <van-form class="space-y-5" @submit="handleSubmit">
@@ -149,6 +162,14 @@
     </div>
   </van-popup>
 
+  <VoiceRecordingOverlay
+    :show="voiceRerecording"
+    :is-recording="isRecording"
+    :processing="processing"
+    :z-index="4000"
+    @finish="handleVoiceRerecordFinish"
+  />
+
   <!-- 日期选择器 -->
   <van-popup v-model:show="showDatePicker" position="bottom" round teleport="body">
     <van-date-picker
@@ -248,7 +269,10 @@
 import { useExpenseStore } from '@/stores/expense';
 import { useCategoryStore } from '@/stores/category';
 import { useTagStore } from '@/stores/tag';
+import { useVoiceExpenseRecording } from '@/composables/useVoiceExpenseRecording';
+import type { VoiceExpenseResult } from '@/api/voice';
 import type { TagData } from '@/api/tag';
+import VoiceRecordingOverlay from '@/components/VoiceRecordingOverlay.vue';
 import dayjs from '@/utils/dayjs';
 
 /**
@@ -283,7 +307,19 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void;
   (e: 'success'): void;
+  (e: 'voice-update', value: VoiceExpenseResult): void;
 }>();
+
+const {
+  isRecording,
+  processing,
+  startRecording,
+  finishRecording,
+  cancelRecording,
+} = useVoiceExpenseRecording();
+
+const displayVoiceRawText = ref<string | undefined>(undefined);
+const voiceRerecording = computed(() => isRecording.value || processing.value);
 
 // Store 实例
 const expenseStore = useExpenseStore();
@@ -453,9 +489,14 @@ const onAmountDelete = () => {
 };
 
 // 关闭弹窗
-const handleClose = () => {
+const closeForm = async () => {
   showNumberKeyboard.value = false;
+  await cancelRecording();
   emit('update:show', false);
+};
+
+const handleClose = () => {
+  void closeForm();
 };
 
 // 提交表单
@@ -494,7 +535,48 @@ const handleSubmit = async () => {
 
 // 处理显示状态更新
 const handleShowUpdate = (value: boolean) => {
-  emit('update:show', value);
+  if (value) {
+    emit('update:show', true);
+    return;
+  }
+
+  void closeForm();
+};
+
+const applyVoiceResult = (result: VoiceExpenseResult) => {
+  displayVoiceRawText.value = result.rawText;
+  form.date = result.date;
+  const dateObj = dayjs(result.date);
+  currentDate.value = [
+    dateObj.year().toString(),
+    (dateObj.month() + 1).toString().padStart(2, '0'),
+    dateObj.date().toString().padStart(2, '0')
+  ];
+  form.category = result.categoryId;
+  form.amount = result.amount.toString();
+  form.description = result.description;
+  form.tags = [...result.tags];
+  form.isExtra = result.isExtra;
+  manuallyRemovedAutoTagIds.value = new Set();
+  syncTagsForDate();
+};
+
+const handleVoiceRerecord = async () => {
+  if (voiceRerecording.value) {
+    return;
+  }
+
+  await startRecording();
+};
+
+const handleVoiceRerecordFinish = async () => {
+  const result = await finishRecording();
+  if (!result) {
+    return;
+  }
+
+  applyVoiceResult(result);
+  emit('voice-update', result);
 };
 
 const applyInitialData = () => {
@@ -517,9 +599,14 @@ const applyInitialData = () => {
   syncTagsForDate();
 };
 
+watch(() => props.voiceRawText, (value) => {
+  displayVoiceRawText.value = value;
+});
+
 // 监听显示状态
 watch(() => props.show, async (newValue) => {
   if (newValue) {
+    displayVoiceRawText.value = props.voiceRawText;
     // 重置表单
     resetForm();
 

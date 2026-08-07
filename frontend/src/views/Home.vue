@@ -116,6 +116,7 @@
       :initial-data="voiceInitialData"
       :voice-raw-text="voiceRawText"
       @success="handleExpenseFormSuccess"
+      @voice-update="handleVoiceUpdate"
     />
   </div>
 </template>
@@ -175,6 +176,18 @@ const handleVoiceSuccess = (result: VoiceExpenseResult) => {
     isExtra: result.isExtra,
   };
   showAddExpenseDialog.value = true;
+};
+
+const handleVoiceUpdate = (result: VoiceExpenseResult) => {
+  voiceRawText.value = result.rawText;
+  voiceInitialData.value = {
+    date: result.date,
+    category: result.categoryId,
+    amount: result.amount,
+    description: result.description,
+    tags: result.tags,
+    isExtra: result.isExtra,
+  };
 };
 
 const handleExpenseFormSuccess = async () => {
