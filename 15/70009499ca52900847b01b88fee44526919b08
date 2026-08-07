@@ -1,0 +1,48 @@
+frontend/src/views/Home.vue
+  s_d5635d4f93ebf4::t_4e0de171678fea 181-192
+  s_d5635d4f93ebf4::t_6ef30a55eaabd6 119
+frontend/src/components/ExpenseForm.vue
+  s_d5635d4f93ebf4::t_a1c526281cc381 538-543
+  s_d5635d4f93ebf4::t_221e41528f4773 169
+  s_d5635d4f93ebf4::t_b52e38519b5119 20,23-38,40
+  s_d5635d4f93ebf4::t_8da25f85dfdd7e 310,313-322
+  s_d5635d4f93ebf4::t_c556e05491c87c 494
+  s_d5635d4f93ebf4::t_7069b40d9ca6d0 602-605,609
+  s_d5635d4f93ebf4::t_cbb97a36b1f920 500,544,546-579
+  s_d5635d4f93ebf4::t_6bb3291238475b 165-168,170-172
+  s_d5635d4f93ebf4::t_352510a7f29171 492,498-499
+  s_d5635d4f93ebf4::t_60574bb9d61eee 272-273,275
+  s_d5635d4f93ebf4::t_de26eb483f58e1 323
+  s_d5635d4f93ebf4::t_d68f99b13a6ad8 501
+  s_d5635d4f93ebf4::t_8202b614315fd9 545
+backend/src/services/mimo/parseExpense.ts
+  s_d5635d4f93ebf4::t_d65403a66387d3 86
+  s_d5635d4f93ebf4::t_e372a26a473c00 90
+frontend/src/components/VoiceRecordButton.vue
+  s_d5635d4f93ebf4::t_7809935415bd1c 16-21,25-27,33-39,57,61,64-66
+frontend/src/composables/useVoiceExpenseRecording.ts
+  s_d5635d4f93ebf4::t_aaeb9fc4347708 1-77
+frontend/src/components/VoiceRecordingOverlay.vue
+  s_d5635d4f93ebf4::t_8cb0c61f4c6222 1,3-29,31-33,38-103
+  s_d5635d4f93ebf4::t_88b8e57351e2e8 30,35-37
+  s_d5635d4f93ebf4::t_48dcbada5cf99c 2
+  s_d5635d4f93ebf4::t_bfbe0ce16b52af 34
+workflow/current/SPEC.md
+  s_d5635d4f93ebf4::t_8530855170926f 3,9-13,17,23-25,29-30,34,36-38,40,42-44,46-50,54-56,62-66,70-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1570009499ca52900847b01b88fee44526919b08",
+  "prompts": {},
+  "sessions": {
+    "s_d5635d4f93ebf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "90823e41-1d0d-4938-8cf8-26b414ccac55",
+        "model": "composer-2.5"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
