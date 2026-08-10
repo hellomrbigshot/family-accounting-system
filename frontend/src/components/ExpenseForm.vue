@@ -18,26 +18,30 @@
       <div class="flex-1 overflow-y-auto p-6 bg-white">
         <div
           v-if="displayVoiceRawText"
-          class="rounded-xl bg-indigo-50 border border-indigo-100 p-4 mb-5"
+          class="voice-result-card mb-5"
         >
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2 min-w-0">
-              <van-icon name="audio" class="text-indigo-500 flex-shrink-0" size="16" />
-              <p class="text-xs font-medium text-indigo-600">语音识别内容</p>
+          <div class="flex items-start gap-3">
+            <div class="voice-result-card__icon" aria-hidden="true">
+              <van-icon name="audio" size="18" />
             </div>
-            <van-button
-              size="mini"
-              type="primary"
-              plain
-              icon="replay"
-              :disabled="voiceRerecording"
-              data-testid="voice-rerecord"
-              @click="handleVoiceRerecord"
-            >
-              重新录制
-            </van-button>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-3 mb-1.5">
+                <p class="text-xs font-semibold text-indigo-700/90 tracking-wide">语音识别</p>
+                <button
+                  type="button"
+                  class="voice-rerecord-btn"
+                  :class="{ 'voice-rerecord-btn--disabled': voiceRerecording }"
+                  :disabled="voiceRerecording"
+                  data-testid="voice-rerecord"
+                  @click="handleVoiceRerecord"
+                >
+                  <van-icon name="replay" size="14" />
+                  <span>重录</span>
+                </button>
+              </div>
+              <p class="text-sm text-gray-800 leading-relaxed break-words">{{ displayVoiceRawText }}</p>
+            </div>
           </div>
-          <p class="text-sm text-gray-800 leading-relaxed">{{ displayVoiceRawText }}</p>
         </div>
 
         <van-form class="space-y-5" @submit="handleSubmit">
@@ -703,6 +707,52 @@ const handleAmountFieldBlur = () => {
 </script>
 
 <style scoped>
+.voice-result-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(99, 102, 241, 0.14);
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%);
+}
+
+.voice-result-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.75rem;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.voice-rerecord-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  color: #4338ca;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.voice-rerecord-btn:active:not(:disabled) {
+  background: #fff;
+  border-color: rgba(99, 102, 241, 0.32);
+  color: #3730a3;
+}
+
+.voice-rerecord-btn--disabled,
+.voice-rerecord-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 :deep(.van-field__label) {
   width: 60px;
   font-weight: 600;
