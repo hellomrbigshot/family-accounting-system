@@ -1,0 +1,20 @@
+frontend/src/components/ExpenseForm.vue
+  s_d5635d4f93ebf4::t_782e4bc6647d97 21,23-42
+  s_d5635d4f93ebf4::t_1ed54ce580e8cf 710-755
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2e8e18378d654199df643b7a0f815539cbbadd6a",
+  "prompts": {},
+  "sessions": {
+    "s_d5635d4f93ebf4": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "90823e41-1d0d-4938-8cf8-26b414ccac55",
+        "model": "composer-2.5"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
