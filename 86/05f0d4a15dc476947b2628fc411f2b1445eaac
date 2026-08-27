@@ -1,0 +1,37 @@
+backend/src/services/voice/resolveTags.ts
+  s_7fd94be41487f1::t_71367248084c12 10-75,77-84,98-100,102,105,109-111,114-115,117
+backend/src/services/mimo/parseExpense.ts
+  s_7fd94be41487f1::t_a5da769d7561ba 23,28-43
+  s_7fd94be41487f1::t_1d7f7cb2b7d0dd 70
+workflow/history/features/tags/GREEN.md
+  s_7fd94be41487f1::t_f3e27a7c6ce9cc 18,27-35
+workflow/history/features/tags/SPEC.md
+  s_7fd94be41487f1::t_ff80023b39c46f 25-34,38-44
+backend/src/services/voice/resolveTags.test.ts
+  s_7fd94be41487f1::t_9b8588345abd6b 88-90
+  s_7fd94be41487f1::t_48afd4e91bb602 1-87,91-108
+e2e/TEST-CATALOG.md
+  s_7fd94be41487f1::t_d20897e0eb1861 86
+workflow/current/SPEC.md
+  s_7fd94be41487f1::t_21ea2f5e224975 3,9-13,17,23,27,31,33,35-37
+  s_7fd94be41487f1::t_65de5346fb2c35 39,41-43,47,53,57-58
+backend/src/controllers/voice.ts
+  s_7fd94be41487f1::t_57956754eb9b6b 1
+  s_7fd94be41487f1::t_fec46f426914fc 24-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "8605f0d4a15dc476947b2628fc411f2b1445eaac",
+  "prompts": {},
+  "sessions": {
+    "s_7fd94be41487f1": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "91c41061-ad7f-4398-b345-06a07212d5dc",
+        "model": "auto-smart"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
