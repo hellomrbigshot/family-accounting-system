@@ -20,19 +20,27 @@ const expenseCategoryNames = systemCategories
   .filter((category) => category.type === 'expense')
   .map((category) => category.name);
 
-const normalizeTagNames = (
-  tagNames: unknown,
-  availableTagNames: string[]
-): string[] => {
+const normalizeTagNames = (tagNames: unknown): string[] => {
   if (!Array.isArray(tagNames)) {
     return [];
   }
 
-  const availableSet = new Set(availableTagNames);
-  return tagNames
-    .filter((name): name is string => typeof name === 'string')
-    .map((name) => name.trim())
-    .filter((name) => availableSet.has(name));
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const name of tagNames) {
+    if (typeof name !== 'string') {
+      continue;
+    }
+    const trimmed = name.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      continue;
+    }
+    seen.add(trimmed);
+    normalized.push(trimmed);
+  }
+
+  return normalized;
 };
 
 const normalizeParsedExpense = (
@@ -59,7 +67,7 @@ const normalizeParsedExpense = (
     description: (parsed.description || '').trim().slice(0, 200),
     date,
     isExtra: parsed.isExtra === true,
-    tagNames: normalizeTagNames(parsed.tagNames, availableTagNames),
+    tagNames: normalizeTagNames(parsed.tagNames),
   };
 };
 
