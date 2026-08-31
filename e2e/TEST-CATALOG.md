@@ -83,6 +83,7 @@ AC 定义以 `workflow/history/features/<模块>/SPEC.md` 为准；本表只记�
 | AC-1 普通标签 | [tags.md](scenarios/tags.md) | `smoke.sh`：「标签管理」 | smoke |
 | AC-2 限时标签 | [tags.md](scenarios/tags.md) | — | verify-only |
 | AC-3 归档标签 | [tags.md](scenarios/tags.md) | — | verify-only |
+| AC-4 语音 AI tag 匹配 (#52) | `resolveTags.test.ts`：精确/模糊/日期过滤 | `pnpm --filter backend test` | **automated** |
 
 ## reports
 

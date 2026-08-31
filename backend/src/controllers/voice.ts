@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { transcribeAudio } from '../services/mimo/asr';
@@ -20,7 +21,8 @@ export const expenseFromVoice = async (req: AuthenticatedRequest, res: Response)
     }
 
     const mimeType = req.file.mimetype || 'audio/wav';
-    const availableTags = await getAvailableTagsForPrompt(req.user.roomNumber);
+    const today = dayjs().format('YYYY-MM-DD');
+    const availableTags = await getAvailableTagsForPrompt(req.user.roomNumber, today);
     const rawText = await transcribeAudio(req.file.buffer, mimeType);
     const parsed = await parseExpenseText(rawText, {
       availableTagNames: availableTags.map((tag) => tag.name),

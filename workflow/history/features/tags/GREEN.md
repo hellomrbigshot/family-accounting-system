@@ -15,6 +15,7 @@
 | AC | 覆盖方式 |
 |----|----------|
 | AC-1 普通标签（入口） | `smoke.sh` 断言「标签管理」 |
+| AC-4 语音 tag 匹配 (#52) | `backend/src/services/voice/resolveTags.test.ts` |
 
 ## VERIFY-only
 
@@ -23,6 +24,15 @@
 | AC-1 普通标签 CRUD | 见 `tags.md` |
 | AC-2 限时标签 | 见 `tags.md` |
 | AC-3 归档标签 | 见 `tags.md` |
+| AC-4 语音端到端 | 依赖 MiMo API，见 VERIFY 单元测试覆盖 |
+
+## Issue #52 交付记录
+
+| 字段 | 内容 |
+|------|------|
+| 完成日期 | 2026-08-27 |
+| 分支 | `fix/issue-52` |
+| TEST | `pnpm --filter backend test` 12/12 pass |
 
 ## 结论
 
