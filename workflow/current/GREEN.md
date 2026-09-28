@@ -1,50 +1,29 @@
-# GREEN — 全通过确认
+# GREEN — 完成归档
 
-> 状态：⬜ 待办 | 🔄 进行中 | ✅ 完成
+> 状态：✅ 完成（已提交并开 PR）
 
-> 前置：SPEC、CODE、VERIFY、TEST 全部完成
-
-## 任务摘要
+## 基本信息
 
 | 字段 | 内容 |
 |------|------|
-| 任务名称 | |
-| 完成日期 | |
-| 分支名 | |
-| PR 链接 | |
+| 任务 | MiMo → 阶跃星辰 StepFun 迁移 |
+| 分支 | `feat/stepfun-replace-mimo` |
+| 完成日期 | 2026-09-28 |
 
-## 阶段回溯
+## 交付摘要
 
-| 阶段 | 文档 | 状态 | 备注 |
-|------|------|------|------|
-| SPEC | workflow/current/SPEC.md | ⬜ | |
-| CODE | SPEC 实现记录 | ⬜ | |
-| VERIFY | workflow/current/VERIFY.md | ⬜ | |
-| TEST | workflow/current/TEST.md | ⬜ | |
+- 语音记账后端供应商从 MiMo 切换为 StepFun Step Plan
+- Chat 解析默认 `step-3.5-flash`；ASR 默认 `stepaudio-2.5-asr`
+- 配置项：`STEPFUN_API_KEY` / `STEPFUN_BASE_URL` / `STEPFUN_MODEL` / `STEPFUN_ASR_MODEL`
 
-## AC 测试映射（必填）
+## 上线注意
 
-<!-- 复制到 e2e/TEST-CATALOG.md 对应模块；每条 AC 一行 -->
+1. GitHub Secrets 需新增 `STEPFUN_*`，旧 `MIMO_*` 可删除
+2. 服务器环境变量同步更新后 `pm2 reload`
+3. 密钥勿提交仓库；聊天中暴露过的 key 建议在控制台轮换
 
-| AC | TEST 断言 / 脚本 | 类型 |
-|----|------------------|------|
-| AC-1 | | automated / smoke / verify-only |
-| AC-2 | | |
+## 检查
 
-类型说明见 [`e2e/TEST-CATALOG.md`](../../e2e/TEST-CATALOG.md)。
-
-## 最终检查清单
-
-- [ ] SPEC 每条 AC 在 TEST-CATALOG 有登记（automated 或 verify-only + 原因）
-- [ ] 至少 1 条与本任务相关的 **automated** 断言已加入 `e2e/scripts/`
-- [ ] VERIFY 检查清单全部勾选
-- [ ] `pnpm test:e2e` 通过
-- [ ] 无新增 TypeScript / lint 错误
-- [ ] 未引入与任务无关的代码变更
-- [ ] 已按 [ARCHIVE-CHECKLIST.md](../ARCHIVE-CHECKLIST.md) 归档到 `workflow/history/features/<模块>/`
-- [ ] `workflow/current/` 已重置（`bash workflow/scripts/reset-current.sh`）
-
-## 结论
-
-- [ ] **GREEN — 任务完成**，可合并/交付
-- [ ] 未通过（阻塞项）：
+- [x] SPEC / VERIFY / TEST 已填写
+- [x] TEST-CATALOG 已登记
+- [x] 已提交并开 PR

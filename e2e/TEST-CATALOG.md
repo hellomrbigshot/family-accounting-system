@@ -85,6 +85,14 @@ AC 定义以 `workflow/history/features/<模块>/SPEC.md` 为准；本表只记�
 | AC-3 归档标签 | [tags.md](scenarios/tags.md) | — | verify-only |
 | AC-4 语音 AI tag 匹配 (#52) | `resolveTags.test.ts`：精确/模糊/日期过滤 | `pnpm --filter backend test` | **automated** |
 
+## stepfun（MiMo → StepFun 迁移）
+
+| AC | VERIFY | TEST 断言 | 类型 |
+|----|--------|-----------|------|
+| AC-1 文本解析走 StepFun | [VERIFY.md](../workflow/current/VERIFY.md) V-1 | — | verify-only（外部付费 API） |
+| AC-2 ASR SSE | [VERIFY.md](../workflow/current/VERIFY.md) V-2 | — | verify-only（外部付费 API） |
+| AC-3 配置切换 | [VERIFY.md](../workflow/current/VERIFY.md) V-3 | — | verify-only（配置类） |
+
 ## reports
 
 | AC | VERIFY | TEST 断言 | 类型 |

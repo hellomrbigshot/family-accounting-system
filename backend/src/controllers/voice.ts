@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth';
-import { transcribeAudio } from '../services/mimo/asr';
-import { parseExpenseText } from '../services/mimo/parseExpense';
+import { transcribeAudio } from '../services/stepfun/asr';
+import { parseExpenseText } from '../services/stepfun/parseExpense';
 import { resolveExpenseCategoryId } from '../services/voice/resolveCategory';
 import {
   getAvailableTagsForPrompt,

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { mimoChat } from './client';
+import { stepfunChat } from './client';
 import { systemCategories } from '../../models/category';
 
 export interface ParsedExpenseFields {
@@ -81,8 +81,8 @@ export async function parseExpenseText(
     ? `可用标签（tagNames 只能从中选择，可多个）：${availableTagNames.join('、')}`
     : '当前没有可用标签，tagNames 返回空数组 []';
 
-  const result = await mimoChat({
-    model: process.env.MIMO_MODEL || 'mimo-v2.5-pro',
+  const result = await stepfunChat({
+    model: process.env.STEPFUN_MODEL || 'step-3.5-flash',
     messages: [
       {
         role: 'system',
@@ -102,9 +102,9 @@ ${tagPrompt}
         content: text,
       },
     ],
-    max_completion_tokens: 320,
+    max_tokens: 1024,
     temperature: 0.1,
-    thinking: { type: 'disabled' },
+    reasoning_effort: 'low',
     response_format: { type: 'json_object' },
   });
 
