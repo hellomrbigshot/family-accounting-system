@@ -131,10 +131,10 @@ jobs:
         SSH_USER: ${{ secrets.ALIYUN_USERNAME }}
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        MIMO_API_KEY: ${{ secrets.MIMO_API_KEY }}
-        MIMO_BASE_URL: ${{ secrets.MIMO_BASE_URL }}
-        MIMO_MODEL: ${{ secrets.MIMO_MODEL }}
-        MIMO_ASR_MODEL: ${{ secrets.MIMO_ASR_MODEL }}
+        STEPFUN_API_KEY: ${{ secrets.STEPFUN_API_KEY }}
+        STEPFUN_BASE_URL: ${{ secrets.STEPFUN_BASE_URL }}
+        STEPFUN_MODEL: ${{ secrets.STEPFUN_MODEL }}
+        STEPFUN_ASR_MODEL: ${{ secrets.STEPFUN_ASR_MODEL }}
       run: |
         set -eo pipefail
         mkdir -p ~/.ssh
@@ -148,10 +148,10 @@ jobs:
           echo 'export NODE_ENV=production'
           echo "export MONGODB_URI=$(printf '%q' "$MONGODB_URI")"
           echo "export JWT_SECRET=$(printf '%q' "$JWT_SECRET")"
-          echo "export MIMO_API_KEY=$(printf '%q' "$MIMO_API_KEY")"
-          echo "export MIMO_BASE_URL=$(printf '%q' "$MIMO_BASE_URL")"
-          echo "export MIMO_MODEL=$(printf '%q' "$MIMO_MODEL")"
-          echo "export MIMO_ASR_MODEL=$(printf '%q' "$MIMO_ASR_MODEL")"
+          echo "export STEPFUN_API_KEY=$(printf '%q' "$STEPFUN_API_KEY")"
+          echo "export STEPFUN_BASE_URL=$(printf '%q' "$STEPFUN_BASE_URL")"
+          echo "export STEPFUN_MODEL=$(printf '%q' "$STEPFUN_MODEL")"
+          echo "export STEPFUN_ASR_MODEL=$(printf '%q' "$STEPFUN_ASR_MODEL")"
           echo 'if ! command -v pnpm &> /dev/null; then'
           echo '  echo "Installing pnpm..."'
           echo '  curl -fsSL https://get.pnpm.io/install.sh | sh -'
