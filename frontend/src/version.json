@@ -1,7 +1,7 @@
 {
-  "version": "0.0.49",
-  "buildTime": "2026-08-31T02:30:58.069Z",
-  "buildNumber": "53",
-  "gitCommit": "main-73d13d9",
+  "version": "0.0.50",
+  "buildTime": "2026-09-28T11:58:18.985Z",
+  "buildNumber": "54",
+  "gitCommit": "main-b50cd2b",
   "environment": "ci"
 }
