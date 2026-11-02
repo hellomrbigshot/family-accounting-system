@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowVirtualizer } from '@tanstack/vue-virtual'
+import { useVirtualizer } from '@tanstack/vue-virtual'
 import ExpenseListItem from '@/components/ExpenseListItem.vue'
 
 interface ExpenseWithCategory {
@@ -97,22 +97,30 @@ const emit = defineEmits<{
 const listAnchorEl = ref<HTMLElement | null>(null)
 const sentinelEl = ref<HTMLElement | null>(null)
 const scrollMargin = ref(0)
+const scrollElement = ref<HTMLElement | null>(null)
 
 const updateScrollMargin = () => {
   if (!listAnchorEl.value) {
     scrollMargin.value = 0
     return
   }
-  scrollMargin.value = listAnchorEl.value.getBoundingClientRect().top + window.scrollY
+  const host = scrollElement.value
+  if (!host) return
+  scrollMargin.value = listAnchorEl.value.getBoundingClientRect().top
+    - host.getBoundingClientRect().top - host.clientTop + host.scrollTop
 }
 
-const rowVirtualizer = useWindowVirtualizer(
+const rowVirtualizer = useVirtualizer(
   computed(() => ({
     count: props.expenses.length,
+    getScrollElement: () => scrollElement.value,
+    getItemKey: (index: number) => props.expenses[index].id,
     estimateSize: () => 104,
     overscan: 6,
+    // 不同行高的测量在下一帧执行，避免 ResizeObserver 回调内反复修改布局。
+    useAnimationFrameWithResizeObserver: true,
     scrollMargin: scrollMargin.value,
-    enabled: props.virtual
+    enabled: props.virtual && !!scrollElement.value
   }))
 )
 
@@ -132,7 +140,7 @@ const setupObserver = () => {
 
   if (!sentinelEl.value || props.finished || props.listLoading) return
 
-  // 整页滚动：root 为视口
+  // 与虚拟列表共用实际滚动容器，底部导航不属于可见区域。
   observer = new IntersectionObserver(
     (entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
@@ -140,7 +148,7 @@ const setupObserver = () => {
       }
     },
     {
-      root: null,
+      root: scrollElement.value,
       rootMargin: '160px',
       threshold: 0
     }
@@ -149,7 +157,7 @@ const setupObserver = () => {
 }
 
 watch(
-  [sentinelEl, () => props.finished, () => props.listLoading, () => props.expenses.length],
+  [sentinelEl, scrollElement, () => props.finished, () => props.listLoading, () => props.expenses.length],
   () => {
     nextTick(() => {
       updateScrollMargin()
@@ -159,12 +167,35 @@ watch(
   { immediate: true }
 )
 
+let resizeObserver: ResizeObserver | null = null
+let resizeFrame = 0
+
+const scheduleScrollMarginUpdate = () => {
+  cancelAnimationFrame(resizeFrame)
+  resizeFrame = requestAnimationFrame(updateScrollMargin)
+}
+
 onMounted(() => {
+  let parent = listAnchorEl.value?.parentElement
+  while (parent) {
+    if (/(auto|scroll)/.test(getComputedStyle(parent).overflowY)) {
+      scrollElement.value = parent
+      break
+    }
+    parent = parent.parentElement
+  }
+  resizeObserver = new ResizeObserver(scheduleScrollMarginUpdate)
+  if (scrollElement.value) resizeObserver.observe(scrollElement.value)
+  if (listAnchorEl.value?.parentElement) resizeObserver.observe(listAnchorEl.value.parentElement)
   updateScrollMargin()
   window.addEventListener('resize', updateScrollMargin)
 })
 
+onUpdated(updateScrollMargin)
+
 onBeforeUnmount(() => {
+  cancelAnimationFrame(resizeFrame)
+  resizeObserver?.disconnect()
   observer?.disconnect()
   window.removeEventListener('resize', updateScrollMargin)
 })

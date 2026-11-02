@@ -89,6 +89,24 @@
 - **When**：首屏加载完成
 - **Then**：统计徽章笔数/金额使用服务端 `summary`（即使尚未加载完全部页）
 
+### AC-10：移动端实际容器滚动（2026-11-02 修复）
+
+- **Given**：支出列表存在多页数据，布局由 `main` 滚动
+- **When**：持续向下滚动，再返回顶部
+- **Then**：虚拟行随 `main` 更新，触底持续追加，最后一条可见且显示「已显示全部」；无重复页请求，返回顶部首条重新出现，底部导航保持可见。
+
+### AC-11：尺寸变化与重新查询
+
+- **Given**：移动端长列表已经滚动
+- **When**：变更到小屏、横屏，或搜索后清空关键词
+- **Then**：列表位置与实际滚动容器保持一致，匹配记录可完整浏览，重新查询后仍能分页到末条。
+
+### AC-12：大数据下动态行高稳定性
+
+- **Given**：至少 2,003 条长短备注混合数据（每页 20 条，共 101 页）
+- **When**：在手机与小屏尺寸连续滚动至末条，再回顶部；搜索后跳转不同位置
+- **Then**：记录无遗漏或重复、末页 3 条、summary 正确；无空白及 ResizeObserver 循环错误，实际渲染保持少量行，测试数据清理完成。
+
 ## 技术说明（Issue #40）
 
 - 页面：`frontend/src/views/Expenses.vue`
@@ -115,3 +133,16 @@
 | `frontend/src/stores/expense.ts` | 分页 append / summary（#3） |
 | `backend/src/controllers/expense.ts` | 可选分页与合计（#3） |
 | `backend/src/routes/expense.ts` | 支出 API |
+
+## 2026-11-02 修复记录
+
+分支：`codex/fix-mobile-list-scroll`，基于最新 `origin/main`。
+
+- 根因：布局使用 `main.overflow-y-auto`，虚拟列表却监听 `window`；滚动 1200px 后 DOM 仍为第 0–10 行。
+- `ExpenseListContent.vue`：使用元素虚拟器，查找实际滚动祖先；触底观察器共用该容器；按容器坐标计算偏移，尺寸变化后更新；用记录 ID 作为稳定 key。
+- `ExpenseList.vue`：修正虚拟滚动宿主注释。
+- `e2e/lib/helpers.sh` / `e2e/scripts/smoke.sh`：新增实际滚动至末条、回到首条、有限渲染、导航可见、重复页请求断言。
+
+## 2026-11-02 大数据验证补充
+
+2,003 条长短备注混合数据暴露动态行高测量中的 ResizeObserver 循环通知错误。`ExpenseListContent.vue` 开启虚拟器动画帧测量，自有尺寸观察也通过动画帧更新并在卸载时取消。

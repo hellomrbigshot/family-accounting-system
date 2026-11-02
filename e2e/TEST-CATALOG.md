@@ -51,8 +51,11 @@ AC 定义以 `workflow/history/features/<模块>/SPEC.md` 为准；本表只记�
 | AC-5 日期范围 | [expenses.md](scenarios/expenses.md) 步骤 9 | — | verify-only |
 | AC-6 日历跳转 | [expenses.md](scenarios/expenses.md) 步骤 10 · [calendar.md](scenarios/calendar.md) | — | verify-only |
 | AC-7 统计笔数 (#40) | [expenses.md](scenarios/expenses.md) 步骤 3–4 | `smoke.sh`：`ab_assert_expense_stats_badge` | **automated** |
-| AC-8 列表分页 (#3) | [expenses.md](scenarios/expenses.md) 步骤 15–16 | — | verify-only（依赖大量数据才能稳定触发翻页） |
+| AC-8 列表分页 (#3) | [expenses.md](scenarios/expenses.md) 步骤 15–16 | `smoke.sh`：`ab_assert_expense_scroll`（有数据时滚到末条；多页验证需 >20 条） | **automated** |
 | AC-9 虚拟滚动 (#3) | [expenses.md](scenarios/expenses.md) 步骤 15 | `smoke.sh`：`ab_assert_expense_virtual_list` | **automated** |
+| AC-10 移动端容器滚动 | [expenses.md](scenarios/expenses.md) 移动端滚动回归 | `smoke.sh`：`ab_assert_expense_scroll` | **automated** |
+| AC-11 尺寸变化与重新查询 | [expenses.md](scenarios/expenses.md) 移动端滚动回归 | agent-browser 小屏/横屏、搜索再清空 | verify-only（多尺寸及搜索组合交互） |
+| AC-12 大数据动态行高 | [expenses.md](scenarios/expenses.md) 大数据动态行高回归 | agent-browser + 真实 API 隔离 2,003 条数据，XHR/错误断言 | verify-only（大批量临时数据准备和清理，不加入轻量守门） |
 
 ## filters
 

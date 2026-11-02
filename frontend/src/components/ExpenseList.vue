@@ -76,7 +76,7 @@ const props = defineProps<{
   finishedText?: string
   /** 为 true 时展示骨架屏，不渲染列表项（数据就绪后由父组件置为 false） */
   listLoading?: boolean
-  /** 是否启用虚拟滚动（支出页长列表）；滚动宿主为整页，便于下拉刷新 */
+  /** 是否启用虚拟滚动（支出页长列表）；滚动宿主为布局内容区，便于下拉刷新 */
   virtual?: boolean
   /** 是否还有下一页 */
   hasMore?: boolean
