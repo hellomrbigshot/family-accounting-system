@@ -22,6 +22,7 @@ ab open "$E2E_BASE_URL/expenses?startDate=2020-01-01&endDate=${TODAY}"
 ab wait 1500
 ab_assert_expense_stats_badge
 ab_assert_expense_virtual_list
+ab_assert_expense_scroll
 
 echo "== smoke 日历页 =="
 ab open "$E2E_BASE_URL/calendar"

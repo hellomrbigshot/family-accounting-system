@@ -190,3 +190,44 @@ ab_swipe_action() {
 
 # 每个场景脚本结束时关闭浏览器，避免 daemon 堆积
 trap ab_teardown EXIT
+
+# 移动端真实 main 滚动：到达最后一条，再返回首条；不依赖 DEV bridge。
+ab_assert_expense_scroll() {
+  ab eval '(async () => {
+    const main = document.querySelector("main")
+    const list = document.querySelector("[data-testid=expense-virtual-list]")
+    if (!main) throw new Error("missing main scroll container")
+    if (!list) return "PASS:empty-list-skip-scroll"
+    const badge = [...document.querySelectorAll("span")].find(e => /·\s*\d+\s*笔/.test(e.textContent))
+    const count = Number(badge.textContent.match(/·\s*(\d+)\s*笔/)[1])
+    const pause = () => new Promise(resolve => setTimeout(resolve, 200))
+    let reached = false
+    for (let step = 0; step < 100; step++) {
+      main.scrollTop = Math.min(main.scrollTop + main.clientHeight * 0.7, main.scrollHeight)
+      await pause()
+      const last = list.querySelector(`[data-index="${count - 1}"]`)
+      const hostRect = main.getBoundingClientRect()
+      const lastRect = last?.getBoundingClientRect()
+      if (lastRect && lastRect.bottom <= hostRect.bottom && lastRect.top >= hostRect.top
+        && document.body.innerText.includes("已显示全部")) {
+        reached = true
+        break
+      }
+    }
+    if (!reached) throw new Error("cannot scroll to final expense: count=" + count)
+    if (count > 20 && list.querySelectorAll("[data-index]").length >= count) {
+      throw new Error("virtualization lost after scrolling")
+    }
+    const pages = performance.getEntriesByType("resource")
+      .map(entry => new URL(entry.name))
+      .filter(url => url.pathname.endsWith("/expenses") && url.searchParams.has("page"))
+      .map(url => url.searchParams.get("page"))
+    if (new Set(pages).size !== pages.length) throw new Error("duplicate pagination requests: " + pages)
+    const tabbar = document.querySelector(".van-tabbar").getBoundingClientRect()
+    if (tabbar.bottom > innerHeight + 1 || tabbar.top < 0) throw new Error("tabbar outside viewport")
+    main.scrollTop = 0
+    await pause()
+    if (!list.querySelector("[data-index=\"0\"]")) throw new Error("first row missing after scrolling back")
+    return "PASS:main-scroll final-row=" + (count - 1) + " back-to-first tabbar-visible"
+  })()'
+}
