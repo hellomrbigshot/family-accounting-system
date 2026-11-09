@@ -1,0 +1,67 @@
+backend/src/services/stepfun/parseExpense.test.ts
+  s_c7b73bc2019a46::t_595622fe2789ed 1-43
+backend/src/controllers/voice.test.ts
+  s_c7b73bc2019a46::t_595622fe2789ed 15,23,30,71
+  s_c7b73bc2019a46::t_77001c95b7d546 1-14,16-22,24-29,31-70,72-75
+e2e/run.sh
+  s_c7b73bc2019a46::t_acd0cc5d89b92f 6,26
+backend/src/services/voice/resolveTags.test.ts
+  s_c7b73bc2019a46::t_77001c95b7d546 95-109,121-136
+backend/src/controllers/voice.ts
+  s_c7b73bc2019a46::t_1c42a680e0f2cc 25,28
+frontend/src/components/ExpenseForm.vue
+  s_c7b73bc2019a46::t_acd0cc5d89b92f 108
+backend/src/services/stepfun/client.ts
+  s_c7b73bc2019a46::t_595622fe2789ed 3
+workflow/history/features/voice/SPEC.md
+  s_c7b73bc2019a46::t_33958ea9c02e03 48
+  s_c7b73bc2019a46::t_fced6935ec8dff 1-47
+e2e/scripts/voice-tags.sh
+  s_c7b73bc2019a46::t_7163ad8e9d58e2 19-26,34,54
+  s_c7b73bc2019a46::t_257400f1fd3883 43-44,78,84-85
+  s_c7b73bc2019a46::t_4b36d08a6c6808 47-52
+  s_c7b73bc2019a46::t_a41bb3d5c78478 45
+  s_c7b73bc2019a46::t_acd0cc5d89b92f 1-6,8,27-33,35-42,46,53,55-62,65,79-83,86
+  s_c7b73bc2019a46::t_6c15f35b90a761 63-64,72-77
+  s_c7b73bc2019a46::t_ad2354c28c2023 7,66-71
+  s_c7b73bc2019a46::t_12c0d0117f1dcf 9-18
+workflow/history/VERIFY-LOG.md
+  s_c7b73bc2019a46::t_bdc760300b5b95 151
+  s_c7b73bc2019a46::t_33958ea9c02e03 140-150
+workflow/history/features/voice/GREEN.md
+  s_c7b73bc2019a46::t_460b4c2abeee8f 1-4,6-36
+  s_c7b73bc2019a46::t_460fdc4a96ed79 5,48-53
+  s_c7b73bc2019a46::t_bdc760300b5b95 37-47
+backend/src/services/stepfun/parseExpense.ts
+  s_c7b73bc2019a46::t_595622fe2789ed 105-106,112-114
+  s_c7b73bc2019a46::t_89db494d5782e3 115
+e2e/TEST-CATALOG.md
+  s_c7b73bc2019a46::t_e0fbf946721d6c 99-112
+e2e/fixtures/voice-recorder.js
+  s_c7b73bc2019a46::t_7163ad8e9d58e2 17,19-21,24
+  s_c7b73bc2019a46::t_acd0cc5d89b92f 1-16,18,22-23,25-32
+e2e/README.md
+  s_c7b73bc2019a46::t_d40d48882b7930 24,27,51
+  s_c7b73bc2019a46::t_a110c42440647b 52
+e2e/scenarios/voice.md
+  s_c7b73bc2019a46::t_33958ea9c02e03 15-16
+  s_c7b73bc2019a46::t_4eade49109fe0f 1-14
+backend/src/services/voice/resolveTags.ts
+  s_c7b73bc2019a46::t_1c42a680e0f2cc 76-78,81,97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6ddaf57436edaf56bca56ad13b7017affbbc16d6",
+  "prompts": {},
+  "sessions": {
+    "s_c7b73bc2019a46": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1bdef-2119-78a3-bc70-178c29ab6f56",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "cye2 <cye2@leqee.com>"
+    }
+  }
+}
