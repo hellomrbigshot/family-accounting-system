@@ -22,9 +22,10 @@ export const expenseFromVoice = async (req: AuthenticatedRequest, res: Response)
 
     const mimeType = req.file.mimetype || 'audio/wav';
     const today = dayjs().format('YYYY-MM-DD');
-    const availableTags = await getAvailableTagsForPrompt(req.user.roomNumber, today);
+    const availableTags = await getAvailableTagsForPrompt(req.user.roomNumber)
     const rawText = await transcribeAudio(req.file.buffer, mimeType);
     const parsed = await parseExpenseText(rawText, {
+      today,
       availableTagNames: availableTags.map((tag) => tag.name),
     });
     const categoryId = await resolveExpenseCategoryId(

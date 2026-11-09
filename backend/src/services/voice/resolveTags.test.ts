@@ -92,6 +92,21 @@ describe('resolveTags', () => {
       const tags = await getAvailableTagsForPrompt('1001', '2026-08-27');
 
       expect(tags).toEqual([{ id: activeTag._id.toString(), name: '日常' }]);
+      expect(mockedFind).toHaveBeenCalledWith({ roomNumber: '1001', archived: { $ne: true } })
+    });
+
+    it('keeps historical temporary tags until the expense date is parsed', async () => {
+      const tag = makeTag({
+        name: '五一旅游',
+        type: 'temporary',
+        startDate: new Date('2026-05-01T00:00:00.000Z'),
+        endDate: new Date('2026-05-03T00:00:00.000Z'),
+      })
+      mockedFind.mockReturnValue({ sort: jest.fn().mockResolvedValue([tag]) })
+
+      expect(await getAvailableTagsForPrompt('1001')).toEqual([
+        { id: tag._id.toString(), name: tag.name },
+      ])
     });
   });
 
@@ -103,6 +118,22 @@ describe('resolveTags', () => {
       const resolved = await resolveExpenseTagIds('1001', ['星巴克', '星巴克咖啡'], '2026-08-27');
 
       expect(resolved).toEqual([{ id: tag._id.toString(), name: '星巴克咖啡' }]);
+      expect(mockedFind).toHaveBeenCalledWith({ roomNumber: '1001', archived: { $ne: true } })
+    });
+
+    it('validates temporary tags against the parsed expense date', async () => {
+      const tag = makeTag({
+        name: '五一旅游',
+        type: 'temporary',
+        startDate: new Date('2026-05-01T00:00:00.000Z'),
+        endDate: new Date('2026-05-03T00:00:00.000Z'),
+      })
+      mockedFind.mockResolvedValue([tag])
+
+      expect(await resolveExpenseTagIds('1001', [tag.name], '2026-05-02')).toEqual([
+        { id: tag._id.toString(), name: tag.name },
+      ])
+      expect(await resolveExpenseTagIds('1001', [tag.name], '2026-05-04')).toEqual([])
     });
   });
 });

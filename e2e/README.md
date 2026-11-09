@@ -21,9 +21,10 @@ cp e2e/config.env.example e2e/config.env   # 可选，改测试账号/地址
 前提：本地已启动 `pnpm dev`，前端默认 `http://localhost:5180`。
 
 ```bash
-pnpm test:e2e        # auth + smoke（单功能完成）
+pnpm test:e2e        # auth + smoke + voice-tags（单功能完成）
 pnpm test:e2e auth   # 认证专项
 pnpm test:e2e smoke  # 核心入口 smoke
+pnpm test:e2e voice-tags # 确定性语音标签回填（合成采样/API 响应，不保存账单）
 bash e2e/scripts/verify-history.sh  # 发版前 / 大重构
 ```
 
@@ -46,6 +47,8 @@ bash e2e/scripts/verify-history.sh  # 发版前 / 大重构
 - 预算弹窗可打开
 
 复杂流程见 [`TEST-CATALOG.md`](TEST-CATALOG.md) 中的 **verify-only** 条目。
+
+`voice-tags.sh` 覆盖语音结果首次自动选中标签、重录替换标签、手动取消。使用合成麦克风和语音 API 响应，不依赖外部付费 API 或 DEV bridge。
 
 ## 目录结构
 

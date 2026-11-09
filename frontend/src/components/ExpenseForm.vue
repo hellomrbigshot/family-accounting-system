@@ -105,6 +105,7 @@
           <van-field
             name="tags"
             label="标签"
+            data-testid="expense-tags"
             readonly
             is-link
             @click="showTagPicker = true"
