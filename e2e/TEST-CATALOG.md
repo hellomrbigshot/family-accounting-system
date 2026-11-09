@@ -96,6 +96,20 @@ AC 定义以 `workflow/history/features/<模块>/SPEC.md` 为准；本表只记�
 | AC-2 ASR SSE | [VERIFY.md](../workflow/current/VERIFY.md) V-2 | — | verify-only（外部付费 API） |
 | AC-3 配置切换 | [VERIFY.md](../workflow/current/VERIFY.md) V-3 | — | verify-only（配置类） |
 
+## voice（语音识别与标签回填，2026-11-09）
+
+AC 定义：[voice/SPEC.md](../workflow/history/features/voice/SPEC.md)。
+
+| AC | VERIFY | TEST 断言 | 类型 |
+|----|--------|-----------|------|
+| AC-1 当前 Key 的 ASR 可用范围 | [voice.md](scenarios/voice.md) 模型权限矩阵 | — | verify-only（外部账户权限、额度与付费 API） |
+| AC-2 旧标签及语义匹配 | [voice.md](scenarios/voice.md) 合成语音与候选 | `voice.test.ts` / `parseExpense.test.ts` + `voice-tags.sh` 首次选中 | automated（真实语义效果另做 VERIFY） |
+| AC-3 历史日期与标签边界 | [voice.md](scenarios/voice.md) 日期/归档 | `voice.test.ts` / `resolveTags.test.ts` | automated（后端确定性回归） |
+| AC-4 首次选中、重录替换、手动取消 | [voice.md](scenarios/voice.md) 表单 | `voice-tags.sh`，默认 `pnpm test:e2e` 执行 | automated |
+| AC-5 解析输出截断 | [voice.md](scenarios/voice.md) token 上限 | `parseExpense.test.ts` 拒绝 length 响应 | automated（后端确定性回归） |
+
+后端回归：`pnpm --filter family-accounting-system-backend test -- --runInBand`。浏览器守门使用合成麦克风及语音 API 响应，不依赖付费 API 或 DEV bridge。
+
 ## reports
 
 | AC | VERIFY | TEST 断言 | 类型 |

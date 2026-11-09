@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 target="${1:-all}"
-DEFAULT_SCRIPTS=(auth smoke)
+DEFAULT_SCRIPTS=(auth smoke voice-tags)
 
 run_one() {
   local script="$1"
@@ -23,7 +23,7 @@ if [[ "$target" == "all" ]]; then
 elif [[ -f "$ROOT/scripts/${target}.sh" ]]; then
   run_one "$ROOT/scripts/${target}.sh"
 else
-  echo "用法: pnpm test:e2e [all|auth|smoke]" >&2
+  echo "用法: pnpm test:e2e [all|auth|smoke|voice-tags]" >&2
   printf '%s\n' "${DEFAULT_SCRIPTS[@]}" >&2
   exit 1
 fi

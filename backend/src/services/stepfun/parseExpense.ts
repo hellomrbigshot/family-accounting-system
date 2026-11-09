@@ -102,11 +102,16 @@ ${tagPrompt}
         content: text,
       },
     ],
-    max_tokens: 1024,
+    // 推理和最终 JSON 共用输出额度，避免日期/多标签推断耗尽额度。
+    max_tokens: 4096,
     temperature: 0.1,
     reasoning_effort: 'low',
     response_format: { type: 'json_object' },
   });
+
+  if (result.choices[0]?.finish_reason === 'length') {
+    throw new Error('AI 解析结果不完整，请重试或简化描述')
+  }
 
   const content = result.choices[0]?.message?.content;
   if (!content) {

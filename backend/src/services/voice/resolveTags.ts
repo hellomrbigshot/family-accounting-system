@@ -73,11 +73,12 @@ export async function getAvailableTagsForPrompt(
   roomNumber: string,
   asOfDate?: string
 ): Promise<Array<{ id: string; name: string }>> {
-  const tags = await Tag.find({ roomNumber, archived: false }).sort({ name: 1 });
-  const expenseDate = normalizeTagDate(asOfDate || new Date().toISOString().slice(0, 10));
+  // 旧标签可能没有 archived 字段；未解析消费日期时保留所有未归档候选。
+  const tags = await Tag.find({ roomNumber, archived: { $ne: true } }).sort({ name: 1 })
+  const expenseDate = asOfDate ? normalizeTagDate(asOfDate) : undefined
 
   return tags
-    .filter((tag) => isTagActiveOnDate(tag, expenseDate))
+    .filter((tag) => !expenseDate || isTagActiveOnDate(tag, expenseDate))
     .map((tag) => ({
       id: tag._id.toString(),
       name: tag.name,
@@ -93,7 +94,7 @@ export async function resolveExpenseTagIds(
     return [];
   }
 
-  const tags = await Tag.find({ roomNumber, archived: false });
+  const tags = await Tag.find({ roomNumber, archived: { $ne: true } })
   const expenseDateValue = normalizeTagDate(expenseDate);
   const normalizedNames = Array.from(
     new Set(tagNames.map((name) => name.trim()).filter(Boolean))

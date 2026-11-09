@@ -1,5 +1,6 @@
 interface StepfunChatCompletionResponse {
   choices: Array<{
+    finish_reason?: string
     message: {
       content: string | null;
     };
